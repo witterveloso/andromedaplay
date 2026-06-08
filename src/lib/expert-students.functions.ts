@@ -57,6 +57,14 @@ export const createStudent = createServerFn({ method: "POST" })
       studentId = created.user.id;
     }
 
+    // Ensure profile row exists with the provided name (trigger may not be active)
+    await supabaseAdmin
+      .from("profiles")
+      .upsert(
+        { id: studentId!, full_name: data.full_name },
+        { onConflict: "id" }
+      );
+
     // Ensure student role exists
     await supabaseAdmin
       .from("user_roles")
