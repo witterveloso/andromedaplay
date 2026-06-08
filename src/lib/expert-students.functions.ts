@@ -41,6 +41,7 @@ export const createStudent = createServerFn({ method: "POST" })
 
     // Try to find existing user by email
     let studentId: string | null = null;
+    let isNewUser = false;
     const { data: existingList } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
     const existing = existingList?.users?.find((u) => u.email?.toLowerCase() === data.email.toLowerCase());
 
@@ -55,6 +56,26 @@ export const createStudent = createServerFn({ method: "POST" })
       });
       if (createErr || !created.user) throw new Error(createErr?.message ?? "Falha ao criar aluno");
       studentId = created.user.id;
+      isNewUser = true;
+    }
+
+    // Ensure profile row exists with the provided name (trigger may not be active).
+    // For new users we set the name; for existing users we only fill it if missing.
+    if (isNewUser) {
+      await supabaseAdmin
+        .from("profiles")
+        .upsert({ id: studentId!, full_name: data.full_name }, { onConflict: "id" });
+    } else {
+      const { data: prof } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name")
+        .eq("id", studentId!)
+        .maybeSingle();
+      if (!prof) {
+        await supabaseAdmin.from("profiles").insert({ id: studentId!, full_name: data.full_name });
+      } else if (!prof.full_name) {
+        await supabaseAdmin.from("profiles").update({ full_name: data.full_name }).eq("id", studentId!);
+      }
     }
 
     // Ensure student role exists
