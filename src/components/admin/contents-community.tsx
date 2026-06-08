@@ -513,6 +513,17 @@ function PostDialog({
             </div>
           )}
 
+          <ImageUploadCrop
+            label="Capa do assunto (opcional)"
+            value={coverUrl}
+            onChange={setCoverUrl}
+            folder="post-covers"
+            aspect={16 / 9}
+            recommended={{ width: 1280, height: 720 }}
+            previewClassName="aspect-video w-full"
+            hint="Imagem de capa exibida no card do assunto. Recomendado 1280×720 (16:9)."
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label>Status</Label>
