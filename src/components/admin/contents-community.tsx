@@ -365,6 +365,7 @@ function PostDialog({
   const [imageUrl, setImageUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [isLiveActive, setIsLiveActive] = useState(false);
   const [liveChatEnabled, setLiveChatEnabled] = useState(true);
   const [allowComments, setAllowComments] = useState(true);
@@ -379,6 +380,7 @@ function PostDialog({
     setImageUrl(editing?.image_url ?? "");
     setYoutubeUrl(editing?.youtube_url ?? "");
     setAudioUrl(editing?.audio_url ?? "");
+    setCoverUrl(editing?.cover_url ?? "");
     setIsLiveActive(editing?.is_live_active ?? false);
     setLiveChatEnabled(editing?.live_chat_enabled ?? true);
     setAllowComments(editing?.allow_comments ?? true);
@@ -396,6 +398,7 @@ function PostDialog({
         image_url: imageUrl || null,
         youtube_url: youtubeUrl || null,
         audio_url: audioUrl || null,
+        cover_url: coverUrl || null,
         is_live_active: postType === "live" ? isLiveActive : false,
         live_started_at: postType === "live" && isLiveActive && !editing?.is_live_active
           ? new Date().toISOString() : editing?.live_started_at ?? null,
