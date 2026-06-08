@@ -28,6 +28,7 @@ const createStudentInput = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(72),
   full_name: z.string().trim().min(1).max(120),
+  expires_at: z.string().datetime().nullable().optional(),
 });
 
 export const createStudent = createServerFn({ method: "POST" })
@@ -70,6 +71,7 @@ export const createStudent = createServerFn({ method: "POST" })
           student_id: studentId!,
           created_by: context.userId,
           status: "active",
+          expires_at: data.expires_at ?? null,
         },
         { onConflict: "course_id,student_id" }
       );
@@ -92,6 +94,32 @@ export const removeStudent = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("enrollments")
       .delete()
+      .eq("course_id", data.course_id)
+      .eq("student_id", data.student_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+const updateEnrollmentInput = z.object({
+  course_id: z.string().uuid(),
+  student_id: z.string().uuid(),
+  status: z.enum(["active", "blocked"]).optional(),
+  expires_at: z.string().datetime().nullable().optional(),
+});
+
+export const updateEnrollment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => updateEnrollmentInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertExpertOwnsCourse(context.supabase, context.userId, data.course_id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: Record<string, unknown> = {};
+    if (data.status !== undefined) patch.status = data.status;
+    if (data.expires_at !== undefined) patch.expires_at = data.expires_at;
+    if (!Object.keys(patch).length) return { ok: true };
+    const { error } = await supabaseAdmin
+      .from("enrollments")
+      .update(patch)
       .eq("course_id", data.course_id)
       .eq("student_id", data.student_id);
     if (error) throw new Error(error.message);
