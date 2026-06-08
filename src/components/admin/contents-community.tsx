@@ -43,6 +43,7 @@ type Post = {
   image_url: string | null;
   youtube_url: string | null;
   audio_url: string | null;
+  cover_url: string | null;
   post_type: PostType;
   is_live_active: boolean;
   live_started_at: string | null;
