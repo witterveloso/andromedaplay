@@ -737,6 +737,9 @@ function PostCard({
           </div>
           {post.title && <h3 className="font-semibold text-base">{post.title}</h3>}
           {post.body && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{post.body}</p>}
+          {post.cover_url && (
+            <img src={post.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
+          )}
           {post.post_type === "live" && post.youtube_url && (
             <p className="text-xs text-muted-foreground break-all">URL da live: {post.youtube_url}</p>
           )}
