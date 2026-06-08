@@ -113,7 +113,7 @@ export const updateEnrollment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertExpertOwnsCourse(context.supabase, context.userId, data.course_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
+    const patch: { status?: string; expires_at?: string | null } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.expires_at !== undefined) patch.expires_at = data.expires_at;
     if (!Object.keys(patch).length) return { ok: true };
