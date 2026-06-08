@@ -1,18 +1,21 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LogOut, PlayCircle } from "lucide-react";
+import { ChevronLeft, LogOut, PlayCircle, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/aluno/c/$slug")({
   component: StudentCourse,
+  validateSearch: (s: Record<string, unknown>) => ({ preview: s.preview === "1" || s.preview === 1 || s.preview === true ? 1 : undefined }),
 });
 
 function StudentCourse() {
   const { slug } = Route.useParams();
+  const search = useSearch({ from: "/aluno/c/$slug" }) as { preview?: number };
+  const isPreview = search.preview === 1;
   const { user, signOut, loading, session } = useAuth();
   const navigate = useNavigate();
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -53,12 +56,25 @@ function StudentCourse() {
 
   return (
     <div className="min-h-screen" style={{ background: course.background_color, color: course.text_color, fontFamily: course.font_family }}>
+      {isPreview && (
+        <div className="bg-amber-500/15 border-b border-amber-500/40 px-6 py-2 text-amber-200 text-sm flex items-center gap-2">
+          <Eye className="h-4 w-4" />
+          <span>Você está visualizando este curso no modo <strong>preview</strong> — é assim que o aluno vê.</span>
+          <Link to="/expert/preview" className="ml-auto underline">Voltar ao painel</Link>
+        </div>
+      )}
       <header className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/aluno" className="opacity-70 hover:opacity-100 text-sm flex items-center">
-              <ChevronLeft className="h-4 w-4 mr-1" /> Meus cursos
-            </Link>
+            {isPreview ? (
+              <Link to="/expert/preview" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+                <ChevronLeft className="h-4 w-4 mr-1" /> Voltar ao painel
+              </Link>
+            ) : (
+              <Link to="/aluno" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+                <ChevronLeft className="h-4 w-4 mr-1" /> Meus cursos
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="opacity-70">{user?.email}</span>
