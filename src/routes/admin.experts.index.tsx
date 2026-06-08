@@ -71,14 +71,18 @@ function ExpertsList() {
             const meta = statusMeta[e.status] ?? statusMeta.active;
             return (
               <Card key={e.id} className="p-4 flex flex-wrap items-center justify-between gap-4">
-                <div>
+                <Link
+                  to="/admin/experts/$id"
+                  params={{ id: e.id }}
+                  className="flex-1 min-w-0 hover:opacity-80 transition"
+                >
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{e.display_name}</span>
                     <Badge variant={meta.variant}>{meta.label}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{e.email}</p>
                   {e.paused_reason && <p className="text-xs text-amber-500 mt-1">Motivo: {e.paused_reason}</p>}
-                </div>
+                </Link>
                 <div className="flex gap-2">
                   {e.status !== "active" && (
                     <Button size="sm" variant="outline" onClick={() => setStatus.mutate({ id: e.id, status: "active" })}>
