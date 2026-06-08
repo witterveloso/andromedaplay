@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           description: string | null
           icon: string | null
+          icon_url: string | null
           id: string
           name: string
           position: number
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           icon?: string | null
+          icon_url?: string | null
           id?: string
           name: string
           position?: number
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           icon?: string | null
+          icon_url?: string | null
           id?: string
           name?: string
           position?: number
@@ -502,6 +505,7 @@ export type Database = {
       modules: {
         Row: {
           course_id: string
+          cover_url: string | null
           created_at: string
           description: string | null
           id: string
@@ -511,6 +515,7 @@ export type Database = {
         }
         Insert: {
           course_id: string
+          cover_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -520,6 +525,7 @@ export type Database = {
         }
         Update: {
           course_id?: string
+          cover_url?: string | null
           created_at?: string
           description?: string | null
           id?: string

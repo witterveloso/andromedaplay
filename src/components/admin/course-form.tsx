@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
 
 type Course = {
   id: string;
@@ -143,19 +144,24 @@ export function CourseForm({
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ImageField
+              <ImageUploadCrop
                 label="Capa"
                 value={form.cover_url ?? ""}
                 onChange={(v) => update("cover_url", v)}
                 folder="covers"
-                aspect="aspect-video"
+                aspect={16 / 9}
+                recommended={{ width: 1280, height: 720 }}
+                hint="Aparece no card do curso na listagem dos alunos."
               />
-              <ImageField
+              <ImageUploadCrop
                 label="Logo"
                 value={form.logo_url ?? ""}
                 onChange={(v) => update("logo_url", v)}
                 folder="logos"
-                aspect="aspect-square max-w-[160px]"
+                aspect={1}
+                recommended={{ width: 512, height: 512 }}
+                previewClassName="aspect-square w-32"
+                rounded
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

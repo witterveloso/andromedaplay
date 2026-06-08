@@ -18,6 +18,7 @@ import {
   Plus, Pencil, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FileText, Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
 
 type Module = {
   id: string;
@@ -25,6 +26,7 @@ type Module = {
   title: string;
   description: string | null;
   position: number;
+  cover_url: string | null;
 };
 
 type Lesson = {
@@ -160,6 +162,11 @@ export function ContentsVideo({ courseId }: { courseId: string }) {
                   >
                     {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
+                  {m.cover_url ? (
+                    <img src={m.cover_url} alt="" className="h-10 w-16 rounded object-cover border" />
+                  ) : (
+                    <div className="h-10 w-16 rounded border bg-muted" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{m.title}</div>
                     {m.description && <div className="text-xs text-muted-foreground truncate">{m.description}</div>}
@@ -268,23 +275,25 @@ function ModuleDialog({
   const editing = state.module;
   const [title, setTitle] = useState(editing?.title ?? "");
   const [description, setDescription] = useState(editing?.description ?? "");
+  const [coverUrl, setCoverUrl] = useState(editing?.cover_url ?? "");
 
   // reset when opening
   useResetOnOpen(state.open, () => {
     setTitle(editing?.title ?? "");
     setDescription(editing?.description ?? "");
+    setCoverUrl(editing?.cover_url ?? "");
   });
 
   const save = useMutation({
     mutationFn: async () => {
       if (editing) {
         const { error } = await supabase.from("modules")
-          .update({ title, description: description || null })
+          .update({ title, description: description || null, cover_url: coverUrl || null })
           .eq("id", editing.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("modules").insert({
-          course_id: courseId, title, description: description || null, position: nextPosition,
+          course_id: courseId, title, description: description || null, position: nextPosition, cover_url: coverUrl || null,
         });
         if (error) throw error;
       }
@@ -310,6 +319,15 @@ function ModuleDialog({
             <Label>Descrição</Label>
             <Textarea rows={3} value={description ?? ""} onChange={(e) => setDescription(e.target.value)} />
           </div>
+          <ImageUploadCrop
+            label="Capa do módulo"
+            value={coverUrl}
+            onChange={setCoverUrl}
+            folder="modules"
+            aspect={16 / 9}
+            recommended={{ width: 800, height: 450 }}
+            hint="Aparece no cabeçalho do módulo na área do aluno."
+          />
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
             <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando…" : "Salvar"}</Button>
@@ -442,10 +460,15 @@ function LessonDialog({
               value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Thumbnail (URL)</Label>
-              <Input type="url" value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} />
-            </div>
+            <ImageUploadCrop
+              label="Thumbnail da aula"
+              value={thumbnailUrl}
+              onChange={setThumbnailUrl}
+              folder="lessons"
+              aspect={16 / 9}
+              recommended={{ width: 640, height: 360 }}
+              hint="Aparece nos cards de aulas."
+            />
             <div className="space-y-1.5">
               <Label>Duração (minutos)</Label>
               <Input type="number" min={0} value={durationMin} onChange={(e) => setDurationMin(e.target.value)} />

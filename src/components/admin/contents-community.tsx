@@ -19,6 +19,7 @@ import {
   Plus, Pencil, Trash2, ArrowUp, ArrowDown, Pin, MessageSquare, ImageIcon, Video, Mic, Radio, Send,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
 
 type PostType = "text" | "image" | "video" | "audio" | "live";
 
@@ -28,6 +29,7 @@ type Channel = {
   name: string;
   description: string | null;
   icon: string | null;
+  icon_url: string | null;
   position: number;
 };
 
@@ -174,7 +176,11 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
                   className="flex-1 text-left text-sm truncate"
                   onClick={() => setSelectedChannel(c.id)}
                 >
-                  {c.icon && <span className="mr-1.5">{c.icon}</span>}
+                  {c.icon_url ? (
+                    <img src={c.icon_url} alt="" className="inline-block h-5 w-5 rounded-full object-cover mr-1.5 align-text-bottom" />
+                  ) : c.icon ? (
+                    <span className="mr-1.5">{c.icon}</span>
+                  ) : null}
                   {c.name}
                 </button>
                 <div className="opacity-0 group-hover:opacity-100 flex">
@@ -271,16 +277,18 @@ function ChannelDialog({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("");
+  const [iconUrl, setIconUrl] = useState("");
 
   useResetOnOpen(state.open, () => {
     setName(editing?.name ?? "");
     setDescription(editing?.description ?? "");
     setIcon(editing?.icon ?? "");
+    setIconUrl(editing?.icon_url ?? "");
   });
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { name, description: description || null, icon: icon || null };
+      const payload = { name, description: description || null, icon: icon || null, icon_url: iconUrl || null };
       if (editing) {
         const { error } = await supabase.from("community_channels").update(payload).eq("id", editing.id);
         if (error) throw error;
@@ -308,8 +316,19 @@ function ChannelDialog({
             <Label>Nome</Label>
             <Input required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
+          <ImageUploadCrop
+            label="Ícone do canal"
+            value={iconUrl}
+            onChange={setIconUrl}
+            folder="channels"
+            aspect={1}
+            recommended={{ width: 256, height: 256 }}
+            previewClassName="aspect-square w-20"
+            rounded
+            hint="Se preferir, use um emoji no campo abaixo."
+          />
           <div className="space-y-1.5">
-            <Label>Ícone (emoji)</Label>
+            <Label>Emoji (alternativa ao ícone)</Label>
             <Input maxLength={4} placeholder="💬" value={icon} onChange={(e) => setIcon(e.target.value)} />
           </div>
           <div className="space-y-1.5">
