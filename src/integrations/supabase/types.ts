@@ -101,6 +101,7 @@ export type Database = {
           body: string | null
           channel_id: string
           course_id: string
+          cover_url: string | null
           created_at: string
           id: string
           image_url: string | null
@@ -123,6 +124,7 @@ export type Database = {
           body?: string | null
           channel_id: string
           course_id: string
+          cover_url?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           body?: string | null
           channel_id?: string
           course_id?: string
+          cover_url?: string | null
           created_at?: string
           id?: string
           image_url?: string | null

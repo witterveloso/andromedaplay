@@ -43,6 +43,7 @@ type Post = {
   image_url: string | null;
   youtube_url: string | null;
   audio_url: string | null;
+  cover_url: string | null;
   post_type: PostType;
   is_live_active: boolean;
   live_started_at: string | null;
@@ -364,6 +365,7 @@ function PostDialog({
   const [imageUrl, setImageUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [isLiveActive, setIsLiveActive] = useState(false);
   const [liveChatEnabled, setLiveChatEnabled] = useState(true);
   const [allowComments, setAllowComments] = useState(true);
@@ -378,6 +380,7 @@ function PostDialog({
     setImageUrl(editing?.image_url ?? "");
     setYoutubeUrl(editing?.youtube_url ?? "");
     setAudioUrl(editing?.audio_url ?? "");
+    setCoverUrl(editing?.cover_url ?? "");
     setIsLiveActive(editing?.is_live_active ?? false);
     setLiveChatEnabled(editing?.live_chat_enabled ?? true);
     setAllowComments(editing?.allow_comments ?? true);
@@ -395,6 +398,7 @@ function PostDialog({
         image_url: imageUrl || null,
         youtube_url: youtubeUrl || null,
         audio_url: audioUrl || null,
+        cover_url: coverUrl || null,
         is_live_active: postType === "live" ? isLiveActive : false,
         live_started_at: postType === "live" && isLiveActive && !editing?.is_live_active
           ? new Date().toISOString() : editing?.live_started_at ?? null,
@@ -508,6 +512,17 @@ function PostDialog({
               </div>
             </div>
           )}
+
+          <ImageUploadCrop
+            label="Capa do assunto (opcional)"
+            value={coverUrl}
+            onChange={setCoverUrl}
+            folder="post-covers"
+            aspect={16 / 9}
+            recommended={{ width: 1280, height: 720 }}
+            previewClassName="aspect-video w-full"
+            hint="Imagem de capa exibida no card do assunto. Recomendado 1280×720 (16:9)."
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
@@ -722,6 +737,9 @@ function PostCard({
           </div>
           {post.title && <h3 className="font-semibold text-base">{post.title}</h3>}
           {post.body && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{post.body}</p>}
+          {post.cover_url && (
+            <img src={post.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
+          )}
           {post.post_type === "live" && post.youtube_url && (
             <p className="text-xs text-muted-foreground break-all">URL da live: {post.youtube_url}</p>
           )}

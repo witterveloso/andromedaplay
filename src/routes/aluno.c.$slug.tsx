@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash } from "lucide-react";
+import { toYouTubeEmbed } from "@/lib/youtube";
 
 export const Route = createFileRoute("/aluno/c/$slug")({
   component: StudentCourse,
@@ -138,10 +139,19 @@ function StudentCourse() {
                 channelPosts!.map((p: any) => (
                   <Card key={p.id} className="p-5 space-y-3">
                     {p.title && <h3 className="font-semibold text-lg">{p.title}</h3>}
+                    {p.cover_url && (
+                      <img src={p.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
+                    )}
                     {p.image_url && <img src={p.image_url} alt="" className="rounded-lg w-full" />}
                     {p.youtube_url && (
                       <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                        <iframe src={p.youtube_url} className="w-full h-full" allowFullScreen title={p.title ?? ""} />
+                        <iframe
+                          src={toYouTubeEmbed(p.youtube_url) ?? p.youtube_url}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={p.title ?? ""}
+                        />
                       </div>
                     )}
                     {p.body && <p className="whitespace-pre-wrap text-sm opacity-90">{p.body}</p>}
@@ -152,7 +162,7 @@ function StudentCourse() {
           ) : activeLesson?.youtube_url ? (
             <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
               <iframe
-                src={activeLesson.youtube_url}
+                src={toYouTubeEmbed(activeLesson.youtube_url) ?? activeLesson.youtube_url}
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
