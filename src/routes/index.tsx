@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
-import { Button } from "@/components/ui/button";
 import {
   ArrowRight, PlayCircle, Layers, Users, BarChart3, Lock,
   Video, Sparkles, Rocket, ShieldCheck, Globe, Zap,
