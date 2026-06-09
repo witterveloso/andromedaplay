@@ -68,6 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    // fonts loaded via <link> per Tailwind v4 guidance
   }),
   shellComponent: RootShell,
   component: RootComponent,
