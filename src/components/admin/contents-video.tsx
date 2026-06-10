@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { VIDEO_PROVIDERS, type VideoProvider } from "@/lib/video-player";
 
 type Module = {
   id: string;
