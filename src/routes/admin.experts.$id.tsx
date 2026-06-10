@@ -77,7 +77,7 @@ function ExpertDetail() {
   const del = useMutation({
     mutationFn: () => delFn({ data: { id } }),
     onSuccess: () => {
-      toast.success("Expert excluído");
+      toast.success("Produtor excluído");
       qc.invalidateQueries({ queryKey: ["experts"] });
       navigate({ to: "/admin/experts" });
     },
@@ -85,7 +85,7 @@ function ExpertDetail() {
   });
 
   if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Carregando…</div>;
-  if (!expert) return <div className="p-8 text-muted-foreground">Expert não encontrado.</div>;
+  if (!expert) return <div className="p-8 text-muted-foreground">Produtor não encontrado.</div>;
 
   const meta = statusMeta[expert.status] ?? statusMeta.active;
 
@@ -166,9 +166,9 @@ function ExpertDetail() {
       </div>
 
       <Card className="p-6">
-        <h2 className="font-semibold mb-1">Cursos do expert</h2>
+        <h2 className="font-semibold mb-1">Cursos do produtor</h2>
         <p className="text-xs text-muted-foreground mb-4">
-          Visualização somente para suporte técnico. O conteúdo dos cursos é gerenciado exclusivamente pelo expert.
+          Visualização somente para suporte técnico. O conteúdo dos cursos é gerenciado exclusivamente pelo produtor.
         </p>
         {!courses?.length ? (
           <p className="text-sm text-muted-foreground">Nenhum curso criado ainda.</p>
@@ -198,7 +198,7 @@ function ExpertDetail() {
             <p className="font-semibold">Suporte técnico</p>
             <p className="text-muted-foreground mt-1">
               Como administrador, você vê apenas as informações cadastrais e o status dos cursos.
-              Não há acesso ao conteúdo (vídeos, aulas, comunidade) — esse permanece sob responsabilidade do expert.
+              Não há acesso ao conteúdo (vídeos, aulas, comunidade) — esse permanece sob responsabilidade do produtor.
               Use as ações acima para ativar, pausar, bloquear ou excluir o cadastro quando necessário.
             </p>
           </div>
