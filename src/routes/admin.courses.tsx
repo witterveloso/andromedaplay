@@ -60,7 +60,7 @@ function CoursesPage() {
 
       return (courses ?? []).map((c) => ({
         ...c,
-        expert: expertsById[c.expert_id] ?? null,
+        expert: c.expert_id ? expertsById[c.expert_id] ?? null : null,
         students: enrollCount[c.id] ?? 0,
         content_count:
           c.course_type === "community" ? postCount[c.id] ?? 0 : lessonCount[c.id] ?? 0,
