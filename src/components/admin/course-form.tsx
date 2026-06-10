@@ -87,6 +87,29 @@ export function CourseForm({
         if (error) throw error;
         return data;
       } else {
+        // Garante que o registro do produtor existe em experts (id = auth.uid())
+        const { data: existingExpert } = await supabase
+          .from("experts")
+          .select("id")
+          .eq("id", user!.id)
+          .maybeSingle();
+        if (!existingExpert) {
+          const displayName =
+            (user!.user_metadata?.full_name as string | undefined) ||
+            (user!.user_metadata?.name as string | undefined) ||
+            user!.email ||
+            "Produtor";
+          const { error: expErr } = await supabase
+            .from("experts")
+            .insert({
+              id: user!.id,
+              display_name: displayName,
+              email: user!.email ?? "",
+              status: "active",
+              created_by: user!.id,
+            });
+          if (expErr) throw expErr;
+        }
         // tenta inserir; em caso de slug duplicado, gera variações até funcionar
         let attempt = 0;
         let lastError: unknown = null;
