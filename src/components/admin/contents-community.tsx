@@ -361,7 +361,7 @@ function PostDialog({
     setLiveChatEnabled(editing?.live_chat_enabled ?? true);
     setAllowComments(editing?.allow_comments ?? true);
     setIsPinned(editing?.is_pinned ?? false);
-    setStatus(editing?.status ?? "draft");
+    setStatus(editing?.status ?? "published");
     setPosition(String(editing?.position ?? nextPosition));
   });
 
@@ -533,7 +533,7 @@ function PostDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando…" : "Criar post"}</Button>
+            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Publicando…" : "Publicar"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
