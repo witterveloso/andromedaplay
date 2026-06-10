@@ -307,7 +307,7 @@ export const deleteStudent = createServerFn({ method: "POST" })
     // Clean derived data explicitly (FKs to auth.users may not all cascade)
     await supabaseAdmin.from("enrollments").delete().eq("student_id", data.user_id);
     await supabaseAdmin.from("community_reactions").delete().eq("user_id", data.user_id);
-    await supabaseAdmin.from("community_comments").delete().eq("user_id", data.user_id);
+    await supabaseAdmin.from("community_comments").delete().eq("author_id", data.user_id);
     await supabaseAdmin.from("community_posts").delete().eq("author_id", data.user_id);
     await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
     await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
