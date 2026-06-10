@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
-import { toYouTubeEmbed } from "@/lib/youtube";
+import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 
@@ -275,16 +275,17 @@ function StudentCourse() {
         <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
           <div>
             <h1 className="text-2xl font-semibold mb-4">{course.title}</h1>
-            {activeLesson?.youtube_url ? (
-              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                <iframe
-                  src={toYouTubeEmbed(activeLesson.youtube_url) ?? activeLesson.youtube_url}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={activeLesson.title}
-                />
-              </div>
+            {activeLesson && (activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
+              <VideoPlayer
+                title={activeLesson.title}
+                config={{
+                  provider: (activeLesson.video_provider as any) ?? "youtube",
+                  url: activeLesson.video_url,
+                  externalId: activeLesson.video_id,
+                  embed: activeLesson.video_embed,
+                  legacyYoutubeUrl: activeLesson.youtube_url,
+                }}
+              />
             ) : (
               <Card className="p-12 text-center opacity-80">
                 <p>Selecione uma aula ao lado para começar.</p>

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { VIDEO_PROVIDERS, type VideoProvider } from "@/lib/video-player";
 
 type Module = {
   id: string;
@@ -36,6 +37,10 @@ type Lesson = {
   title: string;
   description: string | null;
   youtube_url: string | null;
+  video_provider: VideoProvider | null;
+  video_url: string | null;
+  video_id: string | null;
+  video_embed: string | null;
   thumbnail_url: string | null;
   duration_seconds: number | null;
   status: "published" | "draft" | "locked";
@@ -208,9 +213,9 @@ export function ContentsVideo({ courseId }: { courseId: string }) {
                                 <Badge variant="outline">Libera em {l.release_after_days}d</Badge>
                               )}
                             </div>
-                            {l.youtube_url && (
+                            {(l.video_url || l.youtube_url) && (
                               <div className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                                <LinkIcon className="h-3 w-3" /> {l.youtube_url}
+                                <LinkIcon className="h-3 w-3" /> {l.video_url || l.youtube_url}
                               </div>
                             )}
                           </div>
@@ -352,7 +357,10 @@ function LessonDialog({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [videoProvider, setVideoProvider] = useState<VideoProvider>("youtube");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoId, setVideoId] = useState("");
+  const [videoEmbed, setVideoEmbed] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [durationMin, setDurationMin] = useState("");
   const [status, setStatus] = useState<Lesson["status"]>("draft");
@@ -373,7 +381,10 @@ function LessonDialog({
   useResetOnOpen(state.open, () => {
     setTitle(editing?.title ?? "");
     setDescription(editing?.description ?? "");
-    setYoutubeUrl(editing?.youtube_url ?? "");
+    setVideoProvider((editing?.video_provider as VideoProvider) ?? "youtube");
+    setVideoUrl(editing?.video_url ?? editing?.youtube_url ?? "");
+    setVideoId(editing?.video_id ?? "");
+    setVideoEmbed(editing?.video_embed ?? "");
     setThumbnailUrl(editing?.thumbnail_url ?? "");
     setDurationMin(editing?.duration_seconds ? String(Math.round(editing.duration_seconds / 60)) : "");
     setStatus(editing?.status ?? "draft");
@@ -383,10 +394,16 @@ function LessonDialog({
 
   const save = useMutation({
     mutationFn: async () => {
+      const trimmedUrl = videoUrl.trim();
       const payload = {
         title,
         description: description || null,
-        youtube_url: youtubeUrl || null,
+        video_provider: videoProvider,
+        video_url: trimmedUrl || null,
+        video_id: videoId.trim() || null,
+        video_embed: videoEmbed.trim() || null,
+        // keep legacy column populated for YouTube so any legacy reader still works
+        youtube_url: videoProvider === "youtube" ? (trimmedUrl || null) : null,
         thumbnail_url: thumbnailUrl || null,
         duration_seconds: durationMin ? Math.round(Number(durationMin) * 60) : null,
         status,
@@ -454,10 +471,59 @@ function LessonDialog({
             <Label>Descrição</Label>
             <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Link do YouTube</Label>
-            <Input type="url" placeholder="https://youtube.com/watch?v=…"
-              value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} />
+          <div className="rounded-md border p-3 space-y-3 bg-muted/20">
+            <div className="space-y-1.5">
+              <Label>Tipo de vídeo</Label>
+              <Select value={videoProvider} onValueChange={(v) => setVideoProvider(v as VideoProvider)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {VIDEO_PROVIDERS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {VIDEO_PROVIDERS.find((p) => p.value === videoProvider)?.hint}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>URL do player</Label>
+              <Input
+                type="url"
+                placeholder={
+                  videoProvider === "youtube" ? "https://youtube.com/watch?v=…" :
+                  videoProvider === "bunny" ? "https://iframe.mediadelivery.net/embed/…" :
+                  videoProvider === "cloudflare" ? "https://iframe.videodelivery.net/…" :
+                  videoProvider === "vimeo" ? "https://vimeo.com/…" :
+                  videoProvider === "mux" ? "https://stream.mux.com/PLAYBACK_ID.m3u8" :
+                  "https://…"
+                }
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>ID do vídeo externo (opcional)</Label>
+              <Input
+                placeholder={
+                  videoProvider === "bunny" ? "library_id/video_id" :
+                  videoProvider === "vimeo" ? "123456789" :
+                  videoProvider === "mux" ? "PLAYBACK_ID" :
+                  "ID do vídeo"
+                }
+                value={videoId}
+                onChange={(e) => setVideoId(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Código embed (opcional, sobrepõe a URL)</Label>
+              <Textarea
+                rows={3}
+                placeholder='<iframe src="…" allow="…" allowfullscreen></iframe>'
+                value={videoEmbed}
+                onChange={(e) => setVideoEmbed(e.target.value)}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ImageUploadCrop
