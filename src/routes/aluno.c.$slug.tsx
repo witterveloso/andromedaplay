@@ -106,7 +106,7 @@ function StudentCourse() {
 
 
   return (
-    <div className="min-h-screen" style={{ background: course.background_color, color: course.text_color, fontFamily: course.font_family }}>
+    <div className="andromeda-cinema min-h-screen" style={{ fontFamily: course.font_family || undefined }}>
       {isPreview && (
         <div className="bg-amber-500/15 border-b border-amber-500/40 px-6 py-2 text-amber-200 text-sm flex items-center gap-2">
           <Eye className="h-4 w-4" />
@@ -119,43 +119,45 @@ function StudentCourse() {
         </div>
       )}
 
-      <header className="border-b border-white/10">
+      <header className="absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-[#0a0a1a] to-transparent">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isPreview ? (
-              <Link to="/expert/preview" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+              <Link to="/expert/preview" className="text-white/70 hover:text-white text-sm flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Voltar ao painel
               </Link>
             ) : (
-              <Link to="/aluno" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+              <Link to="/aluno" className="text-white/70 hover:text-white text-sm flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Meus cursos
               </Link>
             )}
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="opacity-70">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair</Button>
+            <span className="text-white/60">{user?.email}</span>
+            <Button variant="ghost" size="sm" onClick={signOut} className="text-white/80 hover:text-white hover:bg-white/5"><LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair</Button>
           </div>
         </div>
       </header>
 
       {course.course_type === "community" ? (
         <>
-          {/* Banner cinematográfico premium */}
-          <section
-            className="relative w-full overflow-hidden"
-            style={{
-              background: course.cover_url
-                ? `url(${course.cover_url}) center/cover`
-                : `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})`,
-              minHeight: "28vh",
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
-            <div className="relative max-w-6xl mx-auto px-6 flex flex-col items-center justify-center text-center" style={{ minHeight: "28vh" }}>
-              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight drop-shadow-lg">{course.title}</h1>
+          {/* Hero cinematográfico premium */}
+          <section className="relative w-full overflow-hidden" style={{ minHeight: "60vh" }}>
+            <div className="absolute inset-0 animate-ken-burns" style={
+              course.cover_url
+                ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}, ${course.accent_color ?? "#1e1e5a"})` }
+            } />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a]/80 via-transparent to-transparent" />
+            <div className="absolute top-1/2 left-1/3 w-[500px] h-[500px] bg-[#4f46e5]/20 rounded-full blur-[120px] animate-indigo-pulse" />
+            <div className="relative max-w-6xl mx-auto px-6 flex flex-col justify-end pb-12 pt-32" style={{ minHeight: "60vh" }}>
+              <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] w-fit mb-4 shadow-[0_0_20px_rgba(79,70,229,0.5)]">Comunidade</span>
+              <h1 className="font-cinema-display text-4xl md:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl">{(course.title ?? "").toUpperCase()}</h1>
+              {course.description && <p className="mt-4 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>}
             </div>
           </section>
+
 
           <FeaturedMoment data={course as any} />
 
