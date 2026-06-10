@@ -65,17 +65,8 @@ function StudentHome() {
           <div className="flex items-center gap-3">
             <AndromedaLogo className="scale-[0.85]" />
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-muted-foreground hidden sm:inline">{user?.email}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={signOut}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair
-            </Button>
-          </div>
+          <AvatarMenu />
+
         </div>
       </header>
 
