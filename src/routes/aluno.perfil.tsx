@@ -79,7 +79,7 @@ function ProfilePage() {
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `avatars/${user.id}-${Date.now()}.${ext}`;
+      const path = `avatars/${user.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("course-assets")
         .upload(path, file, { upsert: true, contentType: file.type });
