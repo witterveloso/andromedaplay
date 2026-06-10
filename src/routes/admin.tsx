@@ -13,6 +13,7 @@ import {
   LifeBuoy,
   Settings,
   LogOut,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
@@ -31,6 +32,7 @@ const nav: NavItem[] = [
   { to: "/admin/communities", label: "Comunidades", icon: MessagesSquare },
   { to: "/admin/content", label: "Conteúdos", icon: FileStack },
   { to: "/admin/access", label: "Acessos", icon: KeyRound },
+  { to: "/admin/maintenance", label: "Manutenção", icon: Wrench },
   { to: "/admin/support", label: "Suporte", icon: LifeBuoy },
   { to: "/admin/settings", label: "Configurações", icon: Settings },
 ];
