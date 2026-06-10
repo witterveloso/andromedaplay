@@ -157,10 +157,31 @@ function StudentCourse() {
               {(channelPosts?.length ?? 0) === 0 ? (
                 <Card className="p-8 text-center opacity-80">Nenhuma publicação ainda neste canal.</Card>
               ) : (
-                channelPosts!.map((p: any) => <StudentPostCard key={p.id} post={p} />)
+                <div className="space-y-6">
+                  {pinnedPosts.length > 0 && (
+                    <section className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm font-semibold opacity-90">
+                        <Pin className="h-4 w-4" />
+                        Publicações fixadas ({pinnedPosts.length})
+                      </div>
+                      <div className="space-y-3">
+                        {pinnedPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
+                      </div>
+                    </section>
+                  )}
+                  {regularPosts.length > 0 && (
+                    <section className="space-y-3">
+                      {pinnedPosts.length > 0 && (
+                        <div className="text-sm font-semibold opacity-90">Todas as publicações</div>
+                      )}
+                      <div className="space-y-3">
+                        {regularPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
+                      </div>
+                    </section>
+                  )}
+                </div>
               )}
 
-            </div>
           ) : activeLesson?.youtube_url ? (
             <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
               <iframe
