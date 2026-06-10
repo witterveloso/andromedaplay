@@ -381,7 +381,10 @@ function LessonDialog({
   useResetOnOpen(state.open, () => {
     setTitle(editing?.title ?? "");
     setDescription(editing?.description ?? "");
-    setYoutubeUrl(editing?.youtube_url ?? "");
+    setVideoProvider((editing?.video_provider as VideoProvider) ?? "youtube");
+    setVideoUrl(editing?.video_url ?? editing?.youtube_url ?? "");
+    setVideoId(editing?.video_id ?? "");
+    setVideoEmbed(editing?.video_embed ?? "");
     setThumbnailUrl(editing?.thumbnail_url ?? "");
     setDurationMin(editing?.duration_seconds ? String(Math.round(editing.duration_seconds / 60)) : "");
     setStatus(editing?.status ?? "draft");
@@ -391,10 +394,16 @@ function LessonDialog({
 
   const save = useMutation({
     mutationFn: async () => {
+      const trimmedUrl = videoUrl.trim();
       const payload = {
         title,
         description: description || null,
-        youtube_url: youtubeUrl || null,
+        video_provider: videoProvider,
+        video_url: trimmedUrl || null,
+        video_id: videoId.trim() || null,
+        video_embed: videoEmbed.trim() || null,
+        // keep legacy column populated for YouTube so any legacy reader still works
+        youtube_url: videoProvider === "youtube" ? (trimmedUrl || null) : null,
         thumbnail_url: thumbnailUrl || null,
         duration_seconds: durationMin ? Math.round(Number(durationMin) * 60) : null,
         status,
