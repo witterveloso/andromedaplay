@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LogOut, Sparkles, AlertTriangle, Eye, UserCircle } from "lucide-react";
+import { BookOpen, LogOut, AlertTriangle, Eye, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import andromedaLogo from "@/assets/andromeda-logo.png.asset.json";
 
 export const Route = createFileRoute("/expert")({
   component: ExpertLayout,
