@@ -19,6 +19,8 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
 import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
 import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
+import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.index'
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
 import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
@@ -78,6 +80,16 @@ const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
   path: '/aluno/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCoursesRoute = AdminCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ExpertCoursesIndexRoute = ExpertCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -124,6 +136,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
@@ -142,6 +156,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
@@ -163,6 +179,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
@@ -185,6 +203,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/courses'
+    | '/admin/students'
     | '/aluno/perfil'
     | '/expert/preview'
     | '/expert/profile'
@@ -203,6 +223,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/courses'
+    | '/admin/students'
     | '/aluno/perfil'
     | '/expert/preview'
     | '/expert/profile'
@@ -223,6 +245,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/courses'
+    | '/admin/students'
     | '/aluno/perfil'
     | '/expert/preview'
     | '/expert/profile'
@@ -321,6 +345,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlunoPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/courses': {
+      id: '/admin/courses'
+      path: '/courses'
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AdminCoursesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/expert/courses/': {
       id: '/expert/courses/'
       path: '/courses'
@@ -381,6 +419,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminStudentsRoute: typeof AdminStudentsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminExpertsIdRoute: typeof AdminExpertsIdRoute
   AdminExpertsNewRoute: typeof AdminExpertsNewRoute
@@ -388,6 +428,8 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCoursesRoute: AdminCoursesRoute,
+  AdminStudentsRoute: AdminStudentsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminExpertsIdRoute: AdminExpertsIdRoute,
   AdminExpertsNewRoute: AdminExpertsNewRoute,
@@ -441,3 +483,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
