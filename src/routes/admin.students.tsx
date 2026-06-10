@@ -26,11 +26,24 @@ function initials(name?: string | null, email?: string | null) {
 
 function StudentsPage() {
   const [query, setQuery] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
   const fn = useServerFn(listStudents);
+  const delFn = useServerFn(deleteStudent);
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students"],
     queryFn: () => fn({ data: {} }),
+  });
+
+  const delMut = useMutation({
+    mutationFn: (id: string) => delFn({ data: { user_id: id } }),
+    onSuccess: () => {
+      toast.success("Aluno excluído permanentemente.");
+      setPendingDelete(null);
+      qc.invalidateQueries({ queryKey: ["admin-students"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Falha ao excluir"),
   });
 
   const students = (data?.students ?? []).filter((s) => {
