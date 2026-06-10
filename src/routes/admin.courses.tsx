@@ -27,6 +27,18 @@ const statusMeta: Record<string, { label: string; variant: "default" | "secondar
 
 function CoursesPage() {
   const [query, setQuery] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
+  const qc = useQueryClient();
+  const deleteFn = useServerFn(deleteCourse);
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { course_id: id } }),
+    onSuccess: () => {
+      toast.success("Produto excluído permanentemente.");
+      setPendingDelete(null);
+      qc.invalidateQueries({ queryKey: ["admin-all-courses"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Falha ao excluir"),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-all-courses"],
