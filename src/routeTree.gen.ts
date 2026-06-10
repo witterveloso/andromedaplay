@@ -21,6 +21,7 @@ import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
 import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
@@ -94,6 +95,11 @@ const AdminStudentsRoute = AdminStudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMaintenanceRoute = AdminMaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCoursesRoute = AdminCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -407,6 +419,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/maintenance': {
+      id: '/admin/maintenance'
+      path: '/maintenance'
+      fullPath: '/admin/maintenance'
+      preLoaderRoute: typeof AdminMaintenanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/courses': {
       id: '/admin/courses'
       path: '/courses'
@@ -499,6 +518,7 @@ interface AdminRouteChildren {
   AdminCommunitiesRoute: typeof AdminCommunitiesRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminMaintenanceRoute: typeof AdminMaintenanceRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -512,6 +532,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCommunitiesRoute: AdminCommunitiesRoute,
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
+  AdminMaintenanceRoute: AdminMaintenanceRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -567,3 +588,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
