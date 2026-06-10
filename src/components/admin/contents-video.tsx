@@ -36,6 +36,7 @@ type Lesson = {
   module_id: string;
   title: string;
   description: string | null;
+  extra_info: string | null;
   youtube_url: string | null;
   video_provider: VideoProvider | null;
   video_url: string | null;
@@ -49,14 +50,19 @@ type Lesson = {
   position: number;
 };
 
+type MaterialType = "pdf" | "link" | "image" | "file";
+
 type Material = {
   id: string;
   lesson_id: string;
   name: string;
   url: string;
   file_type: string | null;
+  material_type: MaterialType | string;
+  storage_path: string | null;
   position: number;
 };
+
 
 const statusBadge: Record<Lesson["status"], { label: string; variant: "default" | "secondary" | "outline" }> = {
   published: { label: "Publicada", variant: "default" },
@@ -357,6 +363,7 @@ function LessonDialog({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [extraInfo, setExtraInfo] = useState("");
   const [videoProvider, setVideoProvider] = useState<VideoProvider>("youtube");
   const [videoUrl, setVideoUrl] = useState("");
   const [videoId, setVideoId] = useState("");
@@ -381,6 +388,7 @@ function LessonDialog({
   useResetOnOpen(state.open, () => {
     setTitle(editing?.title ?? "");
     setDescription(editing?.description ?? "");
+    setExtraInfo(editing?.extra_info ?? "");
     setVideoProvider((editing?.video_provider as VideoProvider) ?? "youtube");
     setVideoUrl(editing?.video_url ?? editing?.youtube_url ?? "");
     setVideoId(editing?.video_id ?? "");
@@ -398,11 +406,11 @@ function LessonDialog({
       const payload = {
         title,
         description: description || null,
+        extra_info: extraInfo || null,
         video_provider: videoProvider,
         video_url: trimmedUrl || null,
         video_id: videoId.trim() || null,
         video_embed: videoEmbed.trim() || null,
-        // keep legacy column populated for YouTube so any legacy reader still works
         youtube_url: videoProvider === "youtube" ? (trimmedUrl || null) : null,
         thumbnail_url: thumbnailUrl || null,
         duration_seconds: durationMin ? Math.round(Number(durationMin) * 60) : null,
@@ -431,32 +439,63 @@ function LessonDialog({
   });
 
   const [matName, setMatName] = useState("");
+  const [matType, setMatType] = useState<MaterialType>("link");
   const [matUrl, setMatUrl] = useState("");
+  const [matFile, setMatFile] = useState<File | null>(null);
+  const [matUploading, setMatUploading] = useState(false);
+
   const addMaterial = useMutation({
     mutationFn: async () => {
       if (!editing?.id) throw new Error("Salve a aula primeiro.");
+      let finalUrl = matUrl.trim();
+      let storagePath: string | null = null;
+      let fileType: string | null = null;
+
+      if (matType !== "link") {
+        if (!matFile) throw new Error("Selecione um arquivo.");
+        setMatUploading(true);
+        const safeName = matFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        storagePath = `${courseId}/${editing.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("lesson-materials")
+          .upload(storagePath, matFile, { upsert: false, contentType: matFile.type || undefined });
+        if (upErr) { setMatUploading(false); throw upErr; }
+        fileType = matFile.type || null;
+        // Store path as url placeholder; signed URL is generated on demand at view time.
+        finalUrl = storagePath;
+        setMatUploading(false);
+      }
+
       const { error } = await supabase.from("lesson_materials").insert({
         lesson_id: editing.id,
-        name: matName,
-        url: matUrl,
+        name: matName || (matFile?.name ?? "Material"),
+        url: finalUrl,
+        material_type: matType,
+        storage_path: storagePath,
+        file_type: fileType,
         position: materialsQ.data?.length ?? 0,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      setMatName(""); setMatUrl("");
+      setMatName(""); setMatUrl(""); setMatFile(null); setMatType("link");
       qc.invalidateQueries({ queryKey: ["lesson_materials", editing!.id] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => { setMatUploading(false); toast.error(e.message); },
   });
+
   const delMaterial = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("lesson_materials").delete().eq("id", id);
+    mutationFn: async (m: Material) => {
+      if (m.storage_path) {
+        await supabase.storage.from("lesson-materials").remove([m.storage_path]);
+      }
+      const { error } = await supabase.from("lesson_materials").delete().eq("id", m.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson_materials", editing!.id] }),
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <Dialog open={state.open} onOpenChange={(o) => !o && onClose()}>
@@ -566,33 +605,74 @@ function LessonDialog({
             </div>
           </div>
 
+          <div className="space-y-1.5">
+            <Label>Informações adicionais</Label>
+            <Textarea
+              rows={5}
+              placeholder="Orientações, resumo, tarefas, avisos, links complementares…"
+              value={extraInfo}
+              onChange={(e) => setExtraInfo(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Exibido para o aluno abaixo do player, em uma seção "Informações adicionais".</p>
+          </div>
+
           {editing && (
-            <div className="space-y-2 rounded-md border p-3">
+            <div className="space-y-3 rounded-md border p-3">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <FileText className="h-4 w-4" /> Materiais complementares
+                <FileText className="h-4 w-4" /> Materiais extras
               </div>
+              {(materialsQ.data ?? []).length === 0 && (
+                <p className="text-xs text-muted-foreground">Nenhum material adicionado ainda.</p>
+              )}
               {(materialsQ.data ?? []).map((m) => (
-                <div key={m.id} className="flex items-center gap-2 text-sm">
-                  <a href={m.url} target="_blank" rel="noreferrer" className="flex-1 truncate underline">
-                    {m.name}
-                  </a>
+                <div key={m.id} className="flex items-center gap-2 text-sm border rounded px-2 py-1.5">
+                  <Badge variant="outline" className="uppercase text-[10px]">{m.material_type}</Badge>
+                  <span className="flex-1 truncate">{m.name}</span>
+                  {!m.storage_path && (
+                    <a href={m.url} target="_blank" rel="noreferrer" className="text-xs underline text-muted-foreground">
+                      abrir
+                    </a>
+                  )}
                   <Button type="button" variant="ghost" size="icon" className="h-7 w-7"
-                    onClick={() => delMaterial.mutate(m.id)}>
+                    onClick={() => delMaterial.mutate(m)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               ))}
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2">
-                <Input placeholder="Nome" value={matName} onChange={(e) => setMatName(e.target.value)} />
-                <Input placeholder="URL" value={matUrl} onChange={(e) => setMatUrl(e.target.value)} />
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-2">
+                <Select value={matType} onValueChange={(v) => { setMatType(v as MaterialType); setMatFile(null); setMatUrl(""); }}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="link">Link externo</SelectItem>
+                    <SelectItem value="image">Imagem</SelectItem>
+                    <SelectItem value="file">Arquivo</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Título do material" value={matName} onChange={(e) => setMatName(e.target.value)} />
+              </div>
+              {matType === "link" ? (
+                <Input placeholder="https://…" value={matUrl} onChange={(e) => setMatUrl(e.target.value)} />
+              ) : (
+                <Input
+                  type="file"
+                  accept={matType === "pdf" ? "application/pdf" : matType === "image" ? "image/*" : undefined}
+                  onChange={(e) => setMatFile(e.target.files?.[0] ?? null)}
+                />
+              )}
+              <div className="flex justify-end">
                 <Button type="button" variant="outline" size="sm"
-                  disabled={!matName || !matUrl || addMaterial.isPending}
+                  disabled={
+                    addMaterial.isPending || matUploading ||
+                    (matType === "link" ? (!matName || !matUrl) : !matFile)
+                  }
                   onClick={() => addMaterial.mutate()}>
-                  Adicionar
+                  {matUploading || addMaterial.isPending ? "Enviando…" : "Adicionar material"}
                 </Button>
               </div>
             </div>
           )}
+
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
