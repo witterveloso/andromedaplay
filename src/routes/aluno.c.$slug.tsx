@@ -176,7 +176,7 @@ function StudentCourse() {
 
         <aside className="space-y-4">
           {!hasContent ? (
-            <Card className="p-6 text-sm opacity-80">Nenhum conteúdo publicado.</Card>
+            <Card className="p-6 text-sm opacity-80">Este produto ainda não possui conteúdos publicados.</Card>
           ) : (
             <>
             {modules?.map((m) => (
