@@ -14,7 +14,7 @@ export const Route = createFileRoute("/aluno/")({
 });
 
 function StudentHome() {
-  const { user, loading, session, signOut } = useAuth();
+  const { user, loading, session } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
