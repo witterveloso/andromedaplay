@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
+
 import { GraduationCap, ArrowRight } from "lucide-react";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { Skeleton } from "@/components/ui/skeleton";
