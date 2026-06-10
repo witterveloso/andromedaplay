@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,14 +35,7 @@ function StudentHome() {
         .filter(Boolean) as any[];
       const byId = new Map<string, any>();
       for (const c of rows) if (!byId.has(c.id)) byId.set(c.id, c);
-      const byTitle = new Map<string, any>();
-      for (const c of byId.values()) {
-        const key = (c.title ?? "").trim().toLowerCase();
-        const existing = byTitle.get(key);
-        if (!existing) byTitle.set(key, c);
-        else if (existing.course_type !== "video" && c.course_type === "video") byTitle.set(key, c);
-      }
-      return Array.from(byTitle.values());
+      return Array.from(byId.values());
     },
   });
 
@@ -57,9 +50,6 @@ function StudentHome() {
     );
   }
 
-  if (!isLoading && courses && courses.length === 1) {
-    return <Navigate to="/aluno/c/$slug" params={{ slug: courses[0].slug }} />;
-  }
 
   return (
     <div className="andromeda-cinema min-h-screen w-full overflow-x-hidden">
