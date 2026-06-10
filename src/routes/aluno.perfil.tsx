@@ -213,9 +213,22 @@ function ProfilePage() {
                   disabled={uploading}
                   className="absolute bottom-1 right-1 h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg ring-2 ring-background hover:scale-105 transition-transform disabled:opacity-50"
                   aria-label="Alterar foto"
+                  title="Alterar foto"
                 >
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                 </button>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={openReframeExisting}
+                    disabled={uploading}
+                    className="absolute top-1 right-1 h-9 w-9 rounded-full bg-background/80 backdrop-blur text-foreground flex items-center justify-center shadow-lg ring-1 ring-white/15 hover:scale-105 transition-transform disabled:opacity-50"
+                    aria-label="Reenquadrar foto"
+                    title="Reenquadrar foto"
+                  >
+                    <CropIcon className="h-4 w-4" />
+                  </button>
+                )}
                 <input
                   ref={fileInputRef}
                   type="file"
