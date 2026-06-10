@@ -71,9 +71,6 @@ function LoginPage() {
           <div className="flex justify-center">
             <AndromedaLogo className="scale-125" />
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-soft-white md:text-4xl">
-            ANDROMEDA
-          </h1>
           <p className="text-sm text-stellar-silver md:text-base">
             Seu universo de aprendizado, comunidade e conteúdo premium
           </p>
