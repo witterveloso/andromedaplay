@@ -48,11 +48,12 @@ function ExpertLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="flex w-64 flex-col border-r bg-sidebar">
-        <div className="flex items-center gap-2 px-6 py-5 border-b">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-            <Sparkles className="h-4 w-4 text-primary" />
+        <div className="flex items-center gap-2.5 px-6 py-5 border-b">
+          <img src={andromedaLogo.url} alt="Andromeda" className="h-9 w-9 rounded-lg object-cover ring-1 ring-primary/30 shadow-[0_0_18px_rgba(108,77,255,0.35)]" />
+          <div className="flex flex-col leading-tight">
+            <span className="font-semibold tracking-wide">ANDROMEDA</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Painel Produtor</span>
           </div>
-          <span className="font-semibold">Painel Produtor</span>
         </div>
         <nav className="flex-1 space-y-1 p-3">
           {nav.map((item) => {
