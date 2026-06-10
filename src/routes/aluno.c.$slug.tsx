@@ -99,10 +99,15 @@ function StudentCourse() {
       {isPreview && (
         <div className="bg-amber-500/15 border-b border-amber-500/40 px-6 py-2 text-amber-200 text-sm flex items-center gap-2">
           <Eye className="h-4 w-4" />
-          <span>Você está visualizando este curso no modo <strong>preview</strong> — é assim que o aluno vê.</span>
+          <span>
+            Você está visualizando este curso no modo <strong>preview</strong>
+            {course.status !== "published" && <> — status atual: <strong>{course.status === "draft" ? "rascunho" : course.status}</strong> (alunos ainda não veem este conteúdo)</>}
+            .
+          </span>
           <Link to="/expert/preview" className="ml-auto underline">Voltar ao painel</Link>
         </div>
       )}
+
       <header className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
