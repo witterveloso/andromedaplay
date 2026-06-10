@@ -138,28 +138,9 @@ function StudentCourse() {
               {(channelPosts?.length ?? 0) === 0 ? (
                 <Card className="p-8 text-center opacity-80">Nenhuma publicação ainda neste canal.</Card>
               ) : (
-                channelPosts!.map((p: any) => (
-                  <Card key={p.id} className="p-5 space-y-3">
-                    {p.title && <h3 className="font-semibold text-lg">{p.title}</h3>}
-                    {p.cover_url && (
-                      <img src={p.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
-                    )}
-                    {p.image_url && <img src={p.image_url} alt="" className="rounded-lg w-full" />}
-                    {p.youtube_url && (
-                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                        <iframe
-                          src={toYouTubeEmbed(p.youtube_url) ?? p.youtube_url}
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title={p.title ?? ""}
-                        />
-                      </div>
-                    )}
-                    {p.body && <p className="whitespace-pre-wrap text-sm opacity-90">{p.body}</p>}
-                  </Card>
-                ))
+                channelPosts!.map((p: any) => <StudentPostCard key={p.id} post={p} />)
               )}
+
             </div>
           ) : activeLesson?.youtube_url ? (
             <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
