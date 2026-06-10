@@ -213,9 +213,9 @@ export function ContentsVideo({ courseId }: { courseId: string }) {
                                 <Badge variant="outline">Libera em {l.release_after_days}d</Badge>
                               )}
                             </div>
-                            {l.youtube_url && (
+                            {(l.video_url || l.youtube_url) && (
                               <div className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                                <LinkIcon className="h-3 w-3" /> {l.youtube_url}
+                                <LinkIcon className="h-3 w-3" /> {l.video_url || l.youtube_url}
                               </div>
                             )}
                           </div>
