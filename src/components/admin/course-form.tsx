@@ -72,9 +72,10 @@ export function CourseForm({
 
   const save = useMutation({
     mutationFn: async () => {
+      const baseSlug = form.slug || slugify(form.title);
       const payload = {
         ...form,
-        slug: form.slug || slugify(form.title),
+        slug: baseSlug,
         description: form.description || null,
         cover_url: form.cover_url || null,
         logo_url: form.logo_url || null,
@@ -86,12 +87,29 @@ export function CourseForm({
         if (error) throw error;
         return data;
       } else {
-        const { data, error } = await supabase
-          .from("courses")
-          .insert({ ...payload, created_by: user!.id, expert_id: user!.id })
-          .select().single();
-        if (error) throw error;
-        return data;
+        // tenta inserir; em caso de slug duplicado, gera variações até funcionar
+        let attempt = 0;
+        let lastError: unknown = null;
+        while (attempt < 6) {
+          const slugTry = attempt === 0
+            ? baseSlug
+            : `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+          const { data, error } = await supabase
+            .from("courses")
+            .insert({ ...payload, slug: slugTry, created_by: user!.id, expert_id: user!.id })
+            .select().single();
+          if (!error) return data;
+          // 23505 = unique_violation
+          const code = (error as { code?: string }).code;
+          const msg = error.message || "";
+          if (code === "23505" && msg.includes("slug")) {
+            attempt++;
+            lastError = error;
+            continue;
+          }
+          throw error;
+        }
+        throw lastError as Error;
       }
     },
     onSuccess: (data) => {
