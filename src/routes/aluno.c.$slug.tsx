@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
 import { toYouTubeEmbed } from "@/lib/youtube";
 import { StudentPostCard } from "@/components/community/student-post-card";
+import { FeaturedMoment } from "@/components/community/featured-moment";
 
 
 export const Route = createFileRoute("/aluno/c/$slug")({
