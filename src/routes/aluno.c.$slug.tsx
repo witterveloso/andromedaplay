@@ -331,6 +331,18 @@ function StudentCourse() {
                 <h2 className="font-cinema-display text-2xl font-bold tracking-tight">{activeLesson.title}</h2>
                 {activeLesson.description && <p className="text-white/70 mt-2 leading-relaxed">{activeLesson.description}</p>}
               </div>
+              {activeLesson.extra_info && (
+                <section className="mt-8 rounded-xl border border-[#1e1e5a] bg-[#0f0f24] p-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 mb-3">
+                    Informações adicionais
+                  </h3>
+                  <div className="text-white/85 leading-relaxed whitespace-pre-wrap text-sm">
+                    {activeLesson.extra_info}
+                  </div>
+                </section>
+              )}
+              <LessonMaterials lessonId={activeLesson.id} />
+
             </section>
           )}
 
