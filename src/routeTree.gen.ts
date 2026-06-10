@@ -21,6 +21,7 @@ import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
 import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
+import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
 import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.index'
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
 import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
@@ -90,6 +91,11 @@ const AdminCoursesRoute = AdminCoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCommunitiesRoute = AdminCommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ExpertCoursesIndexRoute = ExpertCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/communities'
     | '/admin/courses'
     | '/admin/students'
     | '/aluno/perfil'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/communities'
     | '/admin/courses'
     | '/admin/students'
     | '/aluno/perfil'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/communities'
     | '/admin/courses'
     | '/admin/students'
     | '/aluno/perfil'
@@ -359,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCoursesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/communities': {
+      id: '/admin/communities'
+      path: '/communities'
+      fullPath: '/admin/communities'
+      preLoaderRoute: typeof AdminCommunitiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/expert/courses/': {
       id: '/expert/courses/'
       path: '/courses'
@@ -419,6 +438,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCommunitiesRoute: typeof AdminCommunitiesRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -428,6 +448,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCommunitiesRoute: AdminCommunitiesRoute,
   AdminCoursesRoute: AdminCoursesRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -483,3 +504,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
