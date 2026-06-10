@@ -302,6 +302,76 @@ function ProfilePage() {
           </div>
         </section>
       </main>
+
+      <Dialog open={!!cropSrc} onOpenChange={(o) => !o && closeCrop()}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Reenquadrar foto de perfil</DialogTitle>
+          </DialogHeader>
+          <div className="relative h-[360px] w-full bg-black rounded-md overflow-hidden">
+            {cropSrc && (
+              <Cropper
+                image={cropSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Zoom</Label>
+            <Slider value={[zoom]} min={1} max={4} step={0.01} onValueChange={(v) => setZoom(v[0])} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Arraste para reposicionar. A imagem será salva em 512×512px.
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={closeCrop} disabled={uploading}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={confirmCrop} disabled={uploading || !croppedArea}>
+              {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar enquadramento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+async function getCroppedBlob(
+  src: string,
+  area: Area,
+  output: { width: number; height: number },
+): Promise<Blob> {
+  const img = await loadImage(src);
+  const canvas = document.createElement("canvas");
+  canvas.width = output.width;
+  canvas.height = output.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas indisponível");
+  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, output.width, output.height);
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Falha ao gerar imagem"))),
+      "image/jpeg",
+      0.92,
+    ),
+  );
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+    img.src = src;
+  });
 }
