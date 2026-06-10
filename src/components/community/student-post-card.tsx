@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toYouTubeEmbed } from "@/lib/youtube";
+import { YouTubeLivePlayer } from "@/components/community/youtube-live-player";
 import { toast } from "sonner";
 
 const REACTIONS = [
@@ -154,15 +154,7 @@ export function StudentPostCard({ post }: { post: any }) {
           )}
           {post.image_url && <img src={post.image_url} alt="" className="rounded-xl w-full" />}
           {post.youtube_url && (
-            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
-              <iframe
-                src={toYouTubeEmbed(post.youtube_url) ?? post.youtube_url}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={post.title ?? ""}
-              />
-            </div>
+            <YouTubeLivePlayer url={post.youtube_url} title={post.title ?? ""} />
           )}
           {post.audio_url && <audio controls src={post.audio_url} className="w-full" />}
         </div>
