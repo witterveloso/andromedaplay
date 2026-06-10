@@ -39,8 +39,10 @@ function ExpertLayout() {
 
   const nav = [
     { to: "/expert/courses", label: "Meus cursos", icon: BookOpen },
+    { to: "/expert/profile", label: "Meu perfil", icon: UserCircle },
     { to: "/expert/preview", label: "Ver como aluno", icon: Eye },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-background">
