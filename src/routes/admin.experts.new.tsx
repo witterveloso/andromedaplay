@@ -20,14 +20,14 @@ function NewExpert() {
 
   const m = useMutation({
     mutationFn: () => fn({ data: form }),
-    onSuccess: () => { toast.success("Expert criado"); nav({ to: "/admin/experts" }); },
+    onSuccess: () => { toast.success("Produtor criado"); nav({ to: "/admin/experts" }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
     <div className="p-8 max-w-xl mx-auto">
-      <h1 className="text-3xl font-semibold tracking-tight mb-1">Novo expert</h1>
-      <p className="text-muted-foreground mb-6">O expert recebe login e senha para criar e gerenciar seus cursos</p>
+      <h1 className="text-3xl font-semibold tracking-tight mb-1">Novo produtor</h1>
+      <p className="text-muted-foreground mb-6">O produtor recebe login e senha para criar e gerenciar seus cursos</p>
       <Card className="p-6">
         <form onSubmit={(e) => { e.preventDefault(); m.mutate(); }} className="space-y-4">
           <div className="space-y-1.5">
@@ -41,11 +41,11 @@ function NewExpert() {
           <div className="space-y-1.5">
             <Label>Senha inicial</Label>
             <Input required type="text" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-            <p className="text-xs text-muted-foreground">Compartilhe com o expert. Ele poderá trocar depois.</p>
+            <p className="text-xs text-muted-foreground">Compartilhe com o produtor. Ele poderá trocar depois.</p>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => nav({ to: "/admin/experts" })}>Cancelar</Button>
-            <Button type="submit" disabled={m.isPending}>{m.isPending ? "Criando…" : "Cadastrar expert"}</Button>
+            <Button type="submit" disabled={m.isPending}>{m.isPending ? "Criando…" : "Cadastrar produtor"}</Button>
           </div>
         </form>
       </Card>

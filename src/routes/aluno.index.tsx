@@ -63,7 +63,7 @@ function StudentHome() {
           <Card className="p-12 text-center">
             <p className="font-medium">Você ainda não tem cursos disponíveis</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Entre em contato com o expert que cadastrou você para liberar o acesso.
+              Entre em contato com o produtor que cadastrou você para liberar o acesso.
             </p>
           </Card>
         ) : (
