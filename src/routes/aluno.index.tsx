@@ -3,17 +3,18 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { GraduationCap, LogOut, ArrowRight } from "lucide-react";
+
+import { GraduationCap, ArrowRight } from "lucide-react";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AvatarMenu } from "@/components/student/avatar-menu";
 
 export const Route = createFileRoute("/aluno/")({
   component: StudentHome,
 });
 
 function StudentHome() {
-  const { user, loading, session, signOut } = useAuth();
+  const { user, loading, session } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,17 +65,8 @@ function StudentHome() {
           <div className="flex items-center gap-3">
             <AndromedaLogo className="scale-[0.85]" />
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-muted-foreground hidden sm:inline">{user?.email}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={signOut}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair
-            </Button>
-          </div>
+          <AvatarMenu />
+
         </div>
       </header>
 
