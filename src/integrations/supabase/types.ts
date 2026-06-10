@@ -579,6 +579,42 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          accent_color: string
+          created_at: string
+          footer_text: string | null
+          id: string
+          logo_url: string | null
+          platform_name: string
+          primary_color: string
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          created_at?: string
+          footer_text?: string | null
+          id?: string
+          logo_url?: string | null
+          platform_name?: string
+          primary_color?: string
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          created_at?: string
+          footer_text?: string | null
+          id?: string
+          logo_url?: string | null
+          platform_name?: string
+          primary_color?: string
+          support_email?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
