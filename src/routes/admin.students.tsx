@@ -104,11 +104,43 @@ function StudentsPage() {
                 <Badge variant={s.active_enrollments > 0 ? "default" : "secondary"}>
                   {s.active_enrollments > 0 ? "Ativo" : "Sem acesso"}
                 </Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setPendingDelete({ id: s.id, name: s.full_name ?? s.email ?? "Aluno" })}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             ))}
           </div>
         </Card>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir aluno permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove <strong>{pendingDelete?.name}</strong> da plataforma, incluindo
+              acessos, publicações, comentários e perfil. Não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (pendingDelete) delMut.mutate(pendingDelete.id);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
