@@ -224,3 +224,249 @@ export const setAccessStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* ============================================================
+ * Admin destructive actions + maintenance
+ * ============================================================ */
+
+async function logAction(
+  supabaseAdmin: any,
+  ctx: { userId: string; email?: string | null },
+  action: string,
+  target_type: string | null,
+  target_id: string | null,
+  target_label: string | null,
+  details: Record<string, any> = {},
+) {
+  try {
+    await supabaseAdmin.from("admin_audit_logs").insert({
+      actor_id: ctx.userId,
+      actor_email: ctx.email ?? null,
+      action,
+      target_type,
+      target_id,
+      target_label,
+      details,
+    });
+  } catch {
+    // never block the destructive op due to log failure
+  }
+}
+
+export const deleteCourse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ course_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: course } = await supabaseAdmin
+      .from("courses")
+      .select("id, title, slug")
+      .eq("id", data.course_id)
+      .maybeSingle();
+    if (!course) throw new Error("Curso não encontrado");
+
+    const { error } = await supabaseAdmin.from("courses").delete().eq("id", data.course_id);
+    if (error) throw new Error(error.message);
+
+    await logAction(
+      supabaseAdmin,
+      { userId: context.userId, email: (context.claims as any)?.email },
+      "course.delete",
+      "course",
+      course.id,
+      course.title,
+      { slug: course.slug },
+    );
+    return { ok: true };
+  });
+
+export const deleteStudent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Guard: do not allow deleting admins/experts via student delete
+    const { data: roles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user_id);
+    const roleSet = new Set((roles ?? []).map((r: any) => r.role));
+    if (roleSet.has("admin")) throw new Error("Não é permitido excluir um administrador por aqui");
+    if (roleSet.has("expert")) throw new Error("Este usuário é um produtor. Exclua pelo módulo de produtores.");
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("full_name")
+      .eq("id", data.user_id)
+      .maybeSingle();
+
+    // Clean derived data explicitly (FKs to auth.users may not all cascade)
+    await supabaseAdmin.from("enrollments").delete().eq("student_id", data.user_id);
+    await supabaseAdmin.from("community_reactions").delete().eq("user_id", data.user_id);
+    await supabaseAdmin.from("community_comments").delete().eq("author_id", data.user_id);
+    await supabaseAdmin.from("community_posts").delete().eq("author_id", data.user_id);
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
+    await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    if (error) throw new Error(error.message);
+
+    await logAction(
+      supabaseAdmin,
+      { userId: context.userId, email: (context.claims as any)?.email },
+      "student.delete",
+      "user",
+      data.user_id,
+      profile?.full_name ?? null,
+    );
+    return { ok: true };
+  });
+
+export const cleanupDuplicateEnrollments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("enrollments")
+      .select("id, course_id, student_id, status, created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    const seen = new Set<string>();
+    const toDelete: string[] = [];
+    for (const r of rows ?? []) {
+      const key = `${r.course_id}::${r.student_id}`;
+      if (seen.has(key)) toDelete.push(r.id);
+      else seen.add(key);
+    }
+    if (toDelete.length) {
+      const { error: delErr } = await supabaseAdmin.from("enrollments").delete().in("id", toDelete);
+      if (delErr) throw new Error(delErr.message);
+    }
+
+    await logAction(
+      supabaseAdmin,
+      { userId: context.userId, email: (context.claims as any)?.email },
+      "maintenance.dedupe_enrollments",
+      null,
+      null,
+      null,
+      { removed: toDelete.length },
+    );
+    return { removed: toDelete.length };
+  });
+
+export const detectDuplicates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: courses } = await supabaseAdmin
+      .from("courses")
+      .select("id, title, slug, course_type, expert_id, created_at")
+      .order("created_at", { ascending: true });
+
+    const courseBuckets: Record<string, any[]> = {};
+    for (const c of courses ?? []) {
+      const key = `${(c.title ?? "").trim().toLowerCase()}::${c.expert_id ?? ""}`;
+      (courseBuckets[key] ??= []).push(c);
+    }
+    const duplicateCourses = Object.values(courseBuckets).filter((arr) => arr.length > 1);
+
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name");
+    const emailsById: Record<string, string> = {};
+    let page = 1;
+    while (true) {
+      const { data: usersPage } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      for (const u of usersPage?.users ?? []) emailsById[u.id] = (u.email ?? "").toLowerCase();
+      if ((usersPage?.users.length ?? 0) < 1000) break;
+      page++;
+      if (page > 20) break;
+    }
+    const emailBuckets: Record<string, any[]> = {};
+    for (const p of profiles ?? []) {
+      const email = emailsById[p.id];
+      if (!email) continue;
+      (emailBuckets[email] ??= []).push({ id: p.id, full_name: p.full_name, email });
+    }
+    const duplicateUsers = Object.values(emailBuckets).filter((arr) => arr.length > 1);
+
+    const { data: enrolls } = await supabaseAdmin
+      .from("enrollments")
+      .select("course_id, student_id");
+    const enrollSeen = new Set<string>();
+    let dupEnroll = 0;
+    for (const e of enrolls ?? []) {
+      const k = `${e.course_id}::${e.student_id}`;
+      if (enrollSeen.has(k)) dupEnroll++;
+      else enrollSeen.add(k);
+    }
+
+    return {
+      duplicate_courses: duplicateCourses,
+      duplicate_users: duplicateUsers,
+      duplicate_enrollments: dupEnroll,
+    };
+  });
+
+export const cleanupOrphans = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Lessons whose course no longer exists, modules whose course no longer exists, etc.
+    // Most of these are protected by ON DELETE CASCADE — this is a belt-and-suspenders pass.
+    const { data: courses } = await supabaseAdmin.from("courses").select("id");
+    const courseIds = new Set((courses ?? []).map((c: any) => c.id));
+
+    const { data: modules } = await supabaseAdmin.from("modules").select("id, course_id");
+    const orphanModules = (modules ?? []).filter((m: any) => !courseIds.has(m.course_id)).map((m: any) => m.id);
+
+    const { data: lessons } = await supabaseAdmin.from("lessons").select("id, course_id, module_id");
+    const moduleIds = new Set((modules ?? []).map((m: any) => m.id));
+    const orphanLessons = (lessons ?? [])
+      .filter((l: any) => !courseIds.has(l.course_id) || (l.module_id && !moduleIds.has(l.module_id)))
+      .map((l: any) => l.id);
+
+    if (orphanLessons.length)
+      await supabaseAdmin.from("lessons").delete().in("id", orphanLessons);
+    if (orphanModules.length)
+      await supabaseAdmin.from("modules").delete().in("id", orphanModules);
+
+    const removed = orphanLessons.length + orphanModules.length;
+    await logAction(
+      supabaseAdmin,
+      { userId: context.userId, email: (context.claims as any)?.email },
+      "maintenance.cleanup_orphans",
+      null,
+      null,
+      null,
+      { removed_lessons: orphanLessons.length, removed_modules: orphanModules.length },
+    );
+    return { removed, orphan_lessons: orphanLessons.length, orphan_modules: orphanModules.length };
+  });
+
+export const listAuditLogs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ limit: z.number().min(1).max(500).optional() }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: logs, error } = await supabaseAdmin
+      .from("admin_audit_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 100);
+    if (error) throw new Error(error.message);
+    return { logs: logs ?? [] };
+  });

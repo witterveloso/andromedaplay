@@ -1,12 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteCourse } from "@/lib/admin-platform.functions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, BookOpen, ExternalLink, Eye, Users } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Search, BookOpen, ExternalLink, Eye, Users, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/courses")({
   component: CoursesPage,
@@ -20,6 +27,18 @@ const statusMeta: Record<string, { label: string; variant: "default" | "secondar
 
 function CoursesPage() {
   const [query, setQuery] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
+  const qc = useQueryClient();
+  const deleteFn = useServerFn(deleteCourse);
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { course_id: id } }),
+    onSuccess: () => {
+      toast.success("Produto excluído permanentemente.");
+      setPendingDelete(null);
+      qc.invalidateQueries({ queryKey: ["admin-all-courses"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Falha ao excluir"),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-all-courses"],
@@ -166,6 +185,14 @@ function CoursesPage() {
                         </Link>
                       </Button>
                     )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setPendingDelete({ id: c.id, title: c.title ?? "Produto" })}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -173,6 +200,32 @@ function CoursesPage() {
           })}
         </div>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir produto permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove <strong>{pendingDelete?.title}</strong> e todos os dados vinculados
+              (módulos, aulas, acessos de alunos, canais e publicações da comunidade).
+              <br />
+              Não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (pendingDelete) deleteMut.mutate(pendingDelete.id);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

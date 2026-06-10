@@ -1,13 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listStudents } from "@/lib/admin-platform.functions";
+import { listStudents, deleteStudent } from "@/lib/admin-platform.functions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, Mail, BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Search, Mail, BookOpen, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -20,11 +26,24 @@ function initials(name?: string | null, email?: string | null) {
 
 function StudentsPage() {
   const [query, setQuery] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
   const fn = useServerFn(listStudents);
+  const delFn = useServerFn(deleteStudent);
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students"],
     queryFn: () => fn({ data: {} }),
+  });
+
+  const delMut = useMutation({
+    mutationFn: (id: string) => delFn({ data: { user_id: id } }),
+    onSuccess: () => {
+      toast.success("Aluno excluído permanentemente.");
+      setPendingDelete(null);
+      qc.invalidateQueries({ queryKey: ["admin-students"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Falha ao excluir"),
   });
 
   const students = (data?.students ?? []).filter((s) => {
@@ -85,11 +104,43 @@ function StudentsPage() {
                 <Badge variant={s.active_enrollments > 0 ? "default" : "secondary"}>
                   {s.active_enrollments > 0 ? "Ativo" : "Sem acesso"}
                 </Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setPendingDelete({ id: s.id, name: s.full_name ?? s.email ?? "Aluno" })}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             ))}
           </div>
         </Card>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir aluno permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove <strong>{pendingDelete?.name}</strong> da plataforma, incluindo
+              acessos, publicações, comentários e perfil. Não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (pendingDelete) delMut.mutate(pendingDelete.id);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
