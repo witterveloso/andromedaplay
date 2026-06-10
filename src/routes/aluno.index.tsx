@@ -31,8 +31,25 @@ function StudentHome() {
         .eq("student_id", user!.id)
         .eq("status", "active");
       if (error) throw error;
-      return (data ?? []).map((r: any) => r.courses).filter(Boolean);
+      const rows = (data ?? []).map((r: any) => r.courses).filter(Boolean);
+      // Dedupe: same course_id should appear once; also collapse courses with the
+      // same normalized title (e.g. a "video" + "community" pair of the same product)
+      // preferring the video variant so the student lands on the lessons page.
+      const byId = new Map<string, any>();
+      for (const c of rows) if (!byId.has(c.id)) byId.set(c.id, c);
+      const byTitle = new Map<string, any>();
+      for (const c of byId.values()) {
+        const key = (c.title ?? "").trim().toLowerCase();
+        const existing = byTitle.get(key);
+        if (!existing) {
+          byTitle.set(key, c);
+        } else if (existing.course_type !== "video" && c.course_type === "video") {
+          byTitle.set(key, c);
+        }
+      }
+      return Array.from(byTitle.values());
     },
+
   });
 
   if (loading || !session) {
