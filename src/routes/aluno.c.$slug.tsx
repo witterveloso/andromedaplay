@@ -85,6 +85,12 @@ function StudentCourse() {
     },
   });
 
+  // Auto-select first channel so community posts show as a feed by default
+  useEffect(() => {
+    if (course?.course_type === "community" && !activeChannelId && !activeLessonId && channels && channels.length > 0) {
+      setActiveChannelId(channels[0].id);
+    }
+  }, [course?.course_type, channels, activeChannelId, activeLessonId]);
 
   if (!course) {
     return <div className="p-8 text-muted-foreground">Curso não disponível.</div>;
@@ -94,6 +100,9 @@ function StudentCourse() {
     ?? modules?.[0]?.lessons?.[0];
   const activeChannel = channels?.find((c) => c.id === activeChannelId);
   const hasContent = (modules?.length ?? 0) > 0 || (channels?.length ?? 0) > 0;
+  const pinnedPosts = (channelPosts ?? []).filter((p: any) => p.is_pinned);
+  const regularPosts = (channelPosts ?? []).filter((p: any) => !p.is_pinned);
+
 
   return (
     <div className="min-h-screen" style={{ background: course.background_color, color: course.text_color, fontFamily: course.font_family }}>
