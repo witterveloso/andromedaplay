@@ -180,6 +180,7 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
 
   return (
     <div className="space-y-4">
+      <FeaturedMomentEditor courseId={courseId} />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Publicações</h2>
