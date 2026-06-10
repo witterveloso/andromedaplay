@@ -50,9 +50,6 @@ function StudentHome() {
     );
   }
 
-  if (!isLoading && courses && courses.length === 1) {
-    return <Navigate to="/aluno/c/$slug" params={{ slug: courses[0].slug }} />;
-  }
 
   return (
     <div className="andromeda-cinema min-h-screen w-full overflow-x-hidden">
