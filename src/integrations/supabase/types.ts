@@ -429,8 +429,10 @@ export type Database = {
           file_type: string | null
           id: string
           lesson_id: string
+          material_type: string
           name: string
           position: number
+          storage_path: string | null
           url: string
         }
         Insert: {
@@ -438,8 +440,10 @@ export type Database = {
           file_type?: string | null
           id?: string
           lesson_id: string
+          material_type?: string
           name: string
           position?: number
+          storage_path?: string | null
           url: string
         }
         Update: {
@@ -447,8 +451,10 @@ export type Database = {
           file_type?: string | null
           id?: string
           lesson_id?: string
+          material_type?: string
           name?: string
           position?: number
+          storage_path?: string | null
           url?: string
         }
         Relationships: [
@@ -467,6 +473,7 @@ export type Database = {
           created_at: string
           description: string | null
           duration_seconds: number | null
+          extra_info: string | null
           id: string
           is_free: boolean
           module_id: string
@@ -487,6 +494,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
+          extra_info?: string | null
           id?: string
           is_free?: boolean
           module_id: string
@@ -507,6 +515,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
+          extra_info?: string | null
           id?: string
           is_free?: boolean
           module_id?: string
