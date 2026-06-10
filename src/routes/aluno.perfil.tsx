@@ -35,6 +35,28 @@ function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Crop dialog state
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+
+  const onCropComplete = useCallback((_a: Area, areaPx: Area) => {
+    setCroppedArea(areaPx);
+  }, []);
+
+  function closeCrop() {
+    setCropSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedArea(null);
+  }
+
+  function openReframeExisting() {
+    if (!avatarUrl) return;
+    setCropSrc(avatarUrl);
+  }
+
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
   }, [loading, session, navigate]);
