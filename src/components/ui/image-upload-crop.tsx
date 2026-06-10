@@ -130,17 +130,9 @@ export function ImageUploadCrop({
             }}
           />
           <span className="flex w-full items-center justify-center gap-2 rounded-md border bg-background px-3 py-2 text-sm cursor-pointer hover:bg-accent">
-            <Upload className="h-4 w-4" /> Enviar e recortar
+            <Upload className="h-4 w-4" /> Enviar imagem
           </span>
         </label>
-        {value && (
-          <Button type="button" variant="outline" size="sm" onClick={() => {
-            // re-crop existing
-            setSrc(value);
-          }}>
-            <Crop className="h-3.5 w-3.5 mr-1" /> Recortar
-          </Button>
-        )}
       </div>
 
       <Input
