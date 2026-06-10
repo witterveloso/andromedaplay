@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
 import { toYouTubeEmbed } from "@/lib/youtube";
 import { StudentPostCard } from "@/components/community/student-post-card";
+import { FeaturedMoment } from "@/components/community/featured-moment";
 
 
 export const Route = createFileRoute("/aluno/c/$slug")({
@@ -155,6 +156,10 @@ function StudentCourse() {
               <h1 className="text-3xl sm:text-5xl font-bold tracking-tight drop-shadow-lg">{course.title}</h1>
             </div>
           </section>
+
+          <FeaturedMoment data={course as any} />
+
+
 
           {/* Feed central + sidebar */}
           <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8">

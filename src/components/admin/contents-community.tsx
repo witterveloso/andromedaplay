@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { FeaturedMomentEditor } from "@/components/admin/featured-moment-editor";
 
 type PostType = "text" | "image" | "video" | "audio" | "live";
 
@@ -179,6 +180,7 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
 
   return (
     <div className="space-y-4">
+      <FeaturedMomentEditor courseId={courseId} />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Publicações</h2>

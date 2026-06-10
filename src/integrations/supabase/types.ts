@@ -223,6 +223,13 @@ export type Database = {
           custom_css: string | null
           description: string | null
           expert_id: string | null
+          featured_cta_label: string | null
+          featured_cta_url: string | null
+          featured_description: string | null
+          featured_enabled: boolean
+          featured_image_url: string | null
+          featured_kind: string | null
+          featured_title: string | null
           font_family: string
           id: string
           logo_url: string | null
@@ -244,6 +251,13 @@ export type Database = {
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
+          featured_cta_label?: string | null
+          featured_cta_url?: string | null
+          featured_description?: string | null
+          featured_enabled?: boolean
+          featured_image_url?: string | null
+          featured_kind?: string | null
+          featured_title?: string | null
           font_family?: string
           id?: string
           logo_url?: string | null
@@ -265,6 +279,13 @@ export type Database = {
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
+          featured_cta_label?: string | null
+          featured_cta_url?: string | null
+          featured_description?: string | null
+          featured_enabled?: boolean
+          featured_image_url?: string | null
+          featured_kind?: string | null
+          featured_title?: string | null
           font_family?: string
           id?: string
           logo_url?: string | null
