@@ -39,13 +39,15 @@ function StudentCourse() {
 
   const { data: modules } = useQuery({
     enabled: !!course,
-    queryKey: ["course-content", course?.id],
+    queryKey: ["course-content", course?.id, isPreview],
     queryFn: async () => {
-      const { data: mods, error: e1 } = await supabase
-        .from("modules").select("*").eq("course_id", course!.id).order("position");
+      let modQ = supabase.from("modules").select("*").eq("course_id", course!.id).order("position");
+      if (!isPreview) modQ = modQ.eq("status", "published");
+      const { data: mods, error: e1 } = await modQ;
       if (e1) throw e1;
-      const { data: lessons, error: e2 } = await supabase
-        .from("lessons").select("*").in("module_id", (mods ?? []).map((m) => m.id)).order("position");
+      let lessonsQ = supabase.from("lessons").select("*").in("module_id", (mods ?? []).map((m) => m.id)).order("position");
+      if (!isPreview) lessonsQ = lessonsQ.eq("status", "published");
+      const { data: lessons, error: e2 } = await lessonsQ;
       if (e2) throw e2;
       return (mods ?? []).map((m) => ({ ...m, lessons: (lessons ?? []).filter((l) => l.module_id === m.id) }));
     },
@@ -67,19 +69,21 @@ function StudentCourse() {
 
   const { data: channelPosts } = useQuery({
     enabled: !!activeChannelId,
-    queryKey: ["channel-posts", activeChannelId],
+    queryKey: ["channel-posts", activeChannelId, isPreview],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("community_posts")
         .select("*")
         .eq("channel_id", activeChannelId!)
-        .eq("status", "published")
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
+      if (!isPreview) q = q.eq("status", "published");
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
   });
+
 
   if (!course) {
     return <div className="p-8 text-muted-foreground">Curso não disponível.</div>;
