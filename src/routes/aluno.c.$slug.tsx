@@ -157,6 +157,10 @@ function StudentCourse() {
             </div>
           </section>
 
+          <FeaturedMoment data={course as any} />
+
+
+
           {/* Feed central + sidebar */}
           <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
             <div className="space-y-6 min-w-0">
