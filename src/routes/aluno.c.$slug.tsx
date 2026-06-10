@@ -28,6 +28,7 @@ function StudentCourse() {
     if (!loading && !session) navigate({ to: "/login" });
   }, [loading, session, navigate]);
 
+
   const { data: course } = useQuery({
     queryKey: ["course-slug", slug],
     queryFn: async () => {
