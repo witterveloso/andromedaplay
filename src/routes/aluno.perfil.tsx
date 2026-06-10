@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Cropper, { type Area } from "react-easy-crop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { AvatarMenu } from "@/components/student/avatar-menu";
-import { ArrowLeft, Camera, Loader2, Mail, BookOpen, TrendingUp } from "lucide-react";
+import { ArrowLeft, Camera, Crop as CropIcon, Loader2, Mail, BookOpen, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/aluno/perfil")({
