@@ -39,13 +39,15 @@ function StudentCourse() {
 
   const { data: modules } = useQuery({
     enabled: !!course,
-    queryKey: ["course-content", course?.id],
+    queryKey: ["course-content", course?.id, isPreview],
     queryFn: async () => {
-      const { data: mods, error: e1 } = await supabase
-        .from("modules").select("*").eq("course_id", course!.id).order("position");
+      const modQ = supabase.from("modules").select("*").eq("course_id", course!.id).order("position");
+      const { data: mods, error: e1 } = await modQ;
+
       if (e1) throw e1;
-      const { data: lessons, error: e2 } = await supabase
-        .from("lessons").select("*").in("module_id", (mods ?? []).map((m) => m.id)).order("position");
+      let lessonsQ = supabase.from("lessons").select("*").in("module_id", (mods ?? []).map((m) => m.id)).order("position");
+      if (!isPreview) lessonsQ = lessonsQ.eq("status", "published");
+      const { data: lessons, error: e2 } = await lessonsQ;
       if (e2) throw e2;
       return (mods ?? []).map((m) => ({ ...m, lessons: (lessons ?? []).filter((l) => l.module_id === m.id) }));
     },
@@ -67,19 +69,21 @@ function StudentCourse() {
 
   const { data: channelPosts } = useQuery({
     enabled: !!activeChannelId,
-    queryKey: ["channel-posts", activeChannelId],
+    queryKey: ["channel-posts", activeChannelId, isPreview],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("community_posts")
         .select("*")
         .eq("channel_id", activeChannelId!)
-        .eq("status", "published")
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
+      if (!isPreview) q = q.eq("status", "published");
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
   });
+
 
   if (!course) {
     return <div className="p-8 text-muted-foreground">Curso não disponível.</div>;
@@ -95,10 +99,15 @@ function StudentCourse() {
       {isPreview && (
         <div className="bg-amber-500/15 border-b border-amber-500/40 px-6 py-2 text-amber-200 text-sm flex items-center gap-2">
           <Eye className="h-4 w-4" />
-          <span>Você está visualizando este curso no modo <strong>preview</strong> — é assim que o aluno vê.</span>
+          <span>
+            Você está visualizando este curso no modo <strong>preview</strong>
+            {course.status !== "published" && <> — status atual: <strong>{course.status === "draft" ? "rascunho" : course.status}</strong> (alunos ainda não veem este conteúdo)</>}
+            .
+          </span>
           <Link to="/expert/preview" className="ml-auto underline">Voltar ao painel</Link>
         </div>
       )}
+
       <header className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -167,7 +176,7 @@ function StudentCourse() {
 
         <aside className="space-y-4">
           {!hasContent ? (
-            <Card className="p-6 text-sm opacity-80">Nenhum conteúdo publicado.</Card>
+            <Card className="p-6 text-sm opacity-80">Este produto ainda não possui conteúdos publicados.</Card>
           ) : (
             <>
             {modules?.map((m) => (
