@@ -23,6 +23,7 @@ import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
+import { Route as AdminAccessRouteImport } from './routes/admin.access'
 import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.index'
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
 import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
@@ -102,6 +103,11 @@ const AdminCommunitiesRoute = AdminCommunitiesRouteImport.update({
   path: '/communities',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAccessRoute = AdminAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ExpertCoursesIndexRoute = ExpertCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
@@ -397,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCommunitiesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/access': {
+      id: '/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AdminAccessRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/expert/courses/': {
       id: '/expert/courses/'
       path: '/courses'
@@ -457,6 +476,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAccessRoute: typeof AdminAccessRoute
   AdminCommunitiesRoute: typeof AdminCommunitiesRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
@@ -468,6 +488,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccessRoute: AdminAccessRoute,
   AdminCommunitiesRoute: AdminCommunitiesRoute,
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
