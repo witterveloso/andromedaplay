@@ -115,26 +115,46 @@ export function StudentPostCard({ post }: { post: any }) {
   const author = authorQ.data;
   const commenterMap = new Map((commentersQ.data ?? []).map((p) => [p.id, p]));
 
+  const created = post.created_at ? new Date(post.created_at) : null;
+  const dateLabel = created
+    ? created.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+    : "";
+  const timeLabel = created
+    ? created.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+    : "";
+
   return (
-    <Card className="overflow-hidden">
-      <div className="p-4 flex items-start gap-3">
-        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+    <Card className="overflow-hidden border-white/5 bg-white/[0.03] backdrop-blur-sm shadow-lg shadow-black/20">
+      <div className="p-5 sm:p-6 flex items-start gap-4">
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white/10">
           {author?.avatar_url ? (
             <img src={author.avatar_url} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="text-xs font-medium">{initials(author?.full_name)}</span>
+            <span className="text-sm font-semibold">{initials(author?.full_name)}</span>
           )}
         </div>
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="font-medium">{author?.full_name ?? "Produtor"}</div>
-          {post.title && <h3 className="font-semibold text-base">{post.title}</h3>}
-          {post.body && <p className="text-sm opacity-90 whitespace-pre-wrap">{post.body}</p>}
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-semibold truncate">{author?.full_name ?? "Produtor"}</div>
+              {created && (
+                <div className="text-xs opacity-60 mt-0.5">
+                  {dateLabel} · {timeLabel}
+                </div>
+              )}
+            </div>
+            {post.is_pinned && (
+              <span className="text-[10px] uppercase tracking-wider opacity-70 shrink-0">Fixado</span>
+            )}
+          </div>
+          {post.title && <h3 className="font-semibold text-lg leading-snug">{post.title}</h3>}
+          {post.body && <p className="text-[15px] leading-relaxed opacity-90 whitespace-pre-wrap">{post.body}</p>}
           {post.cover_url && (
-            <img src={post.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
+            <img src={post.cover_url} alt="" className="rounded-xl w-full aspect-video object-cover" />
           )}
-          {post.image_url && <img src={post.image_url} alt="" className="rounded-lg w-full" />}
+          {post.image_url && <img src={post.image_url} alt="" className="rounded-xl w-full" />}
           {post.youtube_url && (
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
               <iframe
                 src={toYouTubeEmbed(post.youtube_url) ?? post.youtube_url}
                 className="w-full h-full"
@@ -147,6 +167,7 @@ export function StudentPostCard({ post }: { post: any }) {
           {post.audio_url && <audio controls src={post.audio_url} className="w-full" />}
         </div>
       </div>
+
 
       <div className="px-4 pb-3 flex items-center justify-end gap-2 flex-wrap border-t pt-3">
         {REACTIONS.map((r) => {

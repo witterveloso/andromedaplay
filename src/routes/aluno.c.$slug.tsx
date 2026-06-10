@@ -138,43 +138,86 @@ function StudentCourse() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-        <div>
-          <h1 className="text-2xl font-semibold mb-4">{course.title}</h1>
-          {activeChannel ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                {activeChannel.icon_url ? (
-                  <img src={activeChannel.icon_url} alt="" className="h-12 w-12 rounded-lg object-cover" />
-                ) : (
-                  <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center"><Hash className="h-5 w-5" /></div>
-                )}
-                <div>
-                  <h2 className="text-xl font-semibold">{activeChannel.name}</h2>
-                  {activeChannel.description && <p className="text-sm opacity-80">{activeChannel.description}</p>}
-                </div>
-              </div>
-              {(channelPosts?.length ?? 0) === 0 ? (
-                <Card className="p-8 text-center opacity-80">Nenhuma publicação ainda neste canal.</Card>
+      {course.course_type === "community" ? (
+        <>
+          {/* Banner premium com logo centralizado */}
+          <section
+            className="relative w-full overflow-hidden"
+            style={{
+              background: course.cover_url
+                ? `url(${course.cover_url}) center/cover`
+                : `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})`,
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
+            <div className="relative max-w-6xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center text-center">
+              {course.logo_url ? (
+                <img
+                  src={course.logo_url}
+                  alt={course.title}
+                  className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover shadow-2xl shadow-black/50 ring-1 ring-white/10"
+                />
               ) : (
-                <div className="space-y-6">
+                <div
+                  className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10"
+                  style={{ background: `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})` }}
+                />
+              )}
+              <h1 className="mt-5 text-3xl sm:text-5xl font-bold tracking-tight">{course.title}</h1>
+              {course.description && (
+                <p className="mt-3 max-w-2xl text-sm sm:text-base opacity-80 line-clamp-2">{course.description}</p>
+              )}
+            </div>
+          </section>
+
+          {/* Feed central + sidebar */}
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
+            <div className="space-y-6 min-w-0">
+              {activeChannel && (
+                <div className="flex items-center gap-3 pb-2 border-b border-white/5">
+                  {activeChannel.icon_url ? (
+                    <img src={activeChannel.icon_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center">
+                      <Hash className="h-4 w-4" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-semibold truncate">{activeChannel.name}</h2>
+                    {activeChannel.description && (
+                      <p className="text-xs opacity-70 truncate">{activeChannel.description}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {!activeChannel ? (
+                <Card className="p-12 text-center opacity-80 border-white/5 bg-white/[0.03]">
+                  Este produto ainda não possui conteúdos publicados.
+                </Card>
+              ) : (channelPosts?.length ?? 0) === 0 ? (
+                <Card className="p-12 text-center opacity-80 border-white/5 bg-white/[0.03]">
+                  Nenhuma publicação ainda neste canal.
+                </Card>
+              ) : (
+                <div className="space-y-8">
                   {pinnedPosts.length > 0 && (
-                    <section className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm font-semibold opacity-90">
-                        <Pin className="h-4 w-4" />
-                        Publicações fixadas ({pinnedPosts.length})
+                    <section className="space-y-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
+                        <Pin className="h-3.5 w-3.5" />
+                        Publicações fixadas
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-5">
                         {pinnedPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
                       </div>
                     </section>
                   )}
                   {regularPosts.length > 0 && (
-                    <section className="space-y-3">
+                    <section className="space-y-4">
                       {pinnedPosts.length > 0 && (
-                        <div className="text-sm font-semibold opacity-90">Todas as publicações</div>
+                        <div className="text-xs uppercase tracking-wider opacity-70">Todas as publicações</div>
                       )}
-                      <div className="space-y-3">
+                      <div className="space-y-5">
                         {regularPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
                       </div>
                     </section>
@@ -183,83 +226,116 @@ function StudentCourse() {
               )}
             </div>
 
+            <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+              <Card className="p-5 border-white/5 bg-white/[0.03]">
+                <div className="text-xs uppercase tracking-wider opacity-60 mb-2">Sobre a comunidade</div>
+                <div className="font-semibold mb-2">{course.title}</div>
+                <div className="flex items-center justify-between text-sm opacity-80">
+                  <span>Publicações</span>
+                  <span className="tabular-nums font-medium">{channelPosts?.length ?? 0}</span>
+                </div>
+              </Card>
 
-          ) : activeLesson?.youtube_url ? (
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-              <iframe
-                src={toYouTubeEmbed(activeLesson.youtube_url) ?? activeLesson.youtube_url}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={activeLesson.title}
-              />
-            </div>
-          ) : (
-            <Card className="p-12 text-center opacity-80">
-              <p>Selecione uma aula ou canal ao lado para começar.</p>
-            </Card>
-          )}
-          {!activeChannel && activeLesson && (
-            <div className="mt-4">
-              <h2 className="text-lg font-semibold">{activeLesson.title}</h2>
-              {activeLesson.description && <p className="text-sm opacity-80 mt-1">{activeLesson.description}</p>}
-            </div>
-          )}
-        </div>
+              {(channels?.length ?? 0) > 0 && (
+                <Card className="p-5 border-white/5 bg-white/[0.03]">
+                  <div className="text-xs uppercase tracking-wider opacity-60 mb-3 flex items-center gap-2">
+                    <MessageSquare className="h-3.5 w-3.5" /> Canais
+                  </div>
+                  <ul className="space-y-1">
+                    {channels!.map((c: any) => (
+                      <li key={c.id}>
+                        <button
+                          onClick={() => { setActiveLessonId(null); setActiveChannelId(c.id); }}
+                          className={`w-full text-left flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition ${
+                            activeChannel?.id === c.id ? "bg-white/10" : "hover:bg-white/5"
+                          }`}
+                        >
+                          {c.icon_url ? (
+                            <img src={c.icon_url} alt="" className="h-5 w-5 rounded object-cover" />
+                          ) : (
+                            <Hash className="h-3.5 w-3.5 opacity-70" />
+                          )}
+                          <span className="truncate">{c.name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
 
-        <aside className="space-y-4">
-          {!hasContent ? (
-            <Card className="p-6 text-sm opacity-80">Este produto ainda não possui conteúdos publicados.</Card>
-          ) : (
-            <>
-            {modules?.map((m) => (
-            <Card key={m.id} className="p-4">
-              <div className="font-semibold mb-2">{m.title}</div>
-              <ul className="space-y-1">
-                {m.lessons.map((l: any) => (
-                  <li key={l.id}>
-                    <button
-                      onClick={() => { setActiveChannelId(null); setActiveLessonId(l.id); }}
-                      className={`w-full text-left flex items-center gap-2 rounded px-2 py-1.5 text-sm transition ${
-                        !activeChannel && activeLesson?.id === l.id ? "bg-primary/20" : "hover:bg-muted"
-                      }`}
-                    >
-                      <PlayCircle className="h-3.5 w-3.5 opacity-70" />
-                      {l.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            ))}
-            {(channels?.length ?? 0) > 0 && (
-              <Card className="p-4">
-                <div className="font-semibold mb-2 flex items-center gap-2"><MessageSquare className="h-4 w-4" /> Comunidade</div>
-                <ul className="space-y-1">
-                  {channels!.map((c: any) => (
-                    <li key={c.id}>
-                      <button
-                        onClick={() => { setActiveLessonId(null); setActiveChannelId(c.id); }}
-                        className={`w-full text-left flex items-center gap-2 rounded px-2 py-1.5 text-sm transition ${
-                          activeChannel?.id === c.id ? "bg-primary/20" : "hover:bg-muted"
-                        }`}
-                      >
-                        {c.icon_url ? (
-                          <img src={c.icon_url} alt="" className="h-5 w-5 rounded object-cover" />
-                        ) : (
-                          <Hash className="h-3.5 w-3.5 opacity-70" />
-                        )}
-                        <span className="truncate">{c.name}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+              {pinnedPosts.length > 0 && (
+                <Card className="p-5 border-white/5 bg-white/[0.03]">
+                  <div className="text-xs uppercase tracking-wider opacity-60 mb-3 flex items-center gap-2">
+                    <Pin className="h-3.5 w-3.5" /> Fixados
+                  </div>
+                  <ul className="space-y-2">
+                    {pinnedPosts.slice(0, 5).map((p: any) => (
+                      <li key={p.id} className="text-sm opacity-90 line-clamp-2 leading-snug">
+                        {p.title || p.body?.slice(0, 80) || "Publicação fixada"}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </aside>
+          </main>
+        </>
+      ) : (
+        <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          <div>
+            <h1 className="text-2xl font-semibold mb-4">{course.title}</h1>
+            {activeLesson?.youtube_url ? (
+              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                <iframe
+                  src={toYouTubeEmbed(activeLesson.youtube_url) ?? activeLesson.youtube_url}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={activeLesson.title}
+                />
+              </div>
+            ) : (
+              <Card className="p-12 text-center opacity-80">
+                <p>Selecione uma aula ao lado para começar.</p>
               </Card>
             )}
-            </>
-          )}
-        </aside>
-      </main>
+            {activeLesson && (
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">{activeLesson.title}</h2>
+                {activeLesson.description && <p className="text-sm opacity-80 mt-1">{activeLesson.description}</p>}
+              </div>
+            )}
+          </div>
+
+          <aside className="space-y-4">
+            {!hasContent ? (
+              <Card className="p-6 text-sm opacity-80">Este produto ainda não possui conteúdos publicados.</Card>
+            ) : (
+              modules?.map((m) => (
+                <Card key={m.id} className="p-4">
+                  <div className="font-semibold mb-2">{m.title}</div>
+                  <ul className="space-y-1">
+                    {m.lessons.map((l: any) => (
+                      <li key={l.id}>
+                        <button
+                          onClick={() => { setActiveChannelId(null); setActiveLessonId(l.id); }}
+                          className={`w-full text-left flex items-center gap-2 rounded px-2 py-1.5 text-sm transition ${
+                            activeLesson?.id === l.id ? "bg-primary/20" : "hover:bg-muted"
+                          }`}
+                        >
+                          <PlayCircle className="h-3.5 w-3.5 opacity-70" />
+                          {l.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))
+            )}
+          </aside>
+        </main>
+      )}
     </div>
   );
 }
+
