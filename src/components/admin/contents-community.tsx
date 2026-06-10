@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { FeaturedMomentEditor } from "@/components/admin/featured-moment-editor";
 
 type PostType = "text" | "image" | "video" | "audio" | "live";
 
