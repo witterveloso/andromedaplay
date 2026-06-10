@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Cropper, { type Area } from "react-easy-crop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { AvatarMenu } from "@/components/student/avatar-menu";
-import { ArrowLeft, Camera, Loader2, Mail, BookOpen, TrendingUp } from "lucide-react";
+import { ArrowLeft, Camera, Crop as CropIcon, Loader2, Mail, BookOpen, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/aluno/perfil")({
@@ -31,6 +34,28 @@ function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Crop dialog state
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+
+  const onCropComplete = useCallback((_a: Area, areaPx: Area) => {
+    setCroppedArea(areaPx);
+  }, []);
+
+  function closeCrop() {
+    setCropSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedArea(null);
+  }
+
+  function openReframeExisting() {
+    if (!avatarUrl) return;
+    setCropSrc(avatarUrl);
+  }
 
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
@@ -69,29 +94,41 @@ function ProfilePage() {
     }
   }, [profile]);
 
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = "";
     if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem");
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Imagem deve ter no máximo 5MB");
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function confirmCrop() {
+    if (!cropSrc || !croppedArea || !user) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `avatars/${user.id}/${Date.now()}.${ext}`;
+      const blob = await getCroppedBlob(cropSrc, croppedArea, { width: 512, height: 512 });
+      const path = `avatars/${user.id}/${Date.now()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("course-assets")
-        .upload(path, file, { upsert: true, contentType: file.type });
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("course-assets").getPublicUrl(path);
       setAvatarUrl(data.publicUrl);
-      toast.success("Foto carregada. Não esqueça de salvar.");
+      toast.success("Foto enquadrada. Não esqueça de salvar.");
+      closeCrop();
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao enviar imagem");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -176,9 +213,22 @@ function ProfilePage() {
                   disabled={uploading}
                   className="absolute bottom-1 right-1 h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg ring-2 ring-background hover:scale-105 transition-transform disabled:opacity-50"
                   aria-label="Alterar foto"
+                  title="Alterar foto"
                 >
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                 </button>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={openReframeExisting}
+                    disabled={uploading}
+                    className="absolute top-1 right-1 h-9 w-9 rounded-full bg-background/80 backdrop-blur text-foreground flex items-center justify-center shadow-lg ring-1 ring-white/15 hover:scale-105 transition-transform disabled:opacity-50"
+                    aria-label="Reenquadrar foto"
+                    title="Reenquadrar foto"
+                  >
+                    <CropIcon className="h-4 w-4" />
+                  </button>
+                )}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -252,6 +302,76 @@ function ProfilePage() {
           </div>
         </section>
       </main>
+
+      <Dialog open={!!cropSrc} onOpenChange={(o) => !o && closeCrop()}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Reenquadrar foto de perfil</DialogTitle>
+          </DialogHeader>
+          <div className="relative h-[360px] w-full bg-black rounded-md overflow-hidden">
+            {cropSrc && (
+              <Cropper
+                image={cropSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Zoom</Label>
+            <Slider value={[zoom]} min={1} max={4} step={0.01} onValueChange={(v) => setZoom(v[0])} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Arraste para reposicionar. A imagem será salva em 512×512px.
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={closeCrop} disabled={uploading}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={confirmCrop} disabled={uploading || !croppedArea}>
+              {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar enquadramento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+async function getCroppedBlob(
+  src: string,
+  area: Area,
+  output: { width: number; height: number },
+): Promise<Blob> {
+  const img = await loadImage(src);
+  const canvas = document.createElement("canvas");
+  canvas.width = output.width;
+  canvas.height = output.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas indisponível");
+  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, output.width, output.height);
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Falha ao gerar imagem"))),
+      "image/jpeg",
+      0.92,
+    ),
+  );
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+    img.src = src;
+  });
 }
