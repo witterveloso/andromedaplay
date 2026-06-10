@@ -140,33 +140,19 @@ function StudentCourse() {
 
       {course.course_type === "community" ? (
         <>
-          {/* Banner premium com logo centralizado */}
+          {/* Banner cinematográfico premium */}
           <section
             className="relative w-full overflow-hidden"
             style={{
               background: course.cover_url
                 ? `url(${course.cover_url}) center/cover`
                 : `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})`,
+              minHeight: "28vh",
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
-            <div className="relative max-w-6xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center text-center">
-              {course.logo_url ? (
-                <img
-                  src={course.logo_url}
-                  alt={course.title}
-                  className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover shadow-2xl shadow-black/50 ring-1 ring-white/10"
-                />
-              ) : (
-                <div
-                  className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10"
-                  style={{ background: `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})` }}
-                />
-              )}
-              <h1 className="mt-5 text-3xl sm:text-5xl font-bold tracking-tight">{course.title}</h1>
-              {course.description && (
-                <p className="mt-3 max-w-2xl text-sm sm:text-base opacity-80 line-clamp-2">{course.description}</p>
-              )}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
+            <div className="relative max-w-6xl mx-auto px-6 flex flex-col items-center justify-center text-center" style={{ minHeight: "28vh" }}>
+              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight drop-shadow-lg">{course.title}</h1>
             </div>
           </section>
 
