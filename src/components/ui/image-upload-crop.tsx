@@ -135,13 +135,6 @@ export function ImageUploadCrop({
         </label>
       </div>
 
-      <Input
-        type="url"
-        placeholder="ou cole uma URL: https://…"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="text-xs"
-      />
 
       {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
 
