@@ -363,6 +363,7 @@ function LessonDialog({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [extraInfo, setExtraInfo] = useState("");
   const [videoProvider, setVideoProvider] = useState<VideoProvider>("youtube");
   const [videoUrl, setVideoUrl] = useState("");
   const [videoId, setVideoId] = useState("");
@@ -387,6 +388,7 @@ function LessonDialog({
   useResetOnOpen(state.open, () => {
     setTitle(editing?.title ?? "");
     setDescription(editing?.description ?? "");
+    setExtraInfo(editing?.extra_info ?? "");
     setVideoProvider((editing?.video_provider as VideoProvider) ?? "youtube");
     setVideoUrl(editing?.video_url ?? editing?.youtube_url ?? "");
     setVideoId(editing?.video_id ?? "");
@@ -404,11 +406,11 @@ function LessonDialog({
       const payload = {
         title,
         description: description || null,
+        extra_info: extraInfo || null,
         video_provider: videoProvider,
         video_url: trimmedUrl || null,
         video_id: videoId.trim() || null,
         video_embed: videoEmbed.trim() || null,
-        // keep legacy column populated for YouTube so any legacy reader still works
         youtube_url: videoProvider === "youtube" ? (trimmedUrl || null) : null,
         thumbnail_url: thumbnailUrl || null,
         duration_seconds: durationMin ? Math.round(Number(durationMin) * 60) : null,
@@ -437,32 +439,63 @@ function LessonDialog({
   });
 
   const [matName, setMatName] = useState("");
+  const [matType, setMatType] = useState<MaterialType>("link");
   const [matUrl, setMatUrl] = useState("");
+  const [matFile, setMatFile] = useState<File | null>(null);
+  const [matUploading, setMatUploading] = useState(false);
+
   const addMaterial = useMutation({
     mutationFn: async () => {
       if (!editing?.id) throw new Error("Salve a aula primeiro.");
+      let finalUrl = matUrl.trim();
+      let storagePath: string | null = null;
+      let fileType: string | null = null;
+
+      if (matType !== "link") {
+        if (!matFile) throw new Error("Selecione um arquivo.");
+        setMatUploading(true);
+        const safeName = matFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        storagePath = `${courseId}/${editing.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("lesson-materials")
+          .upload(storagePath, matFile, { upsert: false, contentType: matFile.type || undefined });
+        if (upErr) { setMatUploading(false); throw upErr; }
+        fileType = matFile.type || null;
+        // Store path as url placeholder; signed URL is generated on demand at view time.
+        finalUrl = storagePath;
+        setMatUploading(false);
+      }
+
       const { error } = await supabase.from("lesson_materials").insert({
         lesson_id: editing.id,
-        name: matName,
-        url: matUrl,
+        name: matName || (matFile?.name ?? "Material"),
+        url: finalUrl,
+        material_type: matType,
+        storage_path: storagePath,
+        file_type: fileType,
         position: materialsQ.data?.length ?? 0,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      setMatName(""); setMatUrl("");
+      setMatName(""); setMatUrl(""); setMatFile(null); setMatType("link");
       qc.invalidateQueries({ queryKey: ["lesson_materials", editing!.id] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => { setMatUploading(false); toast.error(e.message); },
   });
+
   const delMaterial = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("lesson_materials").delete().eq("id", id);
+    mutationFn: async (m: Material) => {
+      if (m.storage_path) {
+        await supabase.storage.from("lesson-materials").remove([m.storage_path]);
+      }
+      const { error } = await supabase.from("lesson_materials").delete().eq("id", m.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson_materials", editing!.id] }),
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <Dialog open={state.open} onOpenChange={(o) => !o && onClose()}>
