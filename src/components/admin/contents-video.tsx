@@ -37,6 +37,10 @@ type Lesson = {
   title: string;
   description: string | null;
   youtube_url: string | null;
+  video_provider: VideoProvider | null;
+  video_url: string | null;
+  video_id: string | null;
+  video_embed: string | null;
   thumbnail_url: string | null;
   duration_seconds: number | null;
   status: "published" | "draft" | "locked";
