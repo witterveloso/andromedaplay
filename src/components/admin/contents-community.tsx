@@ -153,91 +153,78 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
     reorder.mutate({ table, id: target.id, position: current.position });
   }
 
+  // Ensure a default channel exists so the producer doesn't have to manage channels.
+  const ensureDefault = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase
+        .from("community_channels")
+        .insert({ course_id: courseId, name: "Publicações", position: 0 })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Channel;
+    },
+    onSuccess: (c) => {
+      qc.invalidateQueries({ queryKey: ["channels", courseId] });
+      setSelectedChannel(c.id);
+    },
+  });
+
+  useEffect(() => {
+    if (channelsQ.isSuccess && (channelsQ.data?.length ?? 0) === 0 && !ensureDefault.isPending) {
+      ensureDefault.mutate();
+    }
+  }, [channelsQ.isSuccess, channelsQ.data, ensureDefault]);
+
+  const channels = channelsQ.data ?? [];
+  const posts = postsQ.data ?? [];
+
+  function move<T extends { id: string; position: number }>(
+    items: T[], idx: number, dir: -1 | 1, table: "community_channels" | "community_posts",
+  ) {
+    const target = items[idx + dir];
+    if (!target) return;
+    const current = items[idx];
+    reorder.mutate({ table, id: current.id, position: target.position });
+    reorder.mutate({ table, id: target.id, position: current.position });
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Canais e publicações</h2>
-          <p className="text-sm text-muted-foreground">Organize a comunidade em canais temáticos.</p>
+          <h2 className="text-xl font-semibold">Publicações</h2>
+          <p className="text-sm text-muted-foreground">Compartilhe conteúdos, vídeos e lives com seus alunos.</p>
         </div>
-        <Button onClick={() => setChannelDialog({ open: true })}>
-          <Plus className="mr-2 h-4 w-4" /> Novo canal
+        <Button
+          onClick={() => setPostDialog({ open: true, channelId: selectedChannel ?? undefined })}
+          disabled={!selectedChannel}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Publicar
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
-        <Card className="p-2 space-y-1 h-fit">
-          {channels.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center p-4">Nenhum canal.</p>
-          ) : (
-            channels.map((c, i) => (
-              <div key={c.id} className={`group flex items-center gap-1 rounded-md px-2 py-1.5 ${selectedChannel === c.id ? "bg-accent" : "hover:bg-accent/50"}`}>
-                <button
-                  type="button"
-                  className="flex-1 text-left text-sm truncate"
-                  onClick={() => setSelectedChannel(c.id)}
-                >
-                  {c.icon_url ? (
-                    <img src={c.icon_url} alt="" className="inline-block h-5 w-5 rounded-full object-cover mr-1.5 align-text-bottom" />
-                  ) : c.icon ? (
-                    <span className="mr-1.5">{c.icon}</span>
-                  ) : null}
-                  {c.name}
-                </button>
-                <div className="opacity-0 group-hover:opacity-100 flex">
-                  <Button variant="ghost" size="icon" className="h-6 w-6" disabled={i === 0}
-                    onClick={() => move(channels, i, -1, "community_channels")}>
-                    <ArrowUp className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" disabled={i === channels.length - 1}
-                    onClick={() => move(channels, i, 1, "community_channels")}>
-                    <ArrowDown className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6"
-                    onClick={() => setChannelDialog({ open: true, channel: c })}>
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6"
-                    onClick={() => { if (confirm(`Excluir canal "${c.name}" e suas publicações?`)) delChannel.mutate(c.id); }}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))
-          )}
-        </Card>
-
-        <div className="space-y-3">
-          {!selectedChannel ? (
-            <Card className="p-10 text-center text-muted-foreground">
-              Selecione ou crie um canal para começar.
-            </Card>
-          ) : (
-            <>
-              <div className="flex justify-end">
-                <Button size="sm" onClick={() => setPostDialog({ open: true, channelId: selectedChannel })}>
-                  <Plus className="mr-2 h-4 w-4" /> Nova publicação
-                </Button>
-              </div>
-              {posts.length === 0 ? (
-                <Card className="p-10 text-center text-muted-foreground">Nenhuma publicação neste canal.</Card>
-              ) : (
-                posts.map((p, i) => (
-                  <PostCard
-                    key={p.id}
-                    post={p}
-                    isFirst={i === 0}
-                    isLast={i === posts.length - 1}
-                    onMoveUp={() => move(posts, i, -1, "community_posts")}
-                    onMoveDown={() => move(posts, i, 1, "community_posts")}
-                    onEdit={() => setPostDialog({ open: true, channelId: p.channel_id, post: p })}
-                    onDelete={() => { if (confirm("Excluir publicação?")) delPost.mutate(p.id); }}
-                  />
-                ))
-              )}
-            </>
-          )}
-        </div>
+      <div className="space-y-3">
+        {!selectedChannel ? (
+          <Card className="p-10 text-center text-muted-foreground">Preparando seu mural…</Card>
+        ) : posts.length === 0 ? (
+          <Card className="p-10 text-center text-muted-foreground">
+            Nenhuma publicação ainda. Clique em <strong>Publicar</strong> para começar.
+          </Card>
+        ) : (
+          posts.map((p, i) => (
+            <PostCard
+              key={p.id}
+              post={p}
+              isFirst={i === 0}
+              isLast={i === posts.length - 1}
+              onMoveUp={() => move(posts, i, -1, "community_posts")}
+              onMoveDown={() => move(posts, i, 1, "community_posts")}
+              onEdit={() => setPostDialog({ open: true, channelId: p.channel_id, post: p })}
+              onDelete={() => { if (confirm("Excluir publicação?")) delPost.mutate(p.id); }}
+            />
+          ))
+        )}
       </div>
 
       <ChannelDialog
@@ -255,6 +242,7 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
     </div>
   );
 }
+
 
 function useResetOnOpen(open: boolean, fn: () => void) {
   const prev = useRef(false);
