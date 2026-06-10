@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LogOut, Sparkles, AlertTriangle, Eye } from "lucide-react";
+import { BookOpen, LogOut, Sparkles, AlertTriangle, Eye, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/expert")({
@@ -39,8 +39,10 @@ function ExpertLayout() {
 
   const nav = [
     { to: "/expert/courses", label: "Meus cursos", icon: BookOpen },
+    { to: "/expert/profile", label: "Meu perfil", icon: UserCircle },
     { to: "/expert/preview", label: "Ver como aluno", icon: Eye },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-background">
