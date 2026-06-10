@@ -106,7 +106,7 @@ function StudentCourse() {
 
 
   return (
-    <div className="min-h-screen" style={{ background: course.background_color, color: course.text_color, fontFamily: course.font_family }}>
+    <div className="andromeda-cinema min-h-screen" style={{ fontFamily: course.font_family || undefined }}>
       {isPreview && (
         <div className="bg-amber-500/15 border-b border-amber-500/40 px-6 py-2 text-amber-200 text-sm flex items-center gap-2">
           <Eye className="h-4 w-4" />
@@ -119,43 +119,45 @@ function StudentCourse() {
         </div>
       )}
 
-      <header className="border-b border-white/10">
+      <header className="absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-[#0a0a1a] to-transparent">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isPreview ? (
-              <Link to="/expert/preview" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+              <Link to="/expert/preview" className="text-white/70 hover:text-white text-sm flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Voltar ao painel
               </Link>
             ) : (
-              <Link to="/aluno" className="opacity-70 hover:opacity-100 text-sm flex items-center">
+              <Link to="/aluno" className="text-white/70 hover:text-white text-sm flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Meus cursos
               </Link>
             )}
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="opacity-70">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair</Button>
+            <span className="text-white/60">{user?.email}</span>
+            <Button variant="ghost" size="sm" onClick={signOut} className="text-white/80 hover:text-white hover:bg-white/5"><LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair</Button>
           </div>
         </div>
       </header>
 
       {course.course_type === "community" ? (
         <>
-          {/* Banner cinematográfico premium */}
-          <section
-            className="relative w-full overflow-hidden"
-            style={{
-              background: course.cover_url
-                ? `url(${course.cover_url}) center/cover`
-                : `linear-gradient(135deg, ${course.primary_color}, ${course.accent_color})`,
-              minHeight: "28vh",
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
-            <div className="relative max-w-6xl mx-auto px-6 flex flex-col items-center justify-center text-center" style={{ minHeight: "28vh" }}>
-              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight drop-shadow-lg">{course.title}</h1>
+          {/* Hero cinematográfico premium */}
+          <section className="relative w-full overflow-hidden" style={{ minHeight: "60vh" }}>
+            <div className="absolute inset-0 animate-ken-burns" style={
+              course.cover_url
+                ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}, ${course.accent_color ?? "#1e1e5a"})` }
+            } />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a]/80 via-transparent to-transparent" />
+            <div className="absolute top-1/2 left-1/3 w-[500px] h-[500px] bg-[#4f46e5]/20 rounded-full blur-[120px] animate-indigo-pulse" />
+            <div className="relative max-w-6xl mx-auto px-6 flex flex-col justify-end pb-12 pt-32" style={{ minHeight: "60vh" }}>
+              <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] w-fit mb-4 shadow-[0_0_20px_rgba(79,70,229,0.5)]">Comunidade</span>
+              <h1 className="font-cinema-display text-4xl md:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl">{(course.title ?? "").toUpperCase()}</h1>
+              {course.description && <p className="mt-4 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>}
             </div>
           </section>
+
 
           <FeaturedMoment data={course as any} />
 
@@ -272,62 +274,127 @@ function StudentCourse() {
           </main>
         </>
       ) : (
-        <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold mb-4">{course.title}</h1>
-            {activeLesson && (activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
-              <VideoPlayer
-                title={activeLesson.title}
-                config={{
-                  provider: (activeLesson.video_provider as any) ?? "youtube",
-                  url: activeLesson.video_url,
-                  externalId: activeLesson.video_id,
-                  embed: activeLesson.video_embed,
-                  legacyYoutubeUrl: activeLesson.youtube_url,
-                }}
-              />
-            ) : (
-              <Card className="p-12 text-center opacity-80">
-                <p>Selecione uma aula ao lado para começar.</p>
-              </Card>
-            )}
-            {activeLesson && (
-              <div className="mt-4">
-                <h2 className="text-lg font-semibold">{activeLesson.title}</h2>
-                {activeLesson.description && <p className="text-sm opacity-80 mt-1">{activeLesson.description}</p>}
+        <>
+          {/* Hero do curso */}
+          {!activeLessonId && (
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "70vh" }}>
+              <div className="absolute inset-0 animate-ken-burns" style={
+                course.cover_url
+                  ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                  : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}, ${course.accent_color ?? "#1e1e5a"})` }
+              } />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a] via-[#0a0a1a]/30 to-transparent" />
+              <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-[#4f46e5]/20 rounded-full blur-[150px] animate-indigo-pulse" />
+              <div className="relative max-w-7xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-16 pt-32" style={{ minHeight: "70vh" }}>
+                <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] w-fit mb-4 shadow-[0_0_20px_rgba(79,70,229,0.5)]">Formação</span>
+                <h1 className="font-cinema-display text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl drop-shadow-2xl">
+                  {(course.title ?? "").toUpperCase()}
+                </h1>
+                {course.description && <p className="mt-5 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>}
+                {modules?.[0]?.lessons?.[0] && (
+                  <div className="flex gap-3 mt-7">
+                    <button
+                      onClick={() => setActiveLessonId(modules[0].lessons[0].id)}
+                      className="px-8 py-4 bg-white text-[#0a0a1a] font-bold rounded-xl flex items-center gap-2 hover:bg-white/90 hover:scale-[1.03] active:scale-95 transition-all"
+                    >
+                      <PlayCircle className="h-5 w-5 fill-current" /> Continuar
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </section>
+          )}
 
-          <aside className="space-y-4">
+          {/* Player ativo */}
+          {activeLessonId && activeLesson && (
+            <section className="px-4 md:px-12 pt-24 pb-8 max-w-7xl mx-auto">
+              <div className="rounded-2xl overflow-hidden border border-[#1e1e5a] shadow-2xl shadow-black/50">
+                {(activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
+                  <VideoPlayer
+                    title={activeLesson.title}
+                    config={{
+                      provider: (activeLesson.video_provider as any) ?? "youtube",
+                      url: activeLesson.video_url,
+                      externalId: activeLesson.video_id,
+                      embed: activeLesson.video_embed,
+                      legacyYoutubeUrl: activeLesson.youtube_url,
+                    }}
+                  />
+                ) : (
+                  <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
+                )}
+              </div>
+              <div className="mt-5">
+                <h2 className="font-cinema-display text-2xl font-bold tracking-tight">{activeLesson.title}</h2>
+                {activeLesson.description && <p className="text-white/70 mt-2 leading-relaxed">{activeLesson.description}</p>}
+              </div>
+            </section>
+          )}
+
+          {/* Catálogo Netflix-style */}
+          <div className="relative z-20 -mt-12 pb-24 space-y-14 max-w-[100vw] overflow-x-hidden">
             {!hasContent ? (
-              <Card className="p-6 text-sm opacity-80">Este produto ainda não possui conteúdos publicados.</Card>
+              <div className="px-6 md:px-16 pt-12">
+                <Card className="p-12 text-center bg-[#141432] border-[#1e1e5a] text-white/70">
+                  Este produto ainda não possui conteúdos publicados.
+                </Card>
+              </div>
             ) : (
               modules?.map((m) => (
-                <Card key={m.id} className="p-4">
-                  <div className="font-semibold mb-2">{m.title}</div>
-                  <ul className="space-y-1">
-                    {m.lessons.map((l: any) => (
-                      <li key={l.id}>
-                        <button
-                          onClick={() => { setActiveChannelId(null); setActiveLessonId(l.id); }}
-                          className={`w-full text-left flex items-center gap-2 rounded px-2 py-1.5 text-sm transition ${
-                            activeLesson?.id === l.id ? "bg-primary/20" : "hover:bg-muted"
-                          }`}
-                        >
-                          <PlayCircle className="h-3.5 w-3.5 opacity-70" />
-                          {l.title}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+                <section key={m.id} className="px-6 md:px-16 space-y-5">
+                  <div className="flex items-center gap-4">
+                    <h2 className="font-cinema-display text-xl md:text-2xl font-bold tracking-tight">{m.title}</h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-[#1e1e5a] to-transparent" />
+                    <span className="text-xs text-white/40 uppercase tracking-wider">
+                      {m.lessons.length} {m.lessons.length === 1 ? "aula" : "aulas"}
+                    </span>
+                  </div>
+                  {m.lessons.length === 0 ? (
+                    <p className="text-sm text-white/40">Nenhuma aula neste módulo ainda.</p>
+                  ) : (
+                    <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
+                      {m.lessons.map((l: any, idx: number) => {
+                        const active = activeLesson?.id === l.id;
+                        return (
+                          <button
+                            key={l.id}
+                            onClick={() => { setActiveChannelId(null); setActiveLessonId(l.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                            className={`group relative min-w-[280px] md:min-w-[320px] aspect-video rounded-xl overflow-hidden border transition-all text-left shadow-lg shadow-black/40 ${
+                              active ? "border-[#4f46e5] ring-2 ring-[#4f46e5]/40" : "border-[#1e1e5a] hover:border-[#4f46e5]"
+                            }`}
+                            style={
+                              l.cover_url
+                                ? { backgroundImage: `url(${l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)` }
+                            }
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/30 to-transparent group-hover:from-[#0a0a1a]/90 transition-all" />
+                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/50 backdrop-blur text-[10px] font-bold text-white/90 tracking-wider">
+                              {String(idx + 1).padStart(2, "0")}
+                            </div>
+                            <div className="absolute inset-x-0 bottom-0 p-4">
+                              <p className="text-[10px] font-bold text-[#a5b4fc] mb-1 uppercase tracking-widest">{m.title}</p>
+                              <h4 className="text-sm md:text-base font-bold leading-tight line-clamp-2">{l.title}</h4>
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
+                                <PlayCircle className="h-7 w-7 fill-white text-white" />
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
               ))
             )}
-          </aside>
-        </main>
+          </div>
+        </>
       )}
     </div>
   );
 }
+
 

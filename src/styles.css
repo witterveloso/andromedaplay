@@ -93,3 +93,31 @@
   }
   .font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
 }
+
+/* Student / cinematic theme — applied on .andromeda-cinema scope */
+.andromeda-cinema {
+  font-family: "Manrope", system-ui, sans-serif;
+  background: #0a0a1a;
+  color: #fff;
+}
+.andromeda-cinema .font-cinema-display { font-family: "Sora", system-ui, sans-serif; letter-spacing: -0.02em; }
+.andromeda-cinema .font-cinema-body { font-family: "Manrope", system-ui, sans-serif; }
+
+/* Hide scrollbars on horizontal carousels */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Slow ken-burns for cinematic hero */
+@keyframes ken-burns {
+  0% { transform: scale(1.02) translate(0, 0); }
+  50% { transform: scale(1.08) translate(-1%, -0.5%); }
+  100% { transform: scale(1.02) translate(0, 0); }
+}
+.animate-ken-burns { animation: ken-burns 24s ease-in-out infinite; }
+
+@keyframes indigo-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.6; }
+}
+.animate-indigo-pulse { animation: indigo-pulse 4s ease-in-out infinite; }
+
