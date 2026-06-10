@@ -181,6 +181,8 @@ function StudentCourse() {
                   )}
                 </div>
               )}
+            </div>
+
 
           ) : activeLesson?.youtube_url ? (
             <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
