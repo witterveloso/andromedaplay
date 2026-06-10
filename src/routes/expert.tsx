@@ -49,7 +49,7 @@ function ExpertLayout() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
             <Sparkles className="h-4 w-4 text-primary" />
           </div>
-          <span className="font-semibold">Painel Expert</span>
+          <span className="font-semibold">Painel Produtor</span>
         </div>
         <nav className="flex-1 space-y-1 p-3">
           {nav.map((item) => {

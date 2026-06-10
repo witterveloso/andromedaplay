@@ -42,7 +42,7 @@ function ExpertsList() {
 
   const del = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("Expert excluído"); qc.invalidateQueries({ queryKey: ["experts"] }); },
+    onSuccess: () => { toast.success("Produtor excluído"); qc.invalidateQueries({ queryKey: ["experts"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -50,11 +50,11 @@ function ExpertsList() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Experts</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Produtores</h1>
           <p className="text-muted-foreground mt-1">Cadastre e gerencie quem cria cursos na plataforma</p>
         </div>
         <Button asChild>
-          <Link to="/admin/experts/new"><Plus className="mr-2 h-4 w-4" /> Novo expert</Link>
+          <Link to="/admin/experts/new"><Plus className="mr-2 h-4 w-4" /> Novo produtor</Link>
         </Button>
       </div>
 
@@ -62,8 +62,8 @@ function ExpertsList() {
         <p className="text-muted-foreground text-sm">Carregando…</p>
       ) : !data?.length ? (
         <Card className="p-12 text-center">
-          <p className="text-muted-foreground">Nenhum expert cadastrado.</p>
-          <Button asChild className="mt-4"><Link to="/admin/experts/new">Cadastrar primeiro expert</Link></Button>
+          <p className="text-muted-foreground">Nenhum produtor cadastrado.</p>
+          <Button asChild className="mt-4"><Link to="/admin/experts/new">Cadastrar primeiro produtor</Link></Button>
         </Card>
       ) : (
         <div className="space-y-3">

@@ -30,7 +30,7 @@ function Dashboard() {
   });
 
   const cards = [
-    { label: "Experts", value: stats?.experts ?? 0, icon: Users, color: "text-primary", to: "/admin/experts" as const },
+    { label: "Produtores", value: stats?.experts ?? 0, icon: Users, color: "text-primary", to: "/admin/experts" as const },
     { label: "Cursos totais", value: stats?.courses ?? 0, icon: BookOpen, color: "text-sky-400", to: "/admin/experts" as const },
     { label: "Publicados", value: stats?.published ?? 0, icon: FileCheck, color: "text-emerald-400", to: "/admin/experts" as const },
     { label: "Rascunhos", value: stats?.drafts ?? 0, icon: Archive, color: "text-amber-400", to: "/admin/experts" as const },
@@ -63,9 +63,9 @@ function Dashboard() {
           <div>
             <h2 className="font-semibold">Suporte técnico</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Você tem acesso às informações cadastrais de experts, cursos e alunos para oferecer suporte
+              Você tem acesso às informações cadastrais de produtores, cursos e alunos para oferecer suporte
               quando necessário. O conteúdo dos cursos (vídeos, aulas, comunidade) é gerenciado exclusivamente
-              pelos experts. Clique nos cards acima ou em qualquer expert para ver detalhes.
+              pelos produtores. Clique nos cards acima ou em qualquer produtor para ver detalhes.
             </p>
           </div>
         </div>
