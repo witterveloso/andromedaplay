@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash } from "lucide-react";
+import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
 import { toYouTubeEmbed } from "@/lib/youtube";
 import { StudentPostCard } from "@/components/community/student-post-card";
 
@@ -27,6 +27,7 @@ function StudentCourse() {
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
   }, [loading, session, navigate]);
+
 
   const { data: course } = useQuery({
     queryKey: ["course-slug", slug],
@@ -84,6 +85,12 @@ function StudentCourse() {
     },
   });
 
+  // Auto-select first channel so community posts show as a feed by default
+  useEffect(() => {
+    if (course?.course_type === "community" && !activeChannelId && !activeLessonId && channels && channels.length > 0) {
+      setActiveChannelId(channels[0].id);
+    }
+  }, [course?.course_type, channels, activeChannelId, activeLessonId]);
 
   if (!course) {
     return <div className="p-8 text-muted-foreground">Curso não disponível.</div>;
@@ -93,6 +100,9 @@ function StudentCourse() {
     ?? modules?.[0]?.lessons?.[0];
   const activeChannel = channels?.find((c) => c.id === activeChannelId);
   const hasContent = (modules?.length ?? 0) > 0 || (channels?.length ?? 0) > 0;
+  const pinnedPosts = (channelPosts ?? []).filter((p: any) => p.is_pinned);
+  const regularPosts = (channelPosts ?? []).filter((p: any) => !p.is_pinned);
+
 
   return (
     <div className="min-h-screen" style={{ background: course.background_color, color: course.text_color, fontFamily: course.font_family }}>
@@ -147,10 +157,33 @@ function StudentCourse() {
               {(channelPosts?.length ?? 0) === 0 ? (
                 <Card className="p-8 text-center opacity-80">Nenhuma publicação ainda neste canal.</Card>
               ) : (
-                channelPosts!.map((p: any) => <StudentPostCard key={p.id} post={p} />)
+                <div className="space-y-6">
+                  {pinnedPosts.length > 0 && (
+                    <section className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm font-semibold opacity-90">
+                        <Pin className="h-4 w-4" />
+                        Publicações fixadas ({pinnedPosts.length})
+                      </div>
+                      <div className="space-y-3">
+                        {pinnedPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
+                      </div>
+                    </section>
+                  )}
+                  {regularPosts.length > 0 && (
+                    <section className="space-y-3">
+                      {pinnedPosts.length > 0 && (
+                        <div className="text-sm font-semibold opacity-90">Todas as publicações</div>
+                      )}
+                      <div className="space-y-3">
+                        {regularPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
+                      </div>
+                    </section>
+                  )}
+                </div>
               )}
-
             </div>
+
+
           ) : activeLesson?.youtube_url ? (
             <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
               <iframe
