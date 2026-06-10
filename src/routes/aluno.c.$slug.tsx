@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
-import { toYouTubeEmbed } from "@/lib/youtube";
+import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 
