@@ -357,7 +357,10 @@ function LessonDialog({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [videoProvider, setVideoProvider] = useState<VideoProvider>("youtube");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoId, setVideoId] = useState("");
+  const [videoEmbed, setVideoEmbed] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [durationMin, setDurationMin] = useState("");
   const [status, setStatus] = useState<Lesson["status"]>("draft");
