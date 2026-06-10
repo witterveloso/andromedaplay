@@ -471,10 +471,59 @@ function LessonDialog({
             <Label>Descrição</Label>
             <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Link do YouTube</Label>
-            <Input type="url" placeholder="https://youtube.com/watch?v=…"
-              value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} />
+          <div className="rounded-md border p-3 space-y-3 bg-muted/20">
+            <div className="space-y-1.5">
+              <Label>Tipo de vídeo</Label>
+              <Select value={videoProvider} onValueChange={(v) => setVideoProvider(v as VideoProvider)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {VIDEO_PROVIDERS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {VIDEO_PROVIDERS.find((p) => p.value === videoProvider)?.hint}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>URL do player</Label>
+              <Input
+                type="url"
+                placeholder={
+                  videoProvider === "youtube" ? "https://youtube.com/watch?v=…" :
+                  videoProvider === "bunny" ? "https://iframe.mediadelivery.net/embed/…" :
+                  videoProvider === "cloudflare" ? "https://iframe.videodelivery.net/…" :
+                  videoProvider === "vimeo" ? "https://vimeo.com/…" :
+                  videoProvider === "mux" ? "https://stream.mux.com/PLAYBACK_ID.m3u8" :
+                  "https://…"
+                }
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>ID do vídeo externo (opcional)</Label>
+              <Input
+                placeholder={
+                  videoProvider === "bunny" ? "library_id/video_id" :
+                  videoProvider === "vimeo" ? "123456789" :
+                  videoProvider === "mux" ? "PLAYBACK_ID" :
+                  "ID do vídeo"
+                }
+                value={videoId}
+                onChange={(e) => setVideoId(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Código embed (opcional, sobrepõe a URL)</Label>
+              <Textarea
+                rows={3}
+                placeholder='<iframe src="…" allow="…" allowfullscreen></iframe>'
+                value={videoEmbed}
+                onChange={(e) => setVideoEmbed(e.target.value)}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ImageUploadCrop
