@@ -41,9 +41,9 @@ function StudentCourse() {
     enabled: !!course,
     queryKey: ["course-content", course?.id, isPreview],
     queryFn: async () => {
-      let modQ = supabase.from("modules").select("*").eq("course_id", course!.id).order("position");
-      if (!isPreview) modQ = modQ.eq("status", "published");
+      const modQ = supabase.from("modules").select("*").eq("course_id", course!.id).order("position");
       const { data: mods, error: e1 } = await modQ;
+
       if (e1) throw e1;
       let lessonsQ = supabase.from("lessons").select("*").in("module_id", (mods ?? []).map((m) => m.id)).order("position");
       if (!isPreview) lessonsQ = lessonsQ.eq("status", "published");
