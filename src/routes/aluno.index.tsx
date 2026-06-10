@@ -35,14 +35,7 @@ function StudentHome() {
         .filter(Boolean) as any[];
       const byId = new Map<string, any>();
       for (const c of rows) if (!byId.has(c.id)) byId.set(c.id, c);
-      const byTitle = new Map<string, any>();
-      for (const c of byId.values()) {
-        const key = (c.title ?? "").trim().toLowerCase();
-        const existing = byTitle.get(key);
-        if (!existing) byTitle.set(key, c);
-        else if (existing.course_type !== "video" && c.course_type === "video") byTitle.set(key, c);
-      }
-      return Array.from(byTitle.values());
+      return Array.from(byId.values());
     },
   });
 
