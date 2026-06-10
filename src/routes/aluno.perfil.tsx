@@ -94,29 +94,41 @@ function ProfilePage() {
     }
   }, [profile]);
 
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = "";
     if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem");
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Imagem deve ter no máximo 5MB");
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function confirmCrop() {
+    if (!cropSrc || !croppedArea || !user) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `avatars/${user.id}/${Date.now()}.${ext}`;
+      const blob = await getCroppedBlob(cropSrc, croppedArea, { width: 512, height: 512 });
+      const path = `avatars/${user.id}/${Date.now()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("course-assets")
-        .upload(path, file, { upsert: true, contentType: file.type });
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("course-assets").getPublicUrl(path);
       setAvatarUrl(data.publicUrl);
-      toast.success("Foto carregada. Não esqueça de salvar.");
+      toast.success("Foto enquadrada. Não esqueça de salvar.");
+      closeCrop();
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao enviar imagem");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
