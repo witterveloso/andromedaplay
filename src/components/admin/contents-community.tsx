@@ -140,18 +140,6 @@ export function ContentsCommunity({ courseId }: { courseId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const channels = channelsQ.data ?? [];
-  const posts = postsQ.data ?? [];
-
-  function move<T extends { id: string; position: number }>(
-    items: T[], idx: number, dir: -1 | 1, table: "community_channels" | "community_posts",
-  ) {
-    const target = items[idx + dir];
-    if (!target) return;
-    const current = items[idx];
-    reorder.mutate({ table, id: current.id, position: target.position });
-    reorder.mutate({ table, id: target.id, position: current.position });
-  }
 
   // Ensure a default channel exists so the producer doesn't have to manage channels.
   const ensureDefault = useMutation({
