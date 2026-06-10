@@ -36,6 +36,7 @@ type Lesson = {
   module_id: string;
   title: string;
   description: string | null;
+  extra_info: string | null;
   youtube_url: string | null;
   video_provider: VideoProvider | null;
   video_url: string | null;
@@ -49,14 +50,19 @@ type Lesson = {
   position: number;
 };
 
+type MaterialType = "pdf" | "link" | "image" | "file";
+
 type Material = {
   id: string;
   lesson_id: string;
   name: string;
   url: string;
   file_type: string | null;
+  material_type: MaterialType | string;
+  storage_path: string | null;
   position: number;
 };
+
 
 const statusBadge: Record<Lesson["status"], { label: string; variant: "default" | "secondary" | "outline" }> = {
   published: { label: "Publicada", variant: "default" },
