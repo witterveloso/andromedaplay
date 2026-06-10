@@ -33,6 +33,7 @@ function CoursesPage() {
       const expertIds = Array.from(
         new Set((courses ?? []).map((c) => c.expert_id).filter((v): v is string => !!v)),
       );
+      const courseIds = (courses ?? []).map((c) => c.id);
 
       const [expertsRes, enrollRes, lessonsRes, postsRes] = await Promise.all([
         expertIds.length
