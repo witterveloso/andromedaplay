@@ -33,7 +33,7 @@ export type ImageUploadCropProps = {
 const MAX_FILE_MB = 10;
 
 export function ImageUploadCrop({
-  label, value, onChange, aspect, recommended, folder, previewClassName, rounded, hint,
+  label, value, onChange, aspect, recommended, folder, bucket = "course-assets", previewClassName, rounded, hint,
 }: ImageUploadCropProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
