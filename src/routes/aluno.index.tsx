@@ -84,15 +84,6 @@ function StudentHome() {
           </div>
 
           <div className="relative z-10 max-w-3xl space-y-6">
-            <div className="flex items-center gap-3">
-              <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(79,70,229,0.5)]">
-                <Sparkles className="inline h-3 w-3 mr-1 -mt-0.5" />
-                Em destaque
-              </span>
-              <span className="text-white/50 text-xs font-semibold uppercase tracking-widest">
-                {featured.course_type === "community" ? "Comunidade" : "Formação"}
-              </span>
-            </div>
             <h1 className="font-cinema-display text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.95]">
               {(featured.title ?? "").toUpperCase()}
             </h1>
