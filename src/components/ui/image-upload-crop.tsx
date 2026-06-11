@@ -71,17 +71,38 @@ export function ImageUploadCrop({
     setUploading(true);
     try {
       const blob = await getCroppedBlob(src, croppedArea, recommended);
-      const path = `${folder}/${crypto.randomUUID()}.jpg`;
-      const { error } = await supabase.storage
-        .from("course-assets")
-        .upload(path, blob, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("course-assets").getPublicUrl(path);
+      // Ensure auth session is fresh — avoids silent "Failed to fetch" when the token expired.
+      await supabase.auth.getSession();
+      const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.jpg`;
+      const path = `${folder}/${fileName}`;
+      const file = new File([blob], fileName, { type: "image/jpeg" });
+
+      let uploadErr: { message: string } | null = null;
+      try {
+        const { error } = await supabase.storage
+          .from(bucket)
+          .upload(path, file, { cacheControl: "3600", upsert: true, contentType: "image/jpeg" });
+        uploadErr = error;
+      } catch (networkErr) {
+        // Browser-level fetch failure (CORS, offline, blocked). Retry once.
+        try {
+          const { error } = await supabase.storage
+            .from(bucket)
+            .upload(path, file, { cacheControl: "3600", upsert: true, contentType: "image/jpeg" });
+          uploadErr = error;
+        } catch (retryErr) {
+          throw new Error("Não foi possível enviar a imagem. Tente novamente.");
+        }
+      }
+      if (uploadErr) throw new Error(uploadErr.message || "Não foi possível enviar a imagem. Tente novamente.");
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
       onChange(data.publicUrl);
       toast.success("Imagem enviada");
       close();
     } catch (e) {
-      toast.error((e as Error).message);
+      const msg = (e as Error).message;
+      toast.error(msg.includes("fetch") ? "Não foi possível enviar a imagem. Tente novamente." : msg);
     } finally {
       setUploading(false);
     }
