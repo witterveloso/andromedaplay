@@ -17,7 +17,7 @@ function EditCourse() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { location } = useRouterState();
-  const isStudentsTab = location.pathname.endsWith("/students");
+  const isChildRoute = location.pathname !== `/expert/courses/${id}`;
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["course", id],
@@ -31,8 +31,8 @@ function EditCourse() {
   if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Carregando…</div>;
   if (!course) return <div className="p-8 text-muted-foreground">Curso não encontrado.</div>;
 
-  // If we're on the /students subroute, render the child outlet
-  if (isStudentsTab) return <Outlet />;
+  // Any nested child (students, live studio, etc.) renders through the outlet
+  if (isChildRoute) return <Outlet />;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
