@@ -62,11 +62,6 @@ function StudentHome() {
               Andromeda<span className="text-[#4f46e5]">.</span>
             </span>
           </Link>
-          <div className="hidden md:flex gap-8 text-sm font-semibold text-white/50">
-            <Link to="/aluno" className="text-white border-b-2 border-[#4f46e5] pb-1">Hub</Link>
-            <span className="opacity-40 cursor-not-allowed">Comunidade</span>
-            <span className="opacity-40 cursor-not-allowed">Suporte</span>
-          </div>
         </div>
         <AvatarMenu />
       </nav>
