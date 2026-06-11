@@ -814,7 +814,7 @@ function PostCard({
       )}
 
       {post.post_type === "live" && post.is_live_active && post.live_chat_enabled && (
-        <LiveChat postId={post.id} />
+        <LiveChat postId={post.id} courseId={post.course_id} />
       )}
     </Card>
   );
