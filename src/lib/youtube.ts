@@ -35,6 +35,7 @@ export function toYouTubeEmbed(url: string | null | undefined): string | null {
     rel: "0",
     modestbranding: "1",
     playsinline: "1",
+    controls: "1",
   });
   return `https://www.youtube.com/embed/${id}?${params.toString()}`;
 }
