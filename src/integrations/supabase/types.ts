@@ -556,6 +556,7 @@ export type Database = {
           id: string
           is_answered: boolean
           is_pinned: boolean
+          is_question: boolean
           post_id: string
           user_id: string
         }
@@ -566,6 +567,7 @@ export type Database = {
           id?: string
           is_answered?: boolean
           is_pinned?: boolean
+          is_question?: boolean
           post_id: string
           user_id: string
         }
@@ -576,6 +578,7 @@ export type Database = {
           id?: string
           is_answered?: boolean
           is_pinned?: boolean
+          is_question?: boolean
           post_id?: string
           user_id?: string
         }
