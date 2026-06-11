@@ -121,3 +121,11 @@
 }
 .animate-indigo-pulse { animation: indigo-pulse 4s ease-in-out infinite; }
 
+@keyframes float-up {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+}
+.animate-float-up { animation: float-up 1.8s ease-out forwards; }
+
+
