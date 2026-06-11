@@ -15,7 +15,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
+  Collapsible, CollapsibleContent, CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Plus, Pencil, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight, FileText, Link as LinkIcon,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
