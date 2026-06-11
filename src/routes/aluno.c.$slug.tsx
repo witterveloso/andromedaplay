@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin, Lock } from "lucide-react";
+import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin, Lock, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
