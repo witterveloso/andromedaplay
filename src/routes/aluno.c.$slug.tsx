@@ -311,7 +311,7 @@ function StudentCourse() {
 
           {/* Player ativo */}
           {activeLessonId && activeLesson && (
-            <section className="px-4 md:px-12 pt-24 pb-8 max-w-7xl mx-auto">
+            <section className="px-4 md:px-12 pt-24 pb-8 max-w-4xl mx-auto">
               <div className="rounded-2xl overflow-hidden border border-[#1e1e5a] shadow-2xl shadow-black/50">
                 {(activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
                   <VideoPlayer
