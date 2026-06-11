@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { useAuth } from "@/hooks/use-auth";
 import { VIDEO_PROVIDERS, type VideoProvider } from "@/lib/video-player";
 
 type Module = {
@@ -362,8 +363,10 @@ function LessonDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const editing = state.lesson;
   const moduleId = state.moduleId ?? editing?.module_id;
+  const thumbFolder = `lessons/${courseId}/${editing?.id ?? `temp/${user?.id ?? "anon"}`}`;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -582,7 +585,7 @@ function LessonDialog({
               label="Thumbnail da aula"
               value={thumbnailUrl}
               onChange={setThumbnailUrl}
-              folder="lessons"
+              folder={thumbFolder}
               aspect={16 / 9}
               recommended={{ width: 640, height: 360 }}
               hint="Aparece nos cards de aulas."

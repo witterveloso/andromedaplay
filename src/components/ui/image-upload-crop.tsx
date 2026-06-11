@@ -19,8 +19,10 @@ export type ImageUploadCropProps = {
   aspect: number;
   /** Recommended pixel size shown as a hint to the user. */
   recommended: { width: number; height: number };
-  /** Storage folder inside the course-assets bucket. */
+  /** Storage folder (path prefix) inside the bucket. */
   folder: string;
+  /** Storage bucket. Defaults to course-assets (public). */
+  bucket?: string;
   /** Tailwind classes that control the preview size. */
   previewClassName?: string;
   /** Round the preview (use for logos/avatars/icons). */
@@ -31,7 +33,7 @@ export type ImageUploadCropProps = {
 const MAX_FILE_MB = 10;
 
 export function ImageUploadCrop({
-  label, value, onChange, aspect, recommended, folder, previewClassName, rounded, hint,
+  label, value, onChange, aspect, recommended, folder, bucket = "course-assets", previewClassName, rounded, hint,
 }: ImageUploadCropProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -69,17 +71,38 @@ export function ImageUploadCrop({
     setUploading(true);
     try {
       const blob = await getCroppedBlob(src, croppedArea, recommended);
-      const path = `${folder}/${crypto.randomUUID()}.jpg`;
-      const { error } = await supabase.storage
-        .from("course-assets")
-        .upload(path, blob, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("course-assets").getPublicUrl(path);
+      // Ensure auth session is fresh — avoids silent "Failed to fetch" when the token expired.
+      await supabase.auth.getSession();
+      const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.jpg`;
+      const path = `${folder}/${fileName}`;
+      const file = new File([blob], fileName, { type: "image/jpeg" });
+
+      let uploadErr: { message: string } | null = null;
+      try {
+        const { error } = await supabase.storage
+          .from(bucket)
+          .upload(path, file, { cacheControl: "3600", upsert: true, contentType: "image/jpeg" });
+        uploadErr = error;
+      } catch (networkErr) {
+        // Browser-level fetch failure (CORS, offline, blocked). Retry once.
+        try {
+          const { error } = await supabase.storage
+            .from(bucket)
+            .upload(path, file, { cacheControl: "3600", upsert: true, contentType: "image/jpeg" });
+          uploadErr = error;
+        } catch (retryErr) {
+          throw new Error("Não foi possível enviar a imagem. Tente novamente.");
+        }
+      }
+      if (uploadErr) throw new Error(uploadErr.message || "Não foi possível enviar a imagem. Tente novamente.");
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
       onChange(data.publicUrl);
       toast.success("Imagem enviada");
       close();
     } catch (e) {
-      toast.error((e as Error).message);
+      const msg = (e as Error).message;
+      toast.error(msg.includes("fetch") ? "Não foi possível enviar a imagem. Tente novamente." : msg);
     } finally {
       setUploading(false);
     }
