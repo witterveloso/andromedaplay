@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
 import { FeaturedMomentEditor } from "@/components/admin/featured-moment-editor";
 import { LiveChat } from "@/components/community/live-chat";
+import { Link } from "@tanstack/react-router";
 
 type PostType = "text" | "image" | "video" | "audio" | "live";
 

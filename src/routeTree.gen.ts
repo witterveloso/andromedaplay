@@ -34,6 +34,7 @@ import { Route as AlunoCSlugRouteImport } from './routes/aluno.c.$slug'
 import { Route as AdminExpertsNewRouteImport } from './routes/admin.experts.new'
 import { Route as AdminExpertsIdRouteImport } from './routes/admin.experts.$id'
 import { Route as ExpertCoursesIdStudentsRouteImport } from './routes/expert.courses.$id.students'
+import { Route as ExpertCoursesIdLivePostIdRouteImport } from './routes/expert.courses.$id.live.$postId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -160,6 +161,12 @@ const ExpertCoursesIdStudentsRoute = ExpertCoursesIdStudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => ExpertCoursesIdRoute,
 } as any)
+const ExpertCoursesIdLivePostIdRoute =
+  ExpertCoursesIdLivePostIdRouteImport.update({
+    id: '/live/$postId',
+    path: '/live/$postId',
+    getParentRoute: () => ExpertCoursesIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/admin/experts/': typeof AdminExpertsIndexRoute
   '/expert/courses/': typeof ExpertCoursesIndexRoute
   '/expert/courses/$id/students': typeof ExpertCoursesIdStudentsRoute
+  '/expert/courses/$id/live/$postId': typeof ExpertCoursesIdLivePostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/admin/experts': typeof AdminExpertsIndexRoute
   '/expert/courses': typeof ExpertCoursesIndexRoute
   '/expert/courses/$id/students': typeof ExpertCoursesIdStudentsRoute
+  '/expert/courses/$id/live/$postId': typeof ExpertCoursesIdLivePostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/admin/experts/': typeof AdminExpertsIndexRoute
   '/expert/courses/': typeof ExpertCoursesIndexRoute
   '/expert/courses/$id/students': typeof ExpertCoursesIdStudentsRoute
+  '/expert/courses/$id/live/$postId': typeof ExpertCoursesIdLivePostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/admin/experts/'
     | '/expert/courses/'
     | '/expert/courses/$id/students'
+    | '/expert/courses/$id/live/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/experts'
     | '/expert/courses'
     | '/expert/courses/$id/students'
+    | '/expert/courses/$id/live/$postId'
   id:
     | '__root__'
     | '/'
@@ -321,6 +333,7 @@ export interface FileRouteTypes {
     | '/admin/experts/'
     | '/expert/courses/'
     | '/expert/courses/$id/students'
+    | '/expert/courses/$id/live/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpertCoursesIdStudentsRouteImport
       parentRoute: typeof ExpertCoursesIdRoute
     }
+    '/expert/courses/$id/live/$postId': {
+      id: '/expert/courses/$id/live/$postId'
+      path: '/live/$postId'
+      fullPath: '/expert/courses/$id/live/$postId'
+      preLoaderRoute: typeof ExpertCoursesIdLivePostIdRouteImport
+      parentRoute: typeof ExpertCoursesIdRoute
+    }
   }
 }
 
@@ -545,10 +565,12 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ExpertCoursesIdRouteChildren {
   ExpertCoursesIdStudentsRoute: typeof ExpertCoursesIdStudentsRoute
+  ExpertCoursesIdLivePostIdRoute: typeof ExpertCoursesIdLivePostIdRoute
 }
 
 const ExpertCoursesIdRouteChildren: ExpertCoursesIdRouteChildren = {
   ExpertCoursesIdStudentsRoute: ExpertCoursesIdStudentsRoute,
+  ExpertCoursesIdLivePostIdRoute: ExpertCoursesIdLivePostIdRoute,
 }
 
 const ExpertCoursesIdRouteWithChildren = ExpertCoursesIdRoute._addFileChildren(
