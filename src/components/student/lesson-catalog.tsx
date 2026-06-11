@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Clock, LayoutGrid, List, PlayCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, LayoutGrid, List, Play, PlayCircle } from "lucide-react";
 
 type Lesson = {
   id: string;
@@ -158,7 +158,7 @@ export function LessonCatalog({
             )}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
-                <PlayCircle className="h-7 w-7 fill-white text-white" />
+                <Play className="h-6 w-6 fill-white text-white ml-0.5" />
               </div>
             </div>
           </div>
@@ -221,7 +221,7 @@ export function LessonCatalog({
           }
         >
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlayCircle className="h-8 w-8 fill-white text-white" />
+            <Play className="h-7 w-7 fill-white text-white ml-0.5" />
           </div>
         </button>
         <div className="flex-1 min-w-0 flex flex-col">
