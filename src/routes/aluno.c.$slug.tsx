@@ -328,6 +328,10 @@ function StudentCourse() {
                   <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
                 )}
               </div>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-white/40 bg-white/5 border border-white/5 rounded-lg px-3 py-2 w-fit">
+                <Lock className="h-3 w-3" />
+                <span>Conteúdo exclusivo para alunos. Compartilhamento não autorizado.</span>
+              </div>
               <div className="mt-5">
                 <h2 className="font-cinema-display text-2xl font-bold tracking-tight">{activeLesson.title}</h2>
                 {activeLesson.description && <p className="text-white/70 mt-2 leading-relaxed">{activeLesson.description}</p>}
