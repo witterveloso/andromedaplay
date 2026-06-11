@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin } from "lucide-react";
+import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin, Lock } from "lucide-react";
 import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
@@ -327,6 +327,10 @@ function StudentCourse() {
                 ) : (
                   <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
                 )}
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-white/40 bg-white/5 border border-white/5 rounded-lg px-3 py-2 w-fit">
+                <Lock className="h-3 w-3" />
+                <span>Conteúdo exclusivo para alunos. Compartilhamento não autorizado.</span>
               </div>
               <div className="mt-5">
                 <h2 className="font-cinema-display text-2xl font-bold tracking-tight">{activeLesson.title}</h2>
