@@ -16,7 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus, Pencil, Trash2, ArrowUp, ArrowDown, Pin, MessageSquare, ImageIcon, Video, Mic, Radio, Send,
+  Plus, Pencil, Trash2, ArrowUp, ArrowDown, Pin, MessageSquare, ImageIcon, Video, Mic, Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
