@@ -76,6 +76,9 @@ export function resolveVideoEmbedUrl(cfg: VideoConfig): string | null {
     case "custom": {
       return url || null;
     }
+    case "external_link": {
+      return null;
+    }
   }
 }
 
