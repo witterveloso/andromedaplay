@@ -8,6 +8,7 @@ type Lesson = {
   title: string;
   description?: string | null;
   cover_url?: string | null;
+  thumbnail_url?: string | null;
   duration_seconds?: number | null;
   duration?: string | null;
 };
