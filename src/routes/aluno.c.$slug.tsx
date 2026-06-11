@@ -312,22 +312,44 @@ function StudentCourse() {
           {/* Player ativo */}
           {activeLessonId && activeLesson && (
             <section className="px-4 md:px-12 pt-24 pb-8 max-w-4xl mx-auto">
-              <div className="rounded-2xl overflow-hidden border border-[#1e1e5a] shadow-2xl shadow-black/50">
-                {(activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
-                  <VideoPlayer
-                    title={activeLesson.title}
-                    config={{
-                      provider: (activeLesson.video_provider as any) ?? "youtube",
-                      url: activeLesson.video_url,
-                      externalId: activeLesson.video_id,
-                      embed: activeLesson.video_embed,
-                      legacyYoutubeUrl: activeLesson.youtube_url,
-                    }}
-                  />
-                ) : (
-                  <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
-                )}
-              </div>
+              {activeLesson.video_provider === "external_link" && (activeLesson.video_url || activeLesson.youtube_url) ? (
+                <div className="rounded-2xl border border-[#1e1e5a] bg-gradient-to-br from-[#141432] to-[#0f0f24] p-10 md:p-14 text-center shadow-2xl shadow-black/50">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4f46e5]/20 border border-[#4f46e5]/40 mb-5">
+                    <LinkIcon className="h-6 w-6 text-[#a5b4fc]" />
+                  </div>
+                  <h3 className="font-cinema-display text-xl md:text-2xl font-bold tracking-tight mb-2">
+                    Acesse o conteúdo desta aula
+                  </h3>
+                  <p className="text-white/60 text-sm mb-6 max-w-md mx-auto">
+                    Esta aula leva você a um conteúdo externo. Clique no botão abaixo para abrir em uma nova aba.
+                  </p>
+                  <a
+                    href={(activeLesson.video_url || activeLesson.youtube_url) as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#0a0a1a] font-bold rounded-xl hover:bg-white/90 hover:scale-[1.03] active:scale-95 transition-all"
+                  >
+                    <ExternalLink className="h-5 w-5" /> Acessar conteúdo
+                  </a>
+                </div>
+              ) : (
+                <div className="rounded-2xl overflow-hidden border border-[#1e1e5a] shadow-2xl shadow-black/50">
+                  {(activeLesson.video_url || activeLesson.youtube_url || activeLesson.video_embed || activeLesson.video_id) ? (
+                    <VideoPlayer
+                      title={activeLesson.title}
+                      config={{
+                        provider: (activeLesson.video_provider as any) ?? "youtube",
+                        url: activeLesson.video_url,
+                        externalId: activeLesson.video_id,
+                        embed: activeLesson.video_embed,
+                        legacyYoutubeUrl: activeLesson.youtube_url,
+                      }}
+                    />
+                  ) : (
+                    <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
+                  )}
+                </div>
+              )}
               <div className="mt-3 flex items-center gap-2 text-[11px] text-white/40 bg-white/5 border border-white/5 rounded-lg px-3 py-2 w-fit">
                 <Lock className="h-3 w-3" />
                 <span>Conteúdo exclusivo para alunos. Compartilhamento não autorizado.</span>
