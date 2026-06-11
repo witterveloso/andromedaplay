@@ -363,8 +363,10 @@ function LessonDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const editing = state.lesson;
   const moduleId = state.moduleId ?? editing?.module_id;
+  const thumbFolder = `lessons/${courseId}/${editing?.id ?? `temp/${user?.id ?? "anon"}`}`;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
