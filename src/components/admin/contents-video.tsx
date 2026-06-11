@@ -516,57 +516,66 @@ function LessonDialog({
           </div>
           <div className="rounded-md border p-3 space-y-3 bg-muted/20">
             <div className="space-y-1.5">
-              <Label>Tipo de vídeo</Label>
-              <Select value={videoProvider} onValueChange={(v) => setVideoProvider(v as VideoProvider)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {VIDEO_PROVIDERS.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {VIDEO_PROVIDERS.find((p) => p.value === videoProvider)?.hint}
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              <Label>URL do player</Label>
+              <Label>URL do vídeo</Label>
               <Input
                 type="url"
-                placeholder={
-                  videoProvider === "youtube" ? "https://youtube.com/watch?v=…" :
-                  videoProvider === "bunny" ? "https://iframe.mediadelivery.net/embed/…" :
-                  videoProvider === "cloudflare" ? "https://iframe.videodelivery.net/…" :
-                  videoProvider === "vimeo" ? "https://vimeo.com/…" :
-                  videoProvider === "mux" ? "https://stream.mux.com/PLAYBACK_ID.m3u8" :
-                  "https://…"
-                }
+                placeholder="https://youtube.com/watch?v=…"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                Cole o link do YouTube (watch, live, embed ou youtu.be). O player será gerado automaticamente.
+              </p>
             </div>
-            <div className="space-y-1.5">
-              <Label>ID do vídeo externo (opcional)</Label>
-              <Input
-                placeholder={
-                  videoProvider === "bunny" ? "library_id/video_id" :
-                  videoProvider === "vimeo" ? "123456789" :
-                  videoProvider === "mux" ? "PLAYBACK_ID" :
-                  "ID do vídeo"
-                }
-                value={videoId}
-                onChange={(e) => setVideoId(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Código embed (opcional, sobrepõe a URL)</Label>
-              <Textarea
-                rows={3}
-                placeholder='<iframe src="…" allow="…" allowfullscreen></iframe>'
-                value={videoEmbed}
-                onChange={(e) => setVideoEmbed(e.target.value)}
-              />
-            </div>
+
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button type="button" variant="ghost" size="sm" className="w-full justify-between h-auto py-2 px-3 text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <Settings2 className="h-4 w-4" /> Opções avançadas
+                  </span>
+                  <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 pt-2">
+                <div className="space-y-1.5">
+                  <Label>Tipo de vídeo</Label>
+                  <Select value={videoProvider} onValueChange={(v) => setVideoProvider(v as VideoProvider)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {VIDEO_PROVIDERS.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {VIDEO_PROVIDERS.find((p) => p.value === videoProvider)?.hint}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>ID do vídeo externo (opcional)</Label>
+                  <Input
+                    placeholder={
+                      videoProvider === "bunny" ? "library_id/video_id" :
+                      videoProvider === "vimeo" ? "123456789" :
+                      videoProvider === "mux" ? "PLAYBACK_ID" :
+                      "ID do vídeo"
+                    }
+                    value={videoId}
+                    onChange={(e) => setVideoId(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Código embed (opcional, sobrepõe a URL)</Label>
+                  <Textarea
+                    rows={3}
+                    placeholder='<iframe src="…" allow="…" allowfullscreen></iframe>'
+                    value={videoEmbed}
+                    onChange={(e) => setVideoEmbed(e.target.value)}
+                  />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ImageUploadCrop
