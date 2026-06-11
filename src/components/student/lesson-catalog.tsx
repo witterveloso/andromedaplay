@@ -8,6 +8,7 @@ type Lesson = {
   title: string;
   description?: string | null;
   cover_url?: string | null;
+  thumbnail_url?: string | null;
   duration_seconds?: number | null;
   duration?: string | null;
 };
@@ -139,8 +140,8 @@ export function LessonCatalog({
           <div
             className="relative aspect-video"
             style={
-              l.cover_url
-                ? { backgroundImage: `url(${l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+              (l.thumbnail_url || l.cover_url)
+                ? { backgroundImage: `url(${l.thumbnail_url || l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                 : {
                     background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)`,
                   }
@@ -212,8 +213,8 @@ export function LessonCatalog({
           onClick={() => select(l.id)}
           className="relative shrink-0 w-32 sm:w-44 aspect-video rounded-lg overflow-hidden"
           style={
-            l.cover_url
-              ? { backgroundImage: `url(${l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+            (l.thumbnail_url || l.cover_url)
+              ? { backgroundImage: `url(${l.thumbnail_url || l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
               : {
                   background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)`,
                 }

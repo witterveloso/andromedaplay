@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
-import { Play, ChevronRight, Lock, Sparkles } from "lucide-react";
+import { Play, ChevronRight, Lock } from "lucide-react";
 import { AvatarMenu } from "@/components/student/avatar-menu";
 
 export const Route = createFileRoute("/aluno/")({
@@ -22,6 +22,8 @@ function StudentHome() {
   const { data: courses, isLoading } = useQuery({
     enabled: !!user,
     queryKey: ["my-courses", user?.id],
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("enrollments")
@@ -62,11 +64,6 @@ function StudentHome() {
               Andromeda<span className="text-[#4f46e5]">.</span>
             </span>
           </Link>
-          <div className="hidden md:flex gap-8 text-sm font-semibold text-white/50">
-            <Link to="/aluno" className="text-white border-b-2 border-[#4f46e5] pb-1">Hub</Link>
-            <span className="opacity-40 cursor-not-allowed">Comunidade</span>
-            <span className="opacity-40 cursor-not-allowed">Suporte</span>
-          </div>
         </div>
         <AvatarMenu />
       </nav>
@@ -89,15 +86,6 @@ function StudentHome() {
           </div>
 
           <div className="relative z-10 max-w-3xl space-y-6">
-            <div className="flex items-center gap-3">
-              <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(79,70,229,0.5)]">
-                <Sparkles className="inline h-3 w-3 mr-1 -mt-0.5" />
-                Em destaque
-              </span>
-              <span className="text-white/50 text-xs font-semibold uppercase tracking-widest">
-                {featured.course_type === "community" ? "Comunidade" : "Formação"}
-              </span>
-            </div>
             <h1 className="font-cinema-display text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.95]">
               {(featured.title ?? "").toUpperCase()}
             </h1>
