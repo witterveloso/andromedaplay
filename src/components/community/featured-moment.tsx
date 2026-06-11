@@ -1,4 +1,6 @@
-import { ArrowRight, Bell, MessageSquare, PlayCircle, Sparkles, Video } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Bell, ExternalLink, MessageSquare, PlayCircle, Sparkles, Video, X } from "lucide-react";
+import { toYouTubeEmbed, extractYouTubeId } from "@/lib/youtube";
 
 type FeaturedKind = "post" | "video" | "lesson" | "notice";
 
@@ -20,6 +22,8 @@ const KIND_META: Record<FeaturedKind, { label: string; Icon: typeof Sparkles }> 
 };
 
 export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | undefined }) {
+  const [open, setOpen] = useState(false);
+
   if (!data?.featured_enabled) return null;
   if (!data.featured_title && !data.featured_image_url) return null;
 
@@ -27,14 +31,26 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
   const meta = KIND_META[kind] ?? KIND_META.post;
   const Icon = meta.Icon;
   const ctaLabel = data.featured_cta_label?.trim() || "Acessar";
-  const ctaUrl = data.featured_cta_url?.trim() || "#";
-  const isExternal = /^https?:\/\//i.test(ctaUrl);
+  const ctaUrl = data.featured_cta_url?.trim() || "";
+
+  const isVideoUrl = !!ctaUrl && !!extractYouTubeId(ctaUrl);
+  const videoEmbed = isVideoUrl ? toYouTubeEmbed(ctaUrl) : null;
+  const hasMedia = !!data.featured_image_url || !!videoEmbed;
+  // Use modal whenever we can show media (image/video). Otherwise fall back to link.
+  const useModal = hasMedia;
+  const isExternalLink = !useModal && /^https?:\/\//i.test(ctaUrl);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (useModal) {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
 
   return (
     <section className="relative w-full">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.02] shadow-[0_30px_80px_-30px_rgba(108,77,255,0.55)]">
-          {/* Ambient glow */}
           <div
             className="pointer-events-none absolute -inset-px opacity-80 transition-opacity duration-700 group-hover:opacity-100"
             style={{
@@ -43,7 +59,6 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
             }}
           />
 
-          {/* Background image */}
           <div className="relative w-full aspect-[4/3] sm:aspect-[16/7]">
             {data.featured_image_url ? (
               <img
@@ -58,14 +73,10 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
               />
             )}
 
-            {/* Overlays */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-            {/* Top highlight */}
             <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-            {/* Content */}
             <div className="relative h-full flex items-end sm:items-center">
               <div className="w-full sm:w-[68%] p-5 sm:p-10 lg:p-12 space-y-4 sm:space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-3 py-1 text-[11px] sm:text-xs uppercase tracking-[0.18em] text-white/90">
@@ -88,9 +99,10 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
 
                 <div className="pt-1 sm:pt-2">
                   <a
-                    href={ctaUrl}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    href={useModal ? "#" : (ctaUrl || "#")}
+                    onClick={handleClick}
+                    target={isExternalLink ? "_blank" : undefined}
+                    rel={isExternalLink ? "noopener noreferrer" : undefined}
                     className="inline-flex items-center gap-2 rounded-full bg-white text-black px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold shadow-[0_10px_40px_-10px_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-[0.99]"
                   >
                     {ctaLabel}
@@ -102,6 +114,64 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
           </div>
         </div>
       </div>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8"
+          onClick={() => setOpen(false)}
+        >
+          <button
+            onClick={() => setOpen(false)}
+            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+            aria-label="Fechar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <div
+            className="relative max-w-5xl w-full max-h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {videoEmbed ? (
+              <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl">
+                <iframe
+                  src={videoEmbed}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  title={data.featured_title ?? "Vídeo"}
+                />
+              </div>
+            ) : data.featured_image_url ? (
+              <img
+                src={data.featured_image_url}
+                alt={data.featured_title ?? ""}
+                className="max-h-[85vh] w-auto mx-auto rounded-2xl shadow-2xl object-contain"
+              />
+            ) : null}
+
+            {(data.featured_title || data.featured_description) && (
+              <div className="mt-4 text-center text-white space-y-1">
+                {data.featured_title && (
+                  <h3 className="text-lg sm:text-xl font-semibold">{data.featured_title}</h3>
+                )}
+                {data.featured_description && (
+                  <p className="text-sm text-white/70 max-w-2xl mx-auto">{data.featured_description}</p>
+                )}
+                {ctaUrl && !videoEmbed && /^https?:\/\//i.test(ctaUrl) && (
+                  <a
+                    href={ctaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-white/80 hover:text-white underline"
+                  >
+                    Abrir link original <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
