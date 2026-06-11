@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Clock, LayoutGrid, List, PlayCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, LayoutGrid, List, Play, PlayCircle } from "lucide-react";
 
 type Lesson = {
   id: string;
