@@ -221,7 +221,7 @@ export function LessonCatalog({
           }
         >
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlayCircle className="h-8 w-8 fill-white text-white" />
+            <Play className="h-7 w-7 fill-white text-white ml-0.5" />
           </div>
         </button>
         <div className="flex-1 min-w-0 flex flex-col">
