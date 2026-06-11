@@ -140,8 +140,8 @@ export function LessonCatalog({
           <div
             className="relative aspect-video"
             style={
-              l.cover_url
-                ? { backgroundImage: `url(${l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+              (l.thumbnail_url || l.cover_url)
+                ? { backgroundImage: `url(${l.thumbnail_url || l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                 : {
                     background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)`,
                   }
