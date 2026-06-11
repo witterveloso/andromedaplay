@@ -554,6 +554,8 @@ export type Database = {
           created_at: string
           emoji: string | null
           id: string
+          is_answered: boolean
+          is_pinned: boolean
           post_id: string
           user_id: string
         }
@@ -562,6 +564,8 @@ export type Database = {
           created_at?: string
           emoji?: string | null
           id?: string
+          is_answered?: boolean
+          is_pinned?: boolean
           post_id: string
           user_id: string
         }
@@ -570,6 +574,8 @@ export type Database = {
           created_at?: string
           emoji?: string | null
           id?: string
+          is_answered?: boolean
+          is_pinned?: boolean
           post_id?: string
           user_id?: string
         }
