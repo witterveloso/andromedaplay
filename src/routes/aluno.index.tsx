@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
-import { Play, ChevronRight, Lock, Sparkles } from "lucide-react";
+import { Play, ChevronRight, Lock } from "lucide-react";
 import { AvatarMenu } from "@/components/student/avatar-menu";
 
 export const Route = createFileRoute("/aluno/")({
