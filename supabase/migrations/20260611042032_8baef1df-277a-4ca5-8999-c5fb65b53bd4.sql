@@ -1,0 +1,2 @@
+ALTER TABLE public.lessons DROP CONSTRAINT IF EXISTS lessons_video_provider_check;
+ALTER TABLE public.lessons ADD CONSTRAINT lessons_video_provider_check CHECK (video_provider = ANY (ARRAY['youtube'::text, 'bunny'::text, 'cloudflare'::text, 'vimeo'::text, 'mux'::text, 'custom'::text, 'external_link'::text]));

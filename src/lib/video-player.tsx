@@ -6,7 +6,8 @@ export type VideoProvider =
   | "cloudflare"
   | "vimeo"
   | "mux"
-  | "custom";
+  | "custom"
+  | "external_link";
 
 export const VIDEO_PROVIDERS: { value: VideoProvider; label: string; hint: string }[] = [
   { value: "youtube", label: "YouTube", hint: "Cole o link do vídeo do YouTube (watch, youtu.be, shorts ou /embed)." },
@@ -15,6 +16,7 @@ export const VIDEO_PROVIDERS: { value: VideoProvider; label: string; hint: strin
   { value: "vimeo", label: "Vimeo", hint: "Cole o link do vídeo (https://vimeo.com/ID) ou o ID do vídeo." },
   { value: "mux", label: "Mux", hint: "Cole a URL do player (https://stream.mux.com/PLAYBACK_ID.m3u8) ou o Playback ID." },
   { value: "custom", label: "URL/embed personalizado", hint: "Cole a URL completa do player ou o código embed (<iframe …>)." },
+  { value: "external_link", label: "Link externo (sem player)", hint: "O aluno verá um botão para acessar o link em uma nova aba (ex.: ChatGPT, Notion, Drive)." },
 ];
 
 export type VideoConfig = {
@@ -73,6 +75,9 @@ export function resolveVideoEmbedUrl(cfg: VideoConfig): string | null {
     }
     case "custom": {
       return url || null;
+    }
+    case "external_link": {
+      return null;
     }
   }
 }
