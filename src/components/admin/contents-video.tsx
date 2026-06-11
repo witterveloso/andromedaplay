@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadCrop } from "@/components/ui/image-upload-crop";
+import { useAuth } from "@/hooks/use-auth";
 import { VIDEO_PROVIDERS, type VideoProvider } from "@/lib/video-player";
 
 type Module = {
