@@ -301,7 +301,7 @@ function StudentCourse() {
                       onClick={() => setActiveLessonId(modules[0].lessons[0].id)}
                       className="px-8 py-4 bg-white text-[#0a0a1a] font-bold rounded-xl flex items-center gap-2 hover:bg-white/90 hover:scale-[1.03] active:scale-95 transition-all"
                     >
-                      <PlayCircle className="h-5 w-5 fill-current" /> Continuar
+                      <PlayCircle className="h-5 w-5" /> Continuar
                     </button>
                   </div>
                 )}
