@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { YouTubeLivePlayer } from "@/components/community/youtube-live-player";
+import { LiveChat } from "@/components/community/live-chat";
 import { toast } from "sonner";
 
 const REACTIONS = [
@@ -181,7 +182,9 @@ export function StudentPostCard({ post }: { post: any }) {
         })}
       </div>
 
-      {post.allow_comments && (
+      {post.post_type === "live" && post.is_live_active && post.live_chat_enabled ? (
+        <LiveChat postId={post.id} courseId={post.course_id} />
+      ) : post.allow_comments && (
         <div className="border-t bg-muted/10 px-4 py-3 space-y-3">
           {(commentsQ.data ?? []).map((c: any) => {
             const cp = commenterMap.get(c.author_id);
