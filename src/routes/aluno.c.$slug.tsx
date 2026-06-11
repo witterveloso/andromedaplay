@@ -10,6 +10,7 @@ import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 import { LessonMaterials } from "@/components/student/lesson-materials";
+import { LessonCatalog } from "@/components/student/lesson-catalog";
 
 
 
