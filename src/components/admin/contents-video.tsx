@@ -585,7 +585,7 @@ function LessonDialog({
               label="Thumbnail da aula"
               value={thumbnailUrl}
               onChange={setThumbnailUrl}
-              folder="lessons"
+              folder={thumbFolder}
               aspect={16 / 9}
               recommended={{ width: 640, height: 360 }}
               hint="Aparece nos cards de aulas."
