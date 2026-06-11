@@ -130,7 +130,7 @@ function StudentCourse() {
                 <ChevronLeft className="h-4 w-4 mr-1" /> Voltar ao painel
               </Link>
             ) : (
-              <Link to="/aluno" className="text-white/70 hover:text-white text-sm flex items-center">
+              <Link to="/aluno" preload="render" className="text-white/70 hover:text-white text-sm flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Meus cursos
               </Link>
             )}
