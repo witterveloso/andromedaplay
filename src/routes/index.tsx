@@ -114,46 +114,8 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Mockup-ish preview */}
-          <div className="relative mx-auto mt-20 max-w-5xl">
-            <div
-              className="absolute -inset-x-10 -top-10 -bottom-10 -z-10 rounded-[3rem] blur-3xl"
-              style={{ background: "var(--gradient-cosmic)", opacity: 0.25 }}
-            />
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0F] shadow-2xl">
-              <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
-                <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
-                <div className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
-                <div className="ml-4 text-xs text-stellar-silver/70">andromeda.play / dashboard</div>
-              </div>
-              <div className="grid grid-cols-[200px_1fr] gap-0">
-                <div className="border-r border-white/5 p-4 space-y-1.5 text-xs text-stellar-silver">
-                  {["Início", "Meus cursos", "Biblioteca", "Comunidade", "Certificados"].map((i) => (
-                    <div key={i} className="rounded px-2 py-1.5 hover:bg-white/5">{i}</div>
-                  ))}
-                </div>
-                <div className="p-6">
-                  <div className="font-display text-sm tracking-widest text-stellar-silver">CONTINUE ASSISTINDO</div>
-                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
-                        <div className="aspect-video relative" style={{ background: "var(--gradient-cosmic)", opacity: 0.85 }}>
-                          <PlayCircle className="absolute inset-0 m-auto h-10 w-10 text-soft-white/90" />
-                        </div>
-                        <div className="p-3">
-                          <div className="text-sm font-semibold">Aula {i} · Composição</div>
-                          <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
-                            <div className="h-1.5 rounded-full" style={{ width: `${30 * i}%`, background: "var(--gradient-cosmic)" }} />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+
+
         </div>
       </section>
 
