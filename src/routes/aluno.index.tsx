@@ -22,6 +22,8 @@ function StudentHome() {
   const { data: courses, isLoading } = useQuery({
     enabled: !!user,
     queryKey: ["my-courses", user?.id],
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("enrollments")
