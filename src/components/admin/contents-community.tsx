@@ -720,8 +720,17 @@ function PostCard({
           {post.cover_url && (
             <img src={post.cover_url} alt="" className="rounded-lg w-full aspect-video object-cover" />
           )}
-          {post.post_type === "live" && post.youtube_url && (
-            <p className="text-xs text-muted-foreground break-all">URL da live: {post.youtube_url}</p>
+          {post.post_type === "live" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild size="sm" className="bg-pink-500 hover:bg-pink-600 text-white">
+                <Link to="/expert/courses/$id/live/$postId" params={{ id: post.course_id, postId: post.id }}>
+                  <Radio className="h-3.5 w-3.5 mr-1.5" /> Entrar no Estúdio da Live
+                </Link>
+              </Button>
+              {post.youtube_url && (
+                <span className="text-xs text-muted-foreground break-all">URL: {post.youtube_url}</span>
+              )}
+            </div>
           )}
 
         </div>
