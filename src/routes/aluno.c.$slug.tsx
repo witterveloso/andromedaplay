@@ -10,6 +10,7 @@ import { VideoPlayer } from "@/lib/video-player";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 import { LessonMaterials } from "@/components/student/lesson-materials";
+import { LessonCatalog } from "@/components/student/lesson-catalog";
 
 
 
@@ -346,65 +347,20 @@ function StudentCourse() {
             </section>
           )}
 
-          {/* Catálogo Netflix-style */}
-          <div className="relative z-20 -mt-12 pb-24 space-y-14 max-w-[100vw] overflow-x-hidden">
-            {!hasContent ? (
-              <div className="px-6 md:px-16 pt-12">
-                <Card className="p-12 text-center bg-[#141432] border-[#1e1e5a] text-white/70">
-                  Este produto ainda não possui conteúdos publicados.
-                </Card>
-              </div>
-            ) : (
-              modules?.map((m) => (
-                <section key={m.id} className="px-6 md:px-16 space-y-5">
-                  <div className="flex items-center gap-4">
-                    <h2 className="font-cinema-display text-xl md:text-2xl font-bold tracking-tight">{m.title}</h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-[#1e1e5a] to-transparent" />
-                    <span className="text-xs text-white/40 uppercase tracking-wider">
-                      {m.lessons.length} {m.lessons.length === 1 ? "aula" : "aulas"}
-                    </span>
-                  </div>
-                  {m.lessons.length === 0 ? (
-                    <p className="text-sm text-white/40">Nenhuma aula neste módulo ainda.</p>
-                  ) : (
-                    <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
-                      {m.lessons.map((l: any, idx: number) => {
-                        const active = activeLesson?.id === l.id;
-                        return (
-                          <button
-                            key={l.id}
-                            onClick={() => { setActiveChannelId(null); setActiveLessonId(l.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                            className={`group relative min-w-[280px] md:min-w-[320px] aspect-video rounded-xl overflow-hidden border transition-all text-left shadow-lg shadow-black/40 ${
-                              active ? "border-[#4f46e5] ring-2 ring-[#4f46e5]/40" : "border-[#1e1e5a] hover:border-[#4f46e5]"
-                            }`}
-                            style={
-                              l.cover_url
-                                ? { backgroundImage: `url(${l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)` }
-                            }
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/30 to-transparent group-hover:from-[#0a0a1a]/90 transition-all" />
-                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/50 backdrop-blur text-[10px] font-bold text-white/90 tracking-wider">
-                              {String(idx + 1).padStart(2, "0")}
-                            </div>
-                            <div className="absolute inset-x-0 bottom-0 p-4">
-                              <p className="text-[10px] font-bold text-[#a5b4fc] mb-1 uppercase tracking-widest">{m.title}</p>
-                              <h4 className="text-sm md:text-base font-bold leading-tight line-clamp-2">{l.title}</h4>
-                            </div>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
-                                <PlayCircle className="h-7 w-7 fill-white text-white" />
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
-              ))
-            )}
+          {/* Catálogo de aulas */}
+          <div className="relative z-20 -mt-12 pb-24 max-w-[100vw] overflow-x-hidden">
+            <LessonCatalog
+              course={course as any}
+              modules={(modules ?? []) as any}
+              activeLessonId={activeLesson?.id ?? null}
+              onSelect={(id) => {
+                setActiveChannelId(null);
+                setActiveLessonId(id);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           </div>
+
         </>
       )}
     </div>
