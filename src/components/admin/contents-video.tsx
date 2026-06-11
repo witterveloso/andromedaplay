@@ -632,62 +632,68 @@ function LessonDialog({
             <p className="text-xs text-muted-foreground">Exibido para o aluno abaixo do player, em uma seção "Informações adicionais".</p>
           </div>
 
-          {editing && (
-            <div className="space-y-3 rounded-md border p-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <FileText className="h-4 w-4" /> Materiais extras
-              </div>
-              {(materialsQ.data ?? []).length === 0 && (
-                <p className="text-xs text-muted-foreground">Nenhum material adicionado ainda.</p>
-              )}
-              {(materialsQ.data ?? []).map((m) => (
-                <div key={m.id} className="flex items-center gap-2 text-sm border rounded px-2 py-1.5">
-                  <Badge variant="outline" className="uppercase text-[10px]">{m.material_type}</Badge>
-                  <span className="flex-1 truncate">{m.name}</span>
-                  {!m.storage_path && (
-                    <a href={m.url} target="_blank" rel="noreferrer" className="text-xs underline text-muted-foreground">
-                      abrir
-                    </a>
-                  )}
-                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7"
-                    onClick={() => delMaterial.mutate(m)}>
-                    <Trash2 className="h-3.5 w-3.5" />
+          <div className="space-y-3 rounded-md border p-3">
+            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider">
+              <FileText className="h-4 w-4" /> Materiais de apoio
+            </div>
+            {!editing ? (
+              <p className="text-xs text-muted-foreground">
+                Salve a aula primeiro para anexar materiais (PDF, imagem, arquivo ou link externo).
+              </p>
+            ) : (
+              <>
+                {(materialsQ.data ?? []).length === 0 && (
+                  <p className="text-xs text-muted-foreground">Nenhum material adicionado ainda.</p>
+                )}
+                {(materialsQ.data ?? []).map((m) => (
+                  <div key={m.id} className="flex items-center gap-2 text-sm border rounded px-2 py-1.5">
+                    <Badge variant="outline" className="uppercase text-[10px]">{m.material_type}</Badge>
+                    <span className="flex-1 truncate">{m.name}</span>
+                    {!m.storage_path && (
+                      <a href={m.url} target="_blank" rel="noreferrer" className="text-xs underline text-muted-foreground">
+                        abrir
+                      </a>
+                    )}
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7"
+                      onClick={() => delMaterial.mutate(m)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-2">
+                  <Select value={matType} onValueChange={(v) => { setMatType(v as MaterialType); setMatFile(null); setMatUrl(""); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pdf">PDF</SelectItem>
+                      <SelectItem value="link">Link externo</SelectItem>
+                      <SelectItem value="image">Imagem</SelectItem>
+                      <SelectItem value="file">Arquivo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input placeholder="Título do material" value={matName} onChange={(e) => setMatName(e.target.value)} />
+                </div>
+                {matType === "link" ? (
+                  <Input placeholder="https://…" value={matUrl} onChange={(e) => setMatUrl(e.target.value)} />
+                ) : (
+                  <Input
+                    type="file"
+                    accept={matType === "pdf" ? "application/pdf" : matType === "image" ? "image/*" : undefined}
+                    onChange={(e) => setMatFile(e.target.files?.[0] ?? null)}
+                  />
+                )}
+                <div className="flex justify-end">
+                  <Button type="button" variant="outline" size="sm"
+                    disabled={
+                      addMaterial.isPending || matUploading ||
+                      (matType === "link" ? (!matName || !matUrl) : !matFile)
+                    }
+                    onClick={() => addMaterial.mutate()}>
+                    {matUploading || addMaterial.isPending ? "Enviando…" : "Adicionar material"}
                   </Button>
                 </div>
-              ))}
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-2">
-                <Select value={matType} onValueChange={(v) => { setMatType(v as MaterialType); setMatFile(null); setMatUrl(""); }}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="link">Link externo</SelectItem>
-                    <SelectItem value="image">Imagem</SelectItem>
-                    <SelectItem value="file">Arquivo</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input placeholder="Título do material" value={matName} onChange={(e) => setMatName(e.target.value)} />
-              </div>
-              {matType === "link" ? (
-                <Input placeholder="https://…" value={matUrl} onChange={(e) => setMatUrl(e.target.value)} />
-              ) : (
-                <Input
-                  type="file"
-                  accept={matType === "pdf" ? "application/pdf" : matType === "image" ? "image/*" : undefined}
-                  onChange={(e) => setMatFile(e.target.files?.[0] ?? null)}
-                />
-              )}
-              <div className="flex justify-end">
-                <Button type="button" variant="outline" size="sm"
-                  disabled={
-                    addMaterial.isPending || matUploading ||
-                    (matType === "link" ? (!matName || !matUrl) : !matFile)
-                  }
-                  onClick={() => addMaterial.mutate()}>
-                  {matUploading || addMaterial.isPending ? "Enviando…" : "Adicionar material"}
-                </Button>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
 
           <DialogFooter>
