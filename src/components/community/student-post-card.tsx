@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { YouTubeLivePlayer } from "@/components/community/youtube-live-player";
+import { LiveChat } from "@/components/community/live-chat";
 import { toast } from "sonner";
 
 const REACTIONS = [
