@@ -19,8 +19,10 @@ export type ImageUploadCropProps = {
   aspect: number;
   /** Recommended pixel size shown as a hint to the user. */
   recommended: { width: number; height: number };
-  /** Storage folder inside the course-assets bucket. */
+  /** Storage folder (path prefix) inside the bucket. */
   folder: string;
+  /** Storage bucket. Defaults to course-assets (public). */
+  bucket?: string;
   /** Tailwind classes that control the preview size. */
   previewClassName?: string;
   /** Round the preview (use for logos/avatars/icons). */
