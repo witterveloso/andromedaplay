@@ -158,7 +158,7 @@ export function LessonCatalog({
             )}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
-                <PlayCircle className="h-7 w-7 fill-white text-white" />
+                <Play className="h-6 w-6 fill-white text-white ml-0.5" />
               </div>
             </div>
           </div>
