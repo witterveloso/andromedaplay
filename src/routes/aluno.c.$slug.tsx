@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Card } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, Lock, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { VideoPlayer } from "@/lib/video-player";
