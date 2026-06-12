@@ -50,7 +50,7 @@ function postIcon(p: any) {
   return MessageSquare;
 }
 
-function PostCard({ post, primary, onOpen }: { post: any; primary: string; onOpen: (p: any) => void }) {
+function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string; onOpen: (p: any) => void; fill?: boolean }) {
   const badge = postBadge(post);
   const Icon = postIcon(post);
   const thumb = post.cover_url || post.image_url;
@@ -62,7 +62,7 @@ function PostCard({ post, primary, onOpen }: { post: any; primary: string; onOpe
   return (
     <button
       onClick={() => onOpen(post)}
-      className="group relative shrink-0 w-[180px] sm:w-[200px] md:w-[220px] aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_20px_60px_-15px_var(--hub-glow)]"
+      className={`group relative ${fill ? "w-full" : "shrink-0 w-[180px] sm:w-[200px] md:w-[220px]"} aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_20px_60px_-15px_var(--hub-glow)]`}
       style={{ ["--hub-glow" as any]: `${primary}55` }}
     >
       {thumb ? (
