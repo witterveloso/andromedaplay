@@ -1,66 +1,27 @@
-## Momento em Destaque
+## Problema
 
-Bloco cinematográfico no topo da comunidade (estilo Netflix hero) com um destaque definido pelo produtor.
+`src/components/community/youtube-live-player.tsx` usa o endpoint `oembed` do YouTube para decidir se a live está "offline". Lives **não listadas** retornam 401/404 no oEmbed (porque oEmbed só responde para vídeos públicos), então o componente entra no estado `offline=true` e mostra o placeholder "A live começará em breve" — mesmo que o iframe embed funcione perfeitamente.
 
-### 1. Banco de dados (mínimo)
+O embed do YouTube aceita vídeos não listados normalmente; a validação via oEmbed é o único bloqueio.
 
-Adicionar campos opcionais em `courses` (sem nova tabela, sem novas policies):
+## Correção
 
-- `featured_kind` text — `post` | `video` | `lesson` | `notice`
-- `featured_title` text
-- `featured_description` text
-- `featured_image_url` text
-- `featured_cta_label` text (default "Acessar")
-- `featured_cta_url` text (link interno ou externo)
-- `featured_enabled` boolean default false
+### 1. `src/components/community/youtube-live-player.tsx`
+- Remover o `useEffect` que faz polling em `youtube.com/oembed`.
+- Remover o state `offline` e o branch que renderiza o placeholder por causa dele.
+- Renderizar o iframe sempre que houver um `embed`/`id` válido extraído da URL.
+- Manter o placeholder "A live começará em breve" **somente** quando:
+  - `url` ausente/vazia, ou
+  - `extractYouTubeId(url)` retornar `null` (URL inválida — não é youtube.com/watch, /live/ ou youtu.be).
+- Manter o badge "AO VIVO" para URLs `/live/`.
+- Manter `allow`/`allowFullScreen` atuais (já suportam autoplay/fullscreen).
 
-Tudo nullable; quando `featured_enabled = false` ou sem dados, o bloco não aparece.
+### 2. Estúdio da Live (`src/routes/expert.courses.$id.live.$postId.tsx`)
+- Já usa o mesmo `YouTubeLivePlayer` (ou o mesmo fluxo). Confirmar e, se estiver usando o componente compartilhado, a correção acima já cobre os dois lados (aluno + produtor). Se houver lógica duplicada inline, alinhar para usar o mesmo componente.
 
-### 2. Admin (gestão)
+### 3. Não tocar
+- Chat realtime, RLS, permissões, player de vídeo geral (`src/lib/video-player.tsx`), parsing em `src/lib/youtube.ts` (já cobre `/watch`, `/live/`, `youtu.be`, `/embed/`, `/shorts/`).
 
-Em `src/components/admin/contents-community.tsx`, adicionar uma seção compacta "Momento em Destaque" com:
+## Resultado
 
-- Switch ativar/desativar
-- Select do tipo (postagem / vídeo / aula / aviso)
-- Input título
-- Textarea descrição curta
-- Upload de imagem/banner (usa `ImageUploadCrop`, bucket `course-assets`)
-- Input rótulo do botão (default "Acessar")
-- Input URL de destino
-- Botão salvar (update na linha de `courses`)
-
-Sem mudanças no banco além das colunas acima, sem mexer em policies (admin já pode atualizar `courses`).
-
-### 3. Hero do aluno
-
-Em `src/routes/aluno.c.$slug.tsx`, acima do feed, renderizar `<FeaturedMoment />` quando `featured_enabled` e dados presentes.
-
-Visual:
-- Banner 16:7 desktop / 4:3 mobile, `object-cover`
-- Overlay gradiente escuro (esquerda forte → direita transparente)
-- Glow ambiente roxo/azul nas bordas
-- Badge do tipo (Postagem / Vídeo / Aula / Aviso) com ícone
-- Título grande (`text-3xl sm:text-5xl`), descrição limitada a 2 linhas
-- Botão CTA pill com glassmorphism + ícone Play/ArrowRight
-- Hover sutil: brilho aumenta, escala 1.005
-
-### 4. Mobile
-
-- Mesma estrutura, padding ajustado, altura mínima reduzida, fontes menores, CTA full-width opcional.
-
-### 5. Arquivos
-
-Novos:
-- `src/components/community/featured-moment.tsx` (apresentacional)
-- `src/components/admin/featured-moment-editor.tsx` (form admin)
-
-Editados:
-- `src/components/admin/contents-community.tsx` (monta o editor)
-- `src/routes/aluno.c.$slug.tsx` (renderiza o hero)
-- Migration adicionando colunas em `courses`
-
-### Fora do escopo
-
-- Não cria nova tabela, nem novas RLS policies
-- Não altera feed, canais, posts existentes
-- Não mexe em permissões
+Lives não listadas renderizam normalmente na comunidade do aluno e no Estúdio do produtor. O placeholder só aparece quando realmente não há URL válida configurada.
