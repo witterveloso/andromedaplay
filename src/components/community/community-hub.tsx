@@ -497,11 +497,7 @@ function FilteredView({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {list.map((p) => (
-            <div key={p.id} className="w-full">
-              <div className="w-full" style={{ contain: "layout" }}>
-                <PostCard post={p} primary={primary} onOpen={onOpen} />
-              </div>
-            </div>
+            <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill />
           ))}
         </div>
       )}
