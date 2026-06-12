@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Card } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LogOut, PlayCircle, Eye, MessageSquare, Hash, Pin, Lock, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { ChevronLeft, LogOut, PlayCircle, Eye, Lock, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { VideoPlayer } from "@/lib/video-player";
-import { StudentPostCard } from "@/components/community/student-post-card";
-import { FeaturedMoment } from "@/components/community/featured-moment";
+import { CommunityHub } from "@/components/community/community-hub";
 import { LessonMaterials } from "@/components/student/lesson-materials";
 import { LessonCatalog } from "@/components/student/lesson-catalog";
 
@@ -143,139 +142,7 @@ function StudentCourse() {
       </header>
 
       {course.course_type === "community" ? (
-        <>
-          {/* Hero cinematográfico premium */}
-          <section className="relative w-full overflow-hidden" style={{ minHeight: "60vh" }}>
-            <div className="absolute inset-0 animate-ken-burns" style={
-              course.cover_url
-                ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}, ${course.accent_color ?? "#1e1e5a"})` }
-            } />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a]/80 via-transparent to-transparent" />
-            <div className="absolute top-1/2 left-1/3 w-[500px] h-[500px] bg-[#4f46e5]/20 rounded-full blur-[120px] animate-indigo-pulse" />
-            <div className="relative max-w-6xl mx-auto px-6 flex flex-col justify-end pb-12 pt-32" style={{ minHeight: "60vh" }}>
-              <span className="bg-[#4f46e5] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.2em] w-fit mb-4 shadow-[0_0_20px_rgba(79,70,229,0.5)]">Comunidade</span>
-              <h1 className="font-cinema-display text-4xl md:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl">{(course.title ?? "").toUpperCase()}</h1>
-              {course.description && <p className="mt-4 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>}
-            </div>
-          </section>
-
-
-          <FeaturedMoment data={course as any} />
-
-
-
-          {/* Feed central + sidebar */}
-          <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
-            <div className="space-y-6 min-w-0">
-              {activeChannel && (
-                <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                  {activeChannel.icon_url ? (
-                    <img src={activeChannel.icon_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                  ) : (
-                    <div className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center">
-                      <Hash className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="text-lg font-semibold truncate">{activeChannel.name}</h2>
-                    {activeChannel.description && (
-                      <p className="text-xs opacity-70 truncate">{activeChannel.description}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {!activeChannel ? (
-                <Card className="p-12 text-center opacity-80 border-white/5 bg-white/[0.03]">
-                  Este produto ainda não possui conteúdos publicados.
-                </Card>
-              ) : (channelPosts?.length ?? 0) === 0 ? (
-                <Card className="p-12 text-center opacity-80 border-white/5 bg-white/[0.03]">
-                  Nenhuma publicação ainda neste canal.
-                </Card>
-              ) : (
-                <div className="space-y-8">
-                  {pinnedPosts.length > 0 && (
-                    <section className="space-y-4">
-                      <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
-                        <Pin className="h-3.5 w-3.5" />
-                        Publicações fixadas
-                      </div>
-                      <div className="space-y-5">
-                        {pinnedPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
-                      </div>
-                    </section>
-                  )}
-                  {regularPosts.length > 0 && (
-                    <section className="space-y-4">
-                      {pinnedPosts.length > 0 && (
-                        <div className="text-xs uppercase tracking-wider opacity-70">Todas as publicações</div>
-                      )}
-                      <div className="space-y-5">
-                        {regularPosts.map((p: any) => <StudentPostCard key={p.id} post={p} />)}
-                      </div>
-                    </section>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-              <Card className="p-5 border-white/5 bg-white/[0.03]">
-                <div className="text-xs uppercase tracking-wider opacity-60 mb-2">Sobre a comunidade</div>
-                <div className="font-semibold mb-2">{course.title}</div>
-                <div className="flex items-center justify-between text-sm opacity-80">
-                  <span>Publicações</span>
-                  <span className="tabular-nums font-medium">{channelPosts?.length ?? 0}</span>
-                </div>
-              </Card>
-
-              {(channels?.length ?? 0) > 0 && (
-                <Card className="p-5 border-white/5 bg-white/[0.03]">
-                  <div className="text-xs uppercase tracking-wider opacity-60 mb-3 flex items-center gap-2">
-                    <MessageSquare className="h-3.5 w-3.5" /> Canais
-                  </div>
-                  <ul className="space-y-1">
-                    {channels!.map((c: any) => (
-                      <li key={c.id}>
-                        <button
-                          onClick={() => { setActiveLessonId(null); setActiveChannelId(c.id); }}
-                          className={`w-full text-left flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition ${
-                            activeChannel?.id === c.id ? "bg-white/10" : "hover:bg-white/5"
-                          }`}
-                        >
-                          {c.icon_url ? (
-                            <img src={c.icon_url} alt="" className="h-5 w-5 rounded object-cover" />
-                          ) : (
-                            <Hash className="h-3.5 w-3.5 opacity-70" />
-                          )}
-                          <span className="truncate">{c.name}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              )}
-
-              {pinnedPosts.length > 0 && (
-                <Card className="p-5 border-white/5 bg-white/[0.03]">
-                  <div className="text-xs uppercase tracking-wider opacity-60 mb-3 flex items-center gap-2">
-                    <Pin className="h-3.5 w-3.5" /> Fixados
-                  </div>
-                  <ul className="space-y-2">
-                    {pinnedPosts.slice(0, 5).map((p: any) => (
-                      <li key={p.id} className="text-sm opacity-90 line-clamp-2 leading-snug">
-                        {p.title || p.body?.slice(0, 80) || "Publicação fixada"}
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              )}
-            </aside>
-          </main>
-        </>
+        <CommunityHub course={course} channels={channels ?? []} isPreview={isPreview} />
       ) : (
         <>
           {/* Hero do curso */}
