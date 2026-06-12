@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, LogOut, PlayCircle, Eye, Lock, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { VideoPlayer } from "@/lib/video-player";
 import { CommunityHub } from "@/components/community/community-hub";
-import { CommunityHub } from "@/components/community/community-hub";
 import { LessonMaterials } from "@/components/student/lesson-materials";
 import { LessonCatalog } from "@/components/student/lesson-catalog";
 
