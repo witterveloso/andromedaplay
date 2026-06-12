@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { extractYouTubeId, isYouTubeLiveUrl, toYouTubeEmbed } from "@/lib/youtube";
 
 type Props = {
@@ -7,42 +6,23 @@ type Props = {
 };
 
 /**
- * Renders a YouTube player that supports active LIVE streams.
- * - Accepts /live/, /watch?v=, youtu.be/ URLs
- * - Shows "AO VIVO" badge for /live/ links
- * - Falls back to an elegant placeholder if the stream is offline
+ * Renders a YouTube player that supports active LIVE streams, including
+ * unlisted videos. We do not gate rendering on the oEmbed endpoint because
+ * oEmbed returns 401/404 for unlisted videos — but the iframe embed works
+ * perfectly fine for them.
+ *
+ * Accepts /live/, /watch?v=, youtu.be/, /embed/, /shorts/ URLs.
+ * Shows "AO VIVO" badge for /live/ links.
+ * Shows a placeholder only when the URL is missing or unparseable.
  */
 export function YouTubeLivePlayer({ url, title }: Props) {
   const id = extractYouTubeId(url);
   const isLive = isYouTubeLiveUrl(url);
-  const embed = toYouTubeEmbed(url) ?? url;
-  const [offline, setOffline] = useState(false);
+  const embed = toYouTubeEmbed(url);
 
-  // Poll the YouTube oEmbed endpoint for live URLs — if the video is not
-  // available (private / not yet started), oEmbed returns 401/404.
-  useEffect(() => {
-    if (!isLive || !id) return;
-    let cancelled = false;
-    const check = async () => {
-      try {
-        const r = await fetch(
-          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`,
-          { method: "GET" },
-        );
-        if (!cancelled) setOffline(!r.ok);
-      } catch {
-        if (!cancelled) setOffline(true);
-      }
-    };
-    void check();
-    const t = setInterval(check, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, [id, isLive]);
+  const hasValid = Boolean(url && id && embed);
 
-  if (isLive && offline) {
+  if (!hasValid) {
     return (
       <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-black via-zinc-900 to-black flex items-center justify-center">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.4),transparent_60%)]" />
@@ -61,7 +41,7 @@ export function YouTubeLivePlayer({ url, title }: Props) {
   return (
     <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black">
       <iframe
-        src={embed}
+        src={embed!}
         className="w-full h-full"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         allowFullScreen
