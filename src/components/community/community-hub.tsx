@@ -62,49 +62,59 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
   return (
     <button
       onClick={() => onOpen(post)}
-      className={`group relative ${fill ? "w-full" : "shrink-0 w-[180px] sm:w-[200px] md:w-[220px]"} aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_20px_60px_-15px_var(--hub-glow)]`}
-      style={{ ["--hub-glow" as any]: `${primary}55` }}
+      className={`group relative ${fill ? "w-full" : "shrink-0 w-[230px] sm:w-[260px] md:w-[290px] lg:w-[310px]"} aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_30px_80px_-20px_var(--hub-glow)]`}
+      style={{ ["--hub-glow" as any]: `${primary}88` }}
     >
       {thumb ? (
-        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110" loading="lazy" />
+        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] group-hover:scale-110" loading="lazy" />
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ background: `radial-gradient(120% 80% at 30% 20%, ${primary}55, transparent 60%), linear-gradient(135deg, #1a1740, #0a0a18)` }}
+          style={{ background: `radial-gradient(120% 80% at 30% 20%, ${primary}66, transparent 60%), linear-gradient(135deg, #1a1740, #0a0a18)` }}
         >
-          <Icon className="h-12 w-12 opacity-30" />
+          <Icon className="h-16 w-16 opacity-30" />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+      {/* Cinematic gradient floor */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+      {/* Top subtle sheen */}
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent opacity-70" />
+      {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ background: `radial-gradient(60% 40% at 50% 100%, ${primary}33, transparent 70%)` }}
+        style={{ background: `radial-gradient(70% 50% at 50% 100%, ${primary}55, transparent 70%)` }}
+      />
+      {/* Hover border highlight */}
+      <div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ring-1 ring-inset"
+        style={{ boxShadow: `inset 0 0 0 1px ${primary}66` }}
       />
 
       {badge && (
-        <span className={`absolute top-2.5 left-2.5 ${badge.tone} text-[9px] font-bold tracking-[0.14em] px-2 py-0.5 rounded shadow`}>
+        <span className={`absolute top-3 left-3 ${badge.tone} text-[10px] font-bold tracking-[0.16em] px-2.5 py-1 rounded-md shadow-lg backdrop-blur`}>
           {badge.label}
         </span>
       )}
       {post.is_pinned && (
-        <span className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur text-[9px] uppercase tracking-wider text-white/80 px-2 py-0.5 rounded">
+        <span className="absolute top-3 right-3 bg-black/70 backdrop-blur text-[9px] uppercase tracking-wider text-white/80 px-2 py-1 rounded-md">
           fixado
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-3 space-y-1">
-        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-white/60">
+      <div className="absolute inset-x-0 bottom-0 p-4 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70">
           <Icon className="h-3 w-3" />
           <span>{post.post_type === "live" ? "Encontro" : post.post_type === "notice" ? "Aviso" : "Publicação"}</span>
           {dateLabel && <span className="opacity-50">· {dateLabel}</span>}
         </div>
-        <div className="text-sm font-semibold leading-tight line-clamp-3 drop-shadow">
+        <div className="text-base font-bold leading-tight line-clamp-3 drop-shadow-lg">
           {post.title || post.body?.slice(0, 70) || "Sem título"}
         </div>
       </div>
     </button>
   );
 }
+
 
 function Rail({
   title, description, posts, primary, onOpen, onSeeAll,
@@ -118,20 +128,20 @@ function Rail({
 }) {
   if (!posts.length) return null;
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-end justify-between gap-4 px-1">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{title}</h2>
-          {description && <p className="text-sm text-white/55 mt-0.5 line-clamp-1">{description}</p>}
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h2>
+          {description && <p className="text-sm text-white/55 mt-1 line-clamp-1">{description}</p>}
         </div>
         {onSeeAll && (
-          <button onClick={onSeeAll} className="text-xs uppercase tracking-[0.18em] text-white/70 hover:text-white flex items-center gap-1 shrink-0">
+          <button onClick={onSeeAll} className="text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white flex items-center gap-1 shrink-0 transition">
             Ver tudo <ChevronRight className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
-      <div className="relative -mx-4 sm:-mx-6">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 pb-3 snap-x snap-mandatory scrollbar-thin">
+      <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
+        <div className="flex gap-4 sm:gap-5 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-6 pt-2 snap-x snap-mandatory scrollbar-thin">
           {posts.map((p) => (
             <div key={p.id} className="snap-start">
               <PostCard post={p} primary={primary} onOpen={onOpen} />
@@ -142,6 +152,7 @@ function Rail({
     </section>
   );
 }
+
 
 export function CommunityHub({
   course,
@@ -326,34 +337,48 @@ export function CommunityHub({
         {view.kind === "home" && (
           <>
             {/* Hero cinematográfico */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "82vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                   : { background: `linear-gradient(135deg, ${primary}, ${accent})` }
               } />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/85 via-[#06060f]/20 to-transparent" />
-              <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full blur-[140px] animate-indigo-pulse"
-                style={{ background: `${primary}33` }} />
-              <div className="relative max-w-6xl mx-auto px-6 lg:px-10 flex flex-col justify-end pb-14 pt-32" style={{ minHeight: "62vh" }}>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.22em] w-fit mb-4"
-                  style={{ background: primary, boxShadow: `0 0 24px ${primary}88` }}>
+              {/* Cinematic layered overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/80 to-[#06060f]/30" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/95 via-[#06060f]/40 to-transparent" />
+              <div className="absolute inset-0" style={{
+                background: "radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(6,6,15,0.5) 70%, rgba(6,6,15,0.95) 100%)"
+              }} />
+              {/* Animated glows */}
+              <div className="absolute top-1/4 left-1/4 w-[700px] h-[700px] rounded-full blur-[180px] animate-indigo-pulse"
+                style={{ background: `${primary}44` }} />
+              <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[160px] opacity-50"
+                style={{ background: `${accent}33` }} />
+              {/* Subtle vignette grain */}
+              <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 3px)",
+                }}
+              />
+
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-20 pt-40" style={{ minHeight: "82vh" }}>
+                <span className="text-[11px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-6 backdrop-blur"
+                  style={{ background: `${primary}cc`, boxShadow: `0 0 32px ${primary}aa` }}>
                   Comunidade
                 </span>
-                <h1 className="font-cinema-display text-4xl md:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl max-w-3xl">
+                <h1 className="font-cinema-display text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[0.92] drop-shadow-2xl max-w-5xl">
                   {(course.title ?? "").toUpperCase()}
                 </h1>
                 {course.description && (
-                  <p className="mt-4 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>
+                  <p className="mt-6 text-white/85 text-lg md:text-xl max-w-2xl leading-relaxed drop-shadow-lg">{course.description}</p>
                 )}
-                <div className="flex gap-3 mt-7">
+                <div className="flex flex-wrap gap-3 mt-10">
                   <button
                     onClick={() => {
                       const next = recent[0] ?? newest[0];
                       if (next) handleOpen(next);
                     }}
-                    className="px-7 py-3.5 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl"
+                    className="px-8 py-4 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-base"
                   >
                     <PlayCircle className="h-5 w-5" />
                     {recent.length ? "Continuar jornada" : "Explorar conteúdos"}
@@ -361,9 +386,9 @@ export function CommunityHub({
                   {liveNow.length > 0 && (
                     <button
                       onClick={() => handleOpen(liveNow[0])}
-                      className="px-5 py-3.5 rounded-xl font-semibold flex items-center gap-2 border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 transition"
+                      className="px-6 py-4 rounded-xl font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-base"
                     >
-                      <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
                       Ao vivo agora
                     </button>
                   )}
@@ -371,9 +396,10 @@ export function CommunityHub({
               </div>
             </section>
 
+
             <FeaturedMoment data={course as any} />
 
-            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-10 space-y-12">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-14 space-y-16">
               {liveNow.length > 0 && (
                 <Rail title="Acontecendo agora" description="Encontros ao vivo abertos para participação"
                   posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })} />
@@ -483,7 +509,7 @@ function FilteredView({
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pt-28 pb-16 space-y-8">
+    <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-10">
       <header className="space-y-2">
         <button onClick={onBack} className="text-xs uppercase tracking-[0.22em] text-white/50 hover:text-white">← Voltar ao hub</button>
         <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">{title}</h1>
@@ -495,7 +521,7 @@ function FilteredView({
           Nada por aqui ainda.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
           {list.map((p) => (
             <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill />
           ))}
