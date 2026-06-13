@@ -1,33 +1,57 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
-import {
-  ArrowRight, PlayCircle, Layers, Users, BarChart3, Lock,
-  Video, Sparkles, Rocket, ShieldCheck, Globe, Zap,
-} from "lucide-react";
+import { ArrowRight, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Andromeda Play — Plataforma premium de cursos online" },
-      { name: "description", content: "Hospede, organize e entregue cursos online com experiência moderna, visual tecnológico e área de membros profissional." },
+      { title: "Andromeda Play — Portal de acesso" },
+      { name: "description", content: "Entre no ecossistema premium da Andromeda Play." },
       { property: "og:title", content: "Andromeda Play" },
-      { property: "og:description", content: "Sua plataforma premium para cursos, treinamentos e formações online." },
+      { property: "og:description", content: "Portal de acesso ao ecossistema Andromeda Play." },
     ],
   }),
   component: HomePage,
 });
 
-function StarField() {
+function CinematicBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Base cosmic gradient */}
       <div className="absolute inset-0" style={{ background: "var(--gradient-aurora)" }} />
+      {/* Deep vignette */}
       <div
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 0%, rgba(6,6,15,0.35) 55%, rgba(6,6,15,0.95) 100%)",
+        }}
+      />
+      {/* Twin nebula glows */}
+      <div
+        className="absolute -top-40 -left-40 h-[640px] w-[640px] rounded-full blur-[180px] opacity-50"
+        style={{ background: "radial-gradient(circle, #6C4DFF 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute -bottom-40 -right-40 h-[640px] w-[640px] rounded-full blur-[180px] opacity-40"
+        style={{ background: "radial-gradient(circle, #00B8FF 0%, transparent 70%)" }}
+      />
+      {/* Star field */}
+      <div
+        className="absolute inset-0 opacity-70"
         style={{
           backgroundImage:
-            "radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 75% 65%, #fff, transparent), radial-gradient(1.5px 1.5px at 40% 80%, #BFC6D6, transparent), radial-gradient(1px 1px at 85% 15%, #00B8FF, transparent), radial-gradient(1px 1px at 10% 70%, #6C4DFF, transparent), radial-gradient(1.5px 1.5px at 60% 40%, #fff, transparent)",
-          backgroundSize: "600px 600px",
+            "radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 75% 65%, #fff, transparent), radial-gradient(1.5px 1.5px at 40% 80%, #BFC6D6, transparent), radial-gradient(1px 1px at 85% 15%, #00B8FF, transparent), radial-gradient(1px 1px at 10% 70%, #6C4DFF, transparent), radial-gradient(1.5px 1.5px at 60% 40%, #fff, transparent), radial-gradient(1px 1px at 30% 55%, #fff, transparent), radial-gradient(1px 1px at 92% 88%, #fff, transparent)",
+          backgroundSize: "700px 700px",
+        }}
+      />
+      {/* Subtle scanline grain */}
+      <div
+        className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 3px)",
         }}
       />
     </div>
@@ -38,199 +62,64 @@ function HomePage() {
   const { session, isAdmin, isExpert, isStudent } = useAuth();
   const inAppDest = isAdmin ? "/admin" : isExpert ? "/expert" : isStudent ? "/aluno" : "/login";
 
-  const features = [
-    { icon: Video, title: "Hospedagem de cursos", desc: "Upload e streaming fluido de aulas em vídeo com qualidade premium." },
-    { icon: Users, title: "Área de membros", desc: "Portal exclusivo para seus alunos acompanharem a jornada." },
-    { icon: Layers, title: "Módulos e aulas", desc: "Organize conteúdo em estruturas claras e progressivas." },
-    { icon: BarChart3, title: "Dashboard administrativo", desc: "Métricas, gestão de alunos e visão completa do produto." },
-    { icon: Lock, title: "Controle de acesso", desc: "Defina quem entra, quando entra e a quê tem direito." },
-    { icon: PlayCircle, title: "Streaming de aulas", desc: "Player moderno, responsivo e otimizado para qualquer dispositivo." },
-    { icon: Sparkles, title: "Visual premium", desc: "Identidade tecnológica e futurista que valoriza sua marca." },
-    { icon: Rocket, title: "Escalável", desc: "Cresça em cursos, alunos e produtos sem dores de cabeça." },
-  ];
-
-  const benefits = [
-    { icon: ShieldCheck, title: "Experiência profissional", desc: "Seus alunos sentem que estão em uma plataforma de outro nível." },
-    { icon: Layers, title: "Gestão organizada", desc: "Conteúdo estruturado, fácil de navegar e atualizar." },
-    { icon: Globe, title: "Acesso centralizado", desc: "Tudo em um só lugar — sem fragmentar a jornada do aluno." },
-    { icon: Zap, title: "Identidade forte", desc: "Marca premium que comunica autoridade desde o primeiro clique." },
-  ];
-
   return (
-    <div className="min-h-screen" style={{ background: "var(--color-cosmic-navy)", color: "var(--color-soft-white)" }}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-md" style={{ background: "rgba(10,15,29,0.7)" }}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <AndromedaLogo />
-          <nav className="hidden items-center gap-8 text-sm text-stellar-silver md:flex">
-            <a href="#inicio" className="transition hover:text-soft-white">Início</a>
-            <a href="#recursos" className="transition hover:text-soft-white">Recursos</a>
-            <a href="#beneficios" className="transition hover:text-soft-white">Benefícios</a>
-            <a href="#sobre" className="transition hover:text-soft-white">Sobre a plataforma</a>
-          </nav>
-          <Link
-            to={session ? inAppDest : "/login"}
-            className="rounded-md px-5 py-2 text-sm font-semibold text-soft-white transition hover:opacity-90"
-            style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
-          >
-            {session ? "Acessar plataforma" : "Login"}
-          </Link>
-        </div>
-      </header>
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
+      style={{ background: "var(--color-cosmic-navy)", color: "var(--color-soft-white)" }}
+    >
+      <CinematicBackdrop />
 
-      {/* Hero */}
-      <section id="inicio" className="relative overflow-hidden">
-        <StarField />
-        <div className="relative mx-auto max-w-7xl px-6 py-24 md:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-stellar-silver">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00B8FF" }} />
-              Seu universo de cursos, vídeos e formações
-            </div>
-            <h1 className="font-display text-5xl font-bold leading-tight md:text-7xl">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-cosmic)" }}>
-                ANDROMEDA
-              </span>
-              <span className="block text-soft-white">PLAY</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-stellar-silver md:text-xl">
-              Sua plataforma premium para hospedar, organizar e entregar cursos online com experiência moderna,
-              visual tecnológico e área de membros profissional.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                to={session ? inAppDest : "/login"}
-                className="inline-flex items-center justify-center gap-2 rounded-md px-7 py-3.5 text-sm font-semibold text-soft-white transition hover:scale-[1.02]"
-                style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
-              >
-                Acessar plataforma <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href="#recursos"
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-semibold text-soft-white transition hover:bg-white/10"
-              >
-                Conheça os recursos
-              </a>
-            </div>
-          </div>
-
-
-
-        </div>
-      </section>
-
-      {/* Sobre */}
-      <section id="sobre" className="border-t border-white/5 py-24">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="font-display text-xs tracking-[0.4em] text-electric-blue">SOBRE A PLATAFORMA</div>
-          <h2 className="mt-4 font-display text-3xl font-bold md:text-5xl">
-            Uma nova órbita para o conhecimento
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-stellar-silver">
-            O Andromeda Play é uma plataforma moderna para hospedagem e entrega de cursos, treinamentos,
-            aulas em vídeo e experiências de aprendizagem online. Ideal para criadores, especialistas,
-            empresas e projetos educacionais que desejam uma experiência premium para seus alunos.
-          </p>
-        </div>
-      </section>
-
-      {/* Recursos */}
-      <section id="recursos" className="relative border-t border-white/5 py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="font-display text-xs tracking-[0.4em] text-electric-blue">RECURSOS</div>
-            <h2 className="mt-4 font-display text-3xl font-bold md:text-5xl">Tudo que sua entrega precisa</h2>
-            <p className="mt-4 text-stellar-silver">Construído para escalar formações, comunidades e produtos digitais.</p>
-          </div>
-          <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/20"
-              >
-                <div
-                  className="absolute inset-0 -z-10 opacity-0 transition group-hover:opacity-100"
-                  style={{ background: "radial-gradient(400px circle at center, rgba(108,77,255,0.18), transparent 60%)" }}
-                />
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg" style={{ background: "var(--gradient-cosmic)" }}>
-                  <f.icon className="h-5 w-5 text-soft-white" />
-                </div>
-                <div className="mt-5 font-display text-base font-semibold">{f.title}</div>
-                <div className="mt-2 text-sm text-stellar-silver">{f.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefícios */}
-      <section id="beneficios" className="border-t border-white/5 py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <div className="font-display text-xs tracking-[0.4em] text-electric-blue">BENEFÍCIOS</div>
-              <h2 className="mt-4 font-display text-3xl font-bold md:text-5xl">
-                Construa autoridade.<br />
-                <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-cosmic)" }}>
-                  Entregue um universo.
-                </span>
-              </h2>
-              <p className="mt-6 text-stellar-silver">
-                Mais que hospedar vídeos, o Andromeda Play eleva a percepção do seu produto e da sua marca.
-                Cada detalhe foi pensado para que a experiência do aluno seja memorável.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {benefits.map((b) => (
-                <div key={b.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10" style={{ background: "rgba(0,184,255,0.1)" }}>
-                    <b.icon className="h-5 w-5 text-electric-blue" />
-                  </div>
-                  <div className="mt-4 font-display text-sm font-semibold">{b.title}</div>
-                  <div className="mt-1.5 text-sm text-stellar-silver">{b.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative border-t border-white/5 py-24">
-        <StarField />
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <h2 className="font-display text-3xl font-bold md:text-5xl">
-            Pronto para transformar sua entrega de cursos em uma{" "}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-cosmic)" }}>
-              experiência premium?
-            </span>
-          </h2>
-          <div className="mt-10">
-            <Link
-              to={session ? inAppDest : "/login"}
-              className="inline-flex items-center gap-2 rounded-md px-8 py-4 text-base font-semibold text-soft-white transition hover:scale-[1.02]"
-              style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
-            >
-              Acessar o Andromeda Play <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 md:flex-row">
-          <div className="flex items-center gap-4">
+      <main className="relative z-10 w-full max-w-2xl text-center">
+        <div className="mb-10 flex justify-center">
+          <div className="scale-125">
             <AndromedaLogo />
           </div>
-          <p className="max-w-md text-center text-xs text-stellar-silver md:text-left">
-            Tecnologia. Conhecimento. Evolução. — © {new Date().getFullYear()} Andromeda Play
-          </p>
-          <Link to="/login" className="text-sm text-stellar-silver transition hover:text-soft-white">
-            Acessar login →
-          </Link>
         </div>
-      </footer>
+
+        <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-stellar-silver backdrop-blur-md">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00B8FF", boxShadow: "0 0 10px #00B8FF" }} />
+          Portal de acesso
+        </div>
+
+        <h1 className="font-display text-5xl font-bold leading-[0.95] tracking-tight md:text-7xl">
+          <span
+            className="bg-clip-text text-transparent"
+            style={{ backgroundImage: "var(--gradient-cosmic)" }}
+          >
+            BEM-VINDO
+          </span>
+          <span className="mt-2 block text-soft-white">AO UNIVERSO</span>
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-md text-base text-stellar-silver md:text-lg">
+          Conhecimento, comunidade e experiência premium em um só ecossistema.
+        </p>
+
+        <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link
+            to={session ? inAppDest : "/login"}
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-soft-white transition-all hover:scale-[1.02] sm:w-auto"
+            style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {session ? "Acessar plataforma" : "Entrar"}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          {!session && (
+            <Link
+              to="/login"
+              search={{ mode: "signup" }}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/[0.04] px-8 py-3.5 text-sm font-semibold text-soft-white backdrop-blur-md transition hover:border-white/30 hover:bg-white/[0.08] sm:w-auto"
+            >
+              <UserPlus className="h-4 w-4" />
+              Criar conta
+            </Link>
+          )}
+        </div>
+
+        <p className="mt-14 text-[10px] uppercase tracking-[0.35em] text-stellar-silver/60">
+          Andromeda Play · © {new Date().getFullYear()}
+        </p>
+      </main>
     </div>
   );
 }
