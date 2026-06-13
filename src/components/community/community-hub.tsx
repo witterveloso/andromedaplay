@@ -62,49 +62,59 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
   return (
     <button
       onClick={() => onOpen(post)}
-      className={`group relative ${fill ? "w-full" : "shrink-0 w-[180px] sm:w-[200px] md:w-[220px]"} aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_20px_60px_-15px_var(--hub-glow)]`}
-      style={{ ["--hub-glow" as any]: `${primary}55` }}
+      className={`group relative ${fill ? "w-full" : "shrink-0 w-[230px] sm:w-[260px] md:w-[290px] lg:w-[310px]"} aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_30px_80px_-20px_var(--hub-glow)]`}
+      style={{ ["--hub-glow" as any]: `${primary}88` }}
     >
       {thumb ? (
-        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110" loading="lazy" />
+        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] group-hover:scale-110" loading="lazy" />
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ background: `radial-gradient(120% 80% at 30% 20%, ${primary}55, transparent 60%), linear-gradient(135deg, #1a1740, #0a0a18)` }}
+          style={{ background: `radial-gradient(120% 80% at 30% 20%, ${primary}66, transparent 60%), linear-gradient(135deg, #1a1740, #0a0a18)` }}
         >
-          <Icon className="h-12 w-12 opacity-30" />
+          <Icon className="h-16 w-16 opacity-30" />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+      {/* Cinematic gradient floor */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+      {/* Top subtle sheen */}
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent opacity-70" />
+      {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ background: `radial-gradient(60% 40% at 50% 100%, ${primary}33, transparent 70%)` }}
+        style={{ background: `radial-gradient(70% 50% at 50% 100%, ${primary}55, transparent 70%)` }}
+      />
+      {/* Hover border highlight */}
+      <div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ring-1 ring-inset"
+        style={{ boxShadow: `inset 0 0 0 1px ${primary}66` }}
       />
 
       {badge && (
-        <span className={`absolute top-2.5 left-2.5 ${badge.tone} text-[9px] font-bold tracking-[0.14em] px-2 py-0.5 rounded shadow`}>
+        <span className={`absolute top-3 left-3 ${badge.tone} text-[10px] font-bold tracking-[0.16em] px-2.5 py-1 rounded-md shadow-lg backdrop-blur`}>
           {badge.label}
         </span>
       )}
       {post.is_pinned && (
-        <span className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur text-[9px] uppercase tracking-wider text-white/80 px-2 py-0.5 rounded">
+        <span className="absolute top-3 right-3 bg-black/70 backdrop-blur text-[9px] uppercase tracking-wider text-white/80 px-2 py-1 rounded-md">
           fixado
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-3 space-y-1">
-        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-white/60">
+      <div className="absolute inset-x-0 bottom-0 p-4 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70">
           <Icon className="h-3 w-3" />
           <span>{post.post_type === "live" ? "Encontro" : post.post_type === "notice" ? "Aviso" : "Publicação"}</span>
           {dateLabel && <span className="opacity-50">· {dateLabel}</span>}
         </div>
-        <div className="text-sm font-semibold leading-tight line-clamp-3 drop-shadow">
+        <div className="text-base font-bold leading-tight line-clamp-3 drop-shadow-lg">
           {post.title || post.body?.slice(0, 70) || "Sem título"}
         </div>
       </div>
     </button>
   );
 }
+
 
 function Rail({
   title, description, posts, primary, onOpen, onSeeAll,
