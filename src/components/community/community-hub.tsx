@@ -399,7 +399,7 @@ export function CommunityHub({
 
             <FeaturedMoment data={course as any} />
 
-            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-10 space-y-12">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-14 space-y-16">
               {liveNow.length > 0 && (
                 <Rail title="Acontecendo agora" description="Encontros ao vivo abertos para participação"
                   posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })} />
@@ -509,7 +509,7 @@ function FilteredView({
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pt-28 pb-16 space-y-8">
+    <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-10">
       <header className="space-y-2">
         <button onClick={onBack} className="text-xs uppercase tracking-[0.22em] text-white/50 hover:text-white">← Voltar ao hub</button>
         <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">{title}</h1>
@@ -521,7 +521,7 @@ function FilteredView({
           Nada por aqui ainda.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
           {list.map((p) => (
             <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill />
           ))}
