@@ -337,34 +337,48 @@ export function CommunityHub({
         {view.kind === "home" && (
           <>
             {/* Hero cinematográfico */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "82vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                   : { background: `linear-gradient(135deg, ${primary}, ${accent})` }
               } />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/85 via-[#06060f]/20 to-transparent" />
-              <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full blur-[140px] animate-indigo-pulse"
-                style={{ background: `${primary}33` }} />
-              <div className="relative max-w-6xl mx-auto px-6 lg:px-10 flex flex-col justify-end pb-14 pt-32" style={{ minHeight: "62vh" }}>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-[0.22em] w-fit mb-4"
-                  style={{ background: primary, boxShadow: `0 0 24px ${primary}88` }}>
+              {/* Cinematic layered overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/80 to-[#06060f]/30" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/95 via-[#06060f]/40 to-transparent" />
+              <div className="absolute inset-0" style={{
+                background: "radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(6,6,15,0.5) 70%, rgba(6,6,15,0.95) 100%)"
+              }} />
+              {/* Animated glows */}
+              <div className="absolute top-1/4 left-1/4 w-[700px] h-[700px] rounded-full blur-[180px] animate-indigo-pulse"
+                style={{ background: `${primary}44` }} />
+              <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[160px] opacity-50"
+                style={{ background: `${accent}33` }} />
+              {/* Subtle vignette grain */}
+              <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 3px)",
+                }}
+              />
+
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-20 pt-40" style={{ minHeight: "82vh" }}>
+                <span className="text-[11px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-6 backdrop-blur"
+                  style={{ background: `${primary}cc`, boxShadow: `0 0 32px ${primary}aa` }}>
                   Comunidade
                 </span>
-                <h1 className="font-cinema-display text-4xl md:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl max-w-3xl">
+                <h1 className="font-cinema-display text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[0.92] drop-shadow-2xl max-w-5xl">
                   {(course.title ?? "").toUpperCase()}
                 </h1>
                 {course.description && (
-                  <p className="mt-4 text-white/80 text-lg max-w-2xl leading-relaxed">{course.description}</p>
+                  <p className="mt-6 text-white/85 text-lg md:text-xl max-w-2xl leading-relaxed drop-shadow-lg">{course.description}</p>
                 )}
-                <div className="flex gap-3 mt-7">
+                <div className="flex flex-wrap gap-3 mt-10">
                   <button
                     onClick={() => {
                       const next = recent[0] ?? newest[0];
                       if (next) handleOpen(next);
                     }}
-                    className="px-7 py-3.5 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl"
+                    className="px-8 py-4 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-base"
                   >
                     <PlayCircle className="h-5 w-5" />
                     {recent.length ? "Continuar jornada" : "Explorar conteúdos"}
@@ -372,15 +386,16 @@ export function CommunityHub({
                   {liveNow.length > 0 && (
                     <button
                       onClick={() => handleOpen(liveNow[0])}
-                      className="px-5 py-3.5 rounded-xl font-semibold flex items-center gap-2 border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 transition"
+                      className="px-6 py-4 rounded-xl font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-base"
                     >
-                      <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
                       Ao vivo agora
                     </button>
                   )}
                 </div>
               </div>
             </section>
+
 
             <FeaturedMoment data={course as any} />
 
