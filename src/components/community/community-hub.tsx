@@ -128,20 +128,20 @@ function Rail({
 }) {
   if (!posts.length) return null;
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-end justify-between gap-4 px-1">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{title}</h2>
-          {description && <p className="text-sm text-white/55 mt-0.5 line-clamp-1">{description}</p>}
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h2>
+          {description && <p className="text-sm text-white/55 mt-1 line-clamp-1">{description}</p>}
         </div>
         {onSeeAll && (
-          <button onClick={onSeeAll} className="text-xs uppercase tracking-[0.18em] text-white/70 hover:text-white flex items-center gap-1 shrink-0">
+          <button onClick={onSeeAll} className="text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white flex items-center gap-1 shrink-0 transition">
             Ver tudo <ChevronRight className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
-      <div className="relative -mx-4 sm:-mx-6">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 pb-3 snap-x snap-mandatory scrollbar-thin">
+      <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
+        <div className="flex gap-4 sm:gap-5 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-6 pt-2 snap-x snap-mandatory scrollbar-thin">
           {posts.map((p) => (
             <div key={p.id} className="snap-start">
               <PostCard post={p} primary={primary} onOpen={onOpen} />
@@ -152,6 +152,7 @@ function Rail({
     </section>
   );
 }
+
 
 export function CommunityHub({
   course,
