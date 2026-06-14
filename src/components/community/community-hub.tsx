@@ -102,16 +102,17 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-4 space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70">
-          <Icon className="h-3 w-3" />
+      <div className="absolute inset-x-0 bottom-0 p-3 space-y-1">
+        <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-white/70">
+          <Icon className="h-2.5 w-2.5" />
           <span>{post.post_type === "live" ? "Encontro" : post.post_type === "notice" ? "Aviso" : "Publicação"}</span>
           {dateLabel && <span className="opacity-50">· {dateLabel}</span>}
         </div>
-        <div className="text-base font-bold leading-tight line-clamp-3 drop-shadow-lg">
+        <div className="text-sm font-bold leading-tight line-clamp-3 drop-shadow-lg">
           {post.title || post.body?.slice(0, 70) || "Sem título"}
         </div>
       </div>
+
     </button>
   );
 }
