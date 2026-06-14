@@ -364,18 +364,19 @@ export function CommunityHub({
                 }}
               />
 
-              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-20 pt-40" style={{ minHeight: "82vh" }}>
-                <span className="text-[11px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-6 backdrop-blur"
-                  style={{ background: `${primary}cc`, boxShadow: `0 0 32px ${primary}aa` }}>
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-12 pt-20 lg:pt-24" style={{ minHeight: "56vh" }}>
+                <span className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-4 backdrop-blur"
+                  style={{ background: `${primary}cc`, boxShadow: `0 0 28px ${primary}99` }}>
                   Comunidade
                 </span>
-                <h1 className="font-cinema-display text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[0.92] drop-shadow-2xl max-w-5xl">
+                <h1 className="font-cinema-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl max-w-4xl">
                   {(course.title ?? "").toUpperCase()}
                 </h1>
                 {course.description && (
-                  <p className="mt-6 text-white/85 text-lg md:text-xl max-w-2xl leading-relaxed drop-shadow-lg">{course.description}</p>
+                  <p className="mt-4 text-white/85 text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-lg line-clamp-2">{course.description}</p>
                 )}
-                <div className="flex flex-wrap gap-3 mt-10">
+                <div className="flex flex-wrap gap-3 mt-6">
+
                   <button
                     onClick={() => {
                       const next = recent[0] ?? newest[0];
