@@ -340,7 +340,7 @@ export function CommunityHub({
         {view.kind === "home" && (
           <>
             {/* Hero cinematográfico */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "82vh" }}>
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "56vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
