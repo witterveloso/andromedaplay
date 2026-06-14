@@ -49,17 +49,17 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
 
   return (
     <section className="relative w-full">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-        <div className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.02] shadow-[0_30px_80px_-30px_rgba(108,77,255,0.55)]">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-6">
+        <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[0_20px_60px_-30px_rgba(108,77,255,0.5)]">
           <div
             className="pointer-events-none absolute -inset-px opacity-80 transition-opacity duration-700 group-hover:opacity-100"
             style={{
               background:
-                "radial-gradient(60% 60% at 15% 50%, rgba(108,77,255,0.35), transparent 60%), radial-gradient(50% 60% at 95% 30%, rgba(0,184,255,0.22), transparent 60%)",
+                "radial-gradient(60% 60% at 15% 50%, rgba(108,77,255,0.28), transparent 60%), radial-gradient(50% 60% at 95% 30%, rgba(0,184,255,0.18), transparent 60%)",
             }}
           />
 
-          <div className="relative w-full aspect-[4/3] sm:aspect-[16/7]">
+          <div className="relative w-full aspect-[16/6] sm:aspect-[21/6] min-h-[150px]">
             {data.featured_image_url ? (
               <img
                 src={data.featured_image_url}
@@ -73,40 +73,40 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
               />
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-            <div className="relative h-full flex items-end sm:items-center">
-              <div className="w-full sm:w-[68%] p-5 sm:p-10 lg:p-12 space-y-4 sm:space-y-5">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-3 py-1 text-[11px] sm:text-xs uppercase tracking-[0.18em] text-white/90">
+            <div className="relative h-full flex items-center">
+              <div className="w-full sm:w-[62%] px-5 sm:px-8 lg:px-10 py-4 space-y-2 sm:space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-2.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-white/90">
                   <Sparkles className="h-3 w-3 text-primary" />
-                  <span>Momento em destaque</span>
+                  <span>Em destaque</span>
                   <span className="opacity-50">·</span>
                   <Icon className="h-3 w-3" />
                   <span>{meta.label}</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)] leading-[1.05]">
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)] leading-[1.1] line-clamp-2">
                   {data.featured_title}
                 </h2>
 
                 {data.featured_description && (
-                  <p className="text-sm sm:text-base text-white/80 max-w-xl leading-relaxed line-clamp-2 sm:line-clamp-3">
+                  <p className="hidden sm:block text-sm text-white/80 max-w-xl leading-snug line-clamp-2">
                     {data.featured_description}
                   </p>
                 )}
 
-                <div className="pt-1 sm:pt-2">
+                <div className="pt-1">
                   <a
                     href={useModal ? "#" : (ctaUrl || "#")}
                     onClick={handleClick}
                     target={isExternalLink ? "_blank" : undefined}
                     rel={isExternalLink ? "noopener noreferrer" : undefined}
-                    className="inline-flex items-center gap-2 rounded-full bg-white text-black px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold shadow-[0_10px_40px_-10px_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-[0.99]"
+                    className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-[0.99]"
                   >
                     {ctaLabel}
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </a>
                 </div>
               </div>
@@ -114,6 +114,7 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
           </div>
         </div>
       </div>
+
 
       {open && (
         <div
