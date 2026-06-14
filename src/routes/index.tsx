@@ -76,24 +76,25 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-stellar-silver backdrop-blur-md">
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[10px] uppercase tracking-[0.32em] text-stellar-silver backdrop-blur-md">
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00B8FF", boxShadow: "0 0 10px #00B8FF" }} />
           Portal de acesso
         </div>
 
-        <h1 className="font-display text-5xl font-bold leading-[0.95] tracking-tight md:text-7xl">
+        <h1 className="font-display font-bold leading-[1.02] tracking-tight text-[clamp(2.25rem,5.2vw,4.5rem)] max-w-3xl mx-auto">
+          <span className="block text-soft-white">BEM-VINDO AO UNIVERSO DO</span>
           <span
-            className="bg-clip-text text-transparent"
+            className="block bg-clip-text text-transparent"
             style={{ backgroundImage: "var(--gradient-cosmic)" }}
           >
-            BEM-VINDO
+            CONHECIMENTO E DA EVOLUÇÃO.
           </span>
-          <span className="mt-2 block text-soft-white">AO UNIVERSO</span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-md text-base text-stellar-silver md:text-lg">
-          Conhecimento, comunidade e experiência premium em um só ecossistema.
+        <p className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-stellar-silver md:text-lg">
+          Aprenda, evolua e acesse experiências educacionais em um único ambiente.
         </p>
+
 
         <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link

@@ -62,8 +62,9 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
   return (
     <button
       onClick={() => onOpen(post)}
-      className={`group relative ${fill ? "w-full" : "shrink-0 w-[230px] sm:w-[260px] md:w-[290px] lg:w-[310px]"} aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_30px_80px_-20px_var(--hub-glow)]`}
+      className={`group relative ${fill ? "w-full" : "shrink-0 w-[170px] sm:w-[190px] md:w-[210px] lg:w-[225px]"} aspect-[2/3] rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_24px_60px_-20px_var(--hub-glow)]`}
       style={{ ["--hub-glow" as any]: `${primary}88` }}
+
     >
       {thumb ? (
         <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] group-hover:scale-110" loading="lazy" />
@@ -101,16 +102,17 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-4 space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70">
-          <Icon className="h-3 w-3" />
+      <div className="absolute inset-x-0 bottom-0 p-3 space-y-1">
+        <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-white/70">
+          <Icon className="h-2.5 w-2.5" />
           <span>{post.post_type === "live" ? "Encontro" : post.post_type === "notice" ? "Aviso" : "Publicação"}</span>
           {dateLabel && <span className="opacity-50">· {dateLabel}</span>}
         </div>
-        <div className="text-base font-bold leading-tight line-clamp-3 drop-shadow-lg">
+        <div className="text-sm font-bold leading-tight line-clamp-3 drop-shadow-lg">
           {post.title || post.body?.slice(0, 70) || "Sem título"}
         </div>
       </div>
+
     </button>
   );
 }
@@ -128,20 +130,20 @@ function Rail({
 }) {
   if (!posts.length) return null;
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <div className="flex items-end justify-between gap-4 px-1">
         <div className="min-w-0">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h2>
-          {description && <p className="text-sm text-white/55 mt-1 line-clamp-1">{description}</p>}
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{title}</h2>
+          {description && <p className="text-xs sm:text-sm text-white/55 mt-0.5 line-clamp-1">{description}</p>}
         </div>
         {onSeeAll && (
-          <button onClick={onSeeAll} className="text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white flex items-center gap-1 shrink-0 transition">
+          <button onClick={onSeeAll} className="text-[11px] uppercase tracking-[0.2em] text-white/70 hover:text-white flex items-center gap-1 shrink-0 transition">
             Ver tudo <ChevronRight className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
       <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
-        <div className="flex gap-4 sm:gap-5 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-6 pt-2 snap-x snap-mandatory scrollbar-thin">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin">
           {posts.map((p) => (
             <div key={p.id} className="snap-start">
               <PostCard post={p} primary={primary} onOpen={onOpen} />
@@ -150,6 +152,7 @@ function Rail({
         </div>
       </div>
     </section>
+
   );
 }
 
@@ -337,7 +340,7 @@ export function CommunityHub({
         {view.kind === "home" && (
           <>
             {/* Hero cinematográfico */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "82vh" }}>
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "56vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
@@ -361,37 +364,39 @@ export function CommunityHub({
                 }}
               />
 
-              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-20 pt-40" style={{ minHeight: "82vh" }}>
-                <span className="text-[11px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-6 backdrop-blur"
-                  style={{ background: `${primary}cc`, boxShadow: `0 0 32px ${primary}aa` }}>
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-12 pt-20 lg:pt-24" style={{ minHeight: "56vh" }}>
+                <span className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-4 backdrop-blur"
+                  style={{ background: `${primary}cc`, boxShadow: `0 0 28px ${primary}99` }}>
                   Comunidade
                 </span>
-                <h1 className="font-cinema-display text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[0.92] drop-shadow-2xl max-w-5xl">
+                <h1 className="font-cinema-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl max-w-4xl">
                   {(course.title ?? "").toUpperCase()}
                 </h1>
                 {course.description && (
-                  <p className="mt-6 text-white/85 text-lg md:text-xl max-w-2xl leading-relaxed drop-shadow-lg">{course.description}</p>
+                  <p className="mt-4 text-white/85 text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-lg line-clamp-2">{course.description}</p>
                 )}
-                <div className="flex flex-wrap gap-3 mt-10">
+                <div className="flex flex-wrap gap-3 mt-6">
+
                   <button
                     onClick={() => {
                       const next = recent[0] ?? newest[0];
                       if (next) handleOpen(next);
                     }}
-                    className="px-8 py-4 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-base"
+                    className="px-6 py-3 bg-white text-[#06060f] font-bold rounded-lg flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-sm"
                   >
-                    <PlayCircle className="h-5 w-5" />
+                    <PlayCircle className="h-4 w-4" />
                     {recent.length ? "Continuar jornada" : "Explorar conteúdos"}
                   </button>
                   {liveNow.length > 0 && (
                     <button
                       onClick={() => handleOpen(liveNow[0])}
-                      className="px-6 py-4 rounded-xl font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-base"
+                      className="px-5 py-3 rounded-lg font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-sm"
                     >
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
+                      <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
                       Ao vivo agora
                     </button>
                   )}
+
                 </div>
               </div>
             </section>
@@ -399,7 +404,7 @@ export function CommunityHub({
 
             <FeaturedMoment data={course as any} />
 
-            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-14 space-y-16">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-10">
               {liveNow.length > 0 && (
                 <Rail title="Acontecendo agora" description="Encontros ao vivo abertos para participação"
                   posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })} />
