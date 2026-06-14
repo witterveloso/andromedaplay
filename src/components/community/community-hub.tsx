@@ -404,7 +404,7 @@ export function CommunityHub({
 
             <FeaturedMoment data={course as any} />
 
-            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-14 space-y-16">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-10">
               {liveNow.length > 0 && (
                 <Rail title="Acontecendo agora" description="Encontros ao vivo abertos para participação"
                   posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })} />
