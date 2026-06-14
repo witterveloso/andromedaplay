@@ -62,8 +62,9 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
   return (
     <button
       onClick={() => onOpen(post)}
-      className={`group relative ${fill ? "w-full" : "shrink-0 w-[230px] sm:w-[260px] md:w-[290px] lg:w-[310px]"} aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_30px_80px_-20px_var(--hub-glow)]`}
+      className={`group relative ${fill ? "w-full" : "shrink-0 w-[170px] sm:w-[190px] md:w-[210px] lg:w-[225px]"} aspect-[2/3] rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_24px_60px_-20px_var(--hub-glow)]`}
       style={{ ["--hub-glow" as any]: `${primary}88` }}
+
     >
       {thumb ? (
         <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] group-hover:scale-110" loading="lazy" />
