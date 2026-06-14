@@ -382,20 +382,21 @@ export function CommunityHub({
                       const next = recent[0] ?? newest[0];
                       if (next) handleOpen(next);
                     }}
-                    className="px-8 py-4 bg-white text-[#06060f] font-bold rounded-xl flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-base"
+                    className="px-6 py-3 bg-white text-[#06060f] font-bold rounded-lg flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl text-sm"
                   >
-                    <PlayCircle className="h-5 w-5" />
+                    <PlayCircle className="h-4 w-4" />
                     {recent.length ? "Continuar jornada" : "Explorar conteúdos"}
                   </button>
                   {liveNow.length > 0 && (
                     <button
                       onClick={() => handleOpen(liveNow[0])}
-                      className="px-6 py-4 rounded-xl font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-base"
+                      className="px-5 py-3 rounded-lg font-semibold flex items-center gap-2 border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 transition backdrop-blur text-sm"
                     >
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
+                      <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]" />
                       Ao vivo agora
                     </button>
                   )}
+
                 </div>
               </div>
             </section>
