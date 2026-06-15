@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -36,6 +37,11 @@ import { Route as AdminExpertsIdRouteImport } from './routes/admin.experts.$id'
 import { Route as ExpertCoursesIdStudentsRouteImport } from './routes/expert.courses.$id.students'
 import { Route as ExpertCoursesIdLivePostIdRouteImport } from './routes/expert.courses.$id.live.$postId'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/access': typeof AdminAccessRoute
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/reset-password'
     | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/reset-password'
     | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
@@ -312,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/expert'
     | '/login'
+    | '/reset-password'
     | '/admin/access'
     | '/admin/communities'
     | '/admin/content'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ExpertRoute: typeof ExpertRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AlunoPerfilRoute: typeof AlunoPerfilRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   AlunoCSlugRoute: typeof AlunoCSlugRoute
@@ -348,6 +361,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -603,6 +623,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ExpertRoute: ExpertRouteWithChildren,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AlunoPerfilRoute: AlunoPerfilRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   AlunoCSlugRoute: AlunoCSlugRoute,

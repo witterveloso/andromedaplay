@@ -248,6 +248,53 @@ export type Database = {
           },
         ]
       }
+      course_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          course_id: string
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_invitations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           accent_color: string
@@ -719,6 +766,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_invitations_for_user: {
+        Args: { _email: string; _user_id: string }
+        Returns: number
+      }
+      email_has_pending_invitation: {
+        Args: { _email: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

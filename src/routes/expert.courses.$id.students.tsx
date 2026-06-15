@@ -9,9 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, Plus, Trash2, Ban, Play, CalendarClock } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Ban, Play, CalendarClock, KeyRound, MailCheck } from "lucide-react";
 import { toast } from "sonner";
-import { createStudent, removeStudent, updateEnrollment } from "@/lib/expert-students.functions";
+import { removeStudent, updateEnrollment } from "@/lib/expert-students.functions";
+import {
+  createCourseInvitation,
+  cancelCourseInvitation,
+  sendPasswordResetForEmail,
+} from "@/lib/auth-access.functions";
 
 export const Route = createFileRoute("/expert/courses/$id/students")({
   component: Students,
@@ -43,10 +48,12 @@ function formatExpiry(iso: string | null): { text: string; expired: boolean } {
 function Students() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
-  const createFn = useServerFn(createStudent);
+  const inviteFn = useServerFn(createCourseInvitation);
+  const cancelInviteFn = useServerFn(cancelCourseInvitation);
+  const resetFn = useServerFn(sendPasswordResetForEmail);
   const removeFn = useServerFn(removeStudent);
   const updateFn = useServerFn(updateEnrollment);
-  const [form, setForm] = useState({ full_name: "", email: "", password: "", access_days: "null" });
+  const [form, setForm] = useState({ full_name: "", email: "", access_days: "null" });
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["enrollments", id],
@@ -65,23 +72,41 @@ function Students() {
     },
   });
 
+  const { data: invites } = useQuery({
+    queryKey: ["course-invitations", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("course_invitations")
+        .select("id, email, status, expires_at, created_at")
+        .eq("course_id", id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const add = useMutation({
     mutationFn: () => {
       const days = form.access_days === "null" ? null : Number(form.access_days);
-      return createFn({
+      return inviteFn({
         data: {
           course_id: id,
           full_name: form.full_name,
           email: form.email,
-          password: form.password,
           expires_at: daysFromNowISO(days),
         },
       });
     },
-    onSuccess: () => {
-      toast.success("Aluno cadastrado");
-      setForm({ full_name: "", email: "", password: "", access_days: "null" });
+    onSuccess: (res: any) => {
+      toast.success(
+        res?.kind === "enrolled"
+          ? "Aluno matriculado (já tinha conta)"
+          : "Acesso liberado. O aluno pode criar a conta dele.",
+      );
+      setForm({ full_name: "", email: "", access_days: "null" });
       qc.invalidateQueries({ queryKey: ["enrollments", id] });
+      qc.invalidateQueries({ queryKey: ["course-invitations", id] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -99,6 +124,19 @@ function Students() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const cancelInvite = useMutation({
+    mutationFn: (invitation_id: string) => cancelInviteFn({ data: { invitation_id } }),
+    onSuccess: () => { toast.success("Convite cancelado"); qc.invalidateQueries({ queryKey: ["course-invitations", id] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reset = useMutation({
+    mutationFn: (email: string) =>
+      resetFn({ data: { email, redirect_to: `${window.location.origin}/reset-password` } }),
+    onSuccess: () => toast.success("Link de redefinição enviado"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
@@ -107,8 +145,11 @@ function Students() {
       <h1 className="text-3xl font-semibold tracking-tight mb-6">Alunos do curso</h1>
 
       <Card className="p-6 mb-6">
-        <h2 className="font-semibold mb-4">Cadastrar novo aluno</h2>
-        <form onSubmit={(e) => { e.preventDefault(); add.mutate(); }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <h2 className="font-semibold mb-1">Liberar acesso para um aluno</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Você libera o e-mail e o prazo. O próprio aluno cria a senha ao se cadastrar.
+        </p>
+        <form onSubmit={(e) => { e.preventDefault(); add.mutate(); }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="space-y-1.5">
             <Label>Nome</Label>
             <Input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
@@ -116,10 +157,6 @@ function Students() {
           <div className="space-y-1.5">
             <Label>Email</Label>
             <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Senha inicial</Label>
-            <Input required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           </div>
           <div className="space-y-1.5">
             <Label>Prazo de acesso</Label>
@@ -134,16 +171,48 @@ function Students() {
               </SelectContent>
             </Select>
           </div>
-          <div className="md:col-span-2 lg:col-span-4">
+          <div className="md:col-span-2 lg:col-span-3">
             <Button type="submit" disabled={add.isPending}>
-              <Plus className="mr-1.5 h-4 w-4" /> {add.isPending ? "Adicionando…" : "Cadastrar aluno"}
+              <Plus className="mr-1.5 h-4 w-4" /> {add.isPending ? "Liberando…" : "Liberar acesso"}
             </Button>
           </div>
         </form>
-        <p className="text-xs text-muted-foreground mt-3">
-          Se o email já existir na plataforma, o aluno é apenas matriculado neste curso (a senha é ignorada).
-        </p>
       </Card>
+
+      {(invites?.length ?? 0) > 0 && (
+        <Card className="p-0 overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b text-sm font-semibold flex items-center gap-2">
+            <MailCheck className="h-4 w-4" /> Convites pendentes ({invites!.length})
+          </div>
+          <div className="divide-y">
+            {invites!.map((inv) => {
+              const expiry = formatExpiry(inv.expires_at);
+              return (
+                <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{inv.email}</span>
+                      <Badge variant="secondary">Convite pendente</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-3 flex-wrap">
+                      <span>Liberado em {new Date(inv.created_at).toLocaleDateString("pt-BR")}</span>
+                      <span className="flex items-center gap-1">
+                        <CalendarClock className="h-3 w-3" />
+                        Acesso até: <strong className={expiry.expired ? "text-destructive" : ""}>{expiry.text}</strong>
+                      </span>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    if (confirm("Cancelar este convite?")) cancelInvite.mutate(inv.id);
+                  }}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-0 overflow-hidden">
         {isLoading ? (
@@ -198,6 +267,7 @@ function Students() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <ResetButton studentId={r.student_id} onSend={(email) => reset.mutate(email)} pending={reset.isPending} />
                     {noAccess && blocked ? (
                       <Button variant="outline" size="sm" onClick={() => update.mutate({ student_id: r.student_id, status: "active" })}>
                         <Play className="mr-1.5 h-3.5 w-3.5" /> Desbloquear
@@ -223,5 +293,43 @@ function Students() {
         )}
       </Card>
     </div>
+  );
+}
+
+/**
+ * Lazy-loads the student's e-mail (not in the enrollments query) only when the
+ * producer clicks "Reset"; uses a small prompt to confirm the address.
+ */
+function ResetButton({
+  studentId,
+  onSend,
+  pending,
+}: {
+  studentId: string;
+  onSend: (email: string) => void;
+  pending: boolean;
+}) {
+  const [loading, setLoading] = useState(false);
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={loading || pending}
+      onClick={async () => {
+        setLoading(true);
+        try {
+          // Producers can't read auth.users directly; ask the producer to confirm the e-mail.
+          const email = window.prompt(
+            "Confirme o e-mail do aluno para o qual enviar o link de redefinição de senha:",
+          )?.trim();
+          if (email) onSend(email);
+        } finally {
+          setLoading(false);
+        }
+        void studentId;
+      }}
+    >
+      <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Redefinir senha
+    </Button>
   );
 }
