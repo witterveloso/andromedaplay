@@ -66,7 +66,7 @@ function LoginPage() {
   useEffect(() => {
     if (search.mode) setMode(search.mode);
     if (search.email) setEmail(search.email.trim().toLowerCase());
-  }, [search.mode]);
+  }, [search.mode, search.email]);
 
   useEffect(() => {
     if (!loading && session && dest) navigate({ to: dest });
