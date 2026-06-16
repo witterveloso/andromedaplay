@@ -13,11 +13,12 @@ import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { Eye, EyeOff } from "lucide-react";
 import { signupWithInvitation } from "@/lib/auth-access.functions";
 
-type LoginSearch = { mode?: "signin" | "signup" };
+type LoginSearch = { mode?: "signin" | "signup"; email?: string };
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
     mode: search.mode === "signup" ? "signup" : "signin",
+    email: typeof search.email === "string" ? search.email : undefined,
   }),
   component: LoginPage,
 });
@@ -64,6 +65,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (search.mode) setMode(search.mode);
+    if (search.email) setEmail(search.email.trim().toLowerCase());
   }, [search.mode]);
 
   useEffect(() => {
@@ -74,8 +76,9 @@ function LoginPage() {
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
     setSubmitting(false);
     if (error) return toast.error(error.message);
     toast.success("Login realizado");
@@ -83,11 +86,12 @@ function LoginPage() {
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
     setSubmitting(true);
     try {
-      await signupFn({ data: { email, password, full_name: name } });
+      await signupFn({ data: { email: normalizedEmail, password, full_name: name } });
       // Auto sign-in
-      const { error: signErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signErr } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
       if (signErr) throw signErr;
       toast.success("Conta criada com sucesso");
     } catch (err: any) {
