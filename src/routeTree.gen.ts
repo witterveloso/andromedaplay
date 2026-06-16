@@ -23,6 +23,7 @@ import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
@@ -107,6 +108,11 @@ const AdminMaintenanceRoute = AdminMaintenanceRouteImport.update({
   path: '/maintenance',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCoursesRoute = AdminCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/admin/communities': typeof AdminCommunitiesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/communities'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/students'
     | '/admin/support'
@@ -459,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMaintenanceRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/invitations': {
+      id: '/admin/invitations'
+      path: '/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/courses': {
       id: '/admin/courses'
       path: '/courses'
@@ -558,6 +577,7 @@ interface AdminRouteChildren {
   AdminCommunitiesRoute: typeof AdminCommunitiesRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMaintenanceRoute: typeof AdminMaintenanceRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
@@ -572,6 +592,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCommunitiesRoute: AdminCommunitiesRoute,
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
+  AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMaintenanceRoute: AdminMaintenanceRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminSupportRoute: AdminSupportRoute,
