@@ -252,11 +252,13 @@ export type Database = {
         Row: {
           accepted_at: string | null
           accepted_by: string | null
+          cohort: string | null
           course_id: string
           created_at: string
           created_by: string | null
           email: string
           expires_at: string | null
+          full_name: string | null
           id: string
           status: string
           updated_at: string
@@ -264,11 +266,13 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           accepted_by?: string | null
+          cohort?: string | null
           course_id: string
           created_at?: string
           created_by?: string | null
           email: string
           expires_at?: string | null
+          full_name?: string | null
           id?: string
           status?: string
           updated_at?: string
@@ -276,11 +280,13 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           accepted_by?: string | null
+          cohort?: string | null
           course_id?: string
           created_at?: string
           created_by?: string | null
           email?: string
           expires_at?: string | null
+          full_name?: string | null
           id?: string
           status?: string
           updated_at?: string
