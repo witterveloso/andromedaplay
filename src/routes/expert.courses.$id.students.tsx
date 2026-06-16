@@ -15,6 +15,8 @@ import { removeStudent, updateEnrollment } from "@/lib/expert-students.functions
 import {
   createCourseInvitation,
   cancelCourseInvitation,
+  reactivateCourseInvitation,
+  updateCourseInvitationEmail,
   sendPasswordResetForEmail,
 } from "@/lib/auth-access.functions";
 
@@ -45,15 +47,33 @@ function formatExpiry(iso: string | null): { text: string; expired: boolean } {
   return { text: d.toLocaleDateString("pt-BR"), expired };
 }
 
+function signupLink(email: string) {
+  return `${window.location.origin}/login?mode=signup&email=${encodeURIComponent(email)}`;
+}
+
+function invitationStatus(inv: { status: string; expires_at: string | null }) {
+  if (inv.status === "pending" && inv.expires_at && new Date(inv.expires_at).getTime() < Date.now()) return "expired";
+  return inv.status;
+}
+
+const invitationLabels: Record<string, string> = {
+  pending: "Pendente",
+  used: "Usado",
+  expired: "Expirado",
+  cancelled: "Cancelado",
+};
+
 function Students() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const inviteFn = useServerFn(createCourseInvitation);
   const cancelInviteFn = useServerFn(cancelCourseInvitation);
+  const reactivateInviteFn = useServerFn(reactivateCourseInvitation);
+  const updateInviteEmailFn = useServerFn(updateCourseInvitationEmail);
   const resetFn = useServerFn(sendPasswordResetForEmail);
   const removeFn = useServerFn(removeStudent);
   const updateFn = useServerFn(updateEnrollment);
-  const [form, setForm] = useState({ full_name: "", email: "", access_days: "null" });
+  const [form, setForm] = useState({ full_name: "", email: "", cohort: "", access_days: "null" });
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["enrollments", id],
@@ -77,9 +97,8 @@ function Students() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("course_invitations")
-        .select("id, email, status, expires_at, created_at")
+        .select("id, email, full_name, cohort, status, expires_at, created_at, course:courses(id, title)")
         .eq("course_id", id)
-        .eq("status", "pending")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -94,6 +113,7 @@ function Students() {
           course_id: id,
           full_name: form.full_name,
           email: form.email,
+          cohort: form.cohort || null,
           expires_at: daysFromNowISO(days),
         },
       });
@@ -101,10 +121,10 @@ function Students() {
     onSuccess: (res: any) => {
       toast.success(
         res?.kind === "enrolled"
-          ? "Aluno matriculado (já tinha conta)"
+          ? res?.message ?? "Aluno já possui conta. Acesso liberado com sucesso."
           : "Acesso liberado. O aluno pode criar a conta dele.",
       );
-      setForm({ full_name: "", email: "", access_days: "null" });
+      setForm({ full_name: "", email: "", cohort: "", access_days: "null" });
       qc.invalidateQueries({ queryKey: ["enrollments", id] });
       qc.invalidateQueries({ queryKey: ["course-invitations", id] });
     },
@@ -127,6 +147,26 @@ function Students() {
   const cancelInvite = useMutation({
     mutationFn: (invitation_id: string) => cancelInviteFn({ data: { invitation_id } }),
     onSuccess: () => { toast.success("Convite cancelado"); qc.invalidateQueries({ queryKey: ["course-invitations", id] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reactivateInvite = useMutation({
+    mutationFn: (invitation_id: string) => reactivateInviteFn({ data: { invitation_id, expires_at: null } }),
+    onSuccess: (res: any) => {
+      toast.success(res?.message ?? "Convite liberado novamente");
+      qc.invalidateQueries({ queryKey: ["enrollments", id] });
+      qc.invalidateQueries({ queryKey: ["course-invitations", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const editInviteEmail = useMutation({
+    mutationFn: (vars: { invitation_id: string; email: string }) => updateInviteEmailFn({ data: vars }),
+    onSuccess: (res: any) => {
+      toast.success(res?.message ?? "E-mail do convite atualizado");
+      qc.invalidateQueries({ queryKey: ["enrollments", id] });
+      qc.invalidateQueries({ queryKey: ["course-invitations", id] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
