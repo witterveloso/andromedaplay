@@ -484,6 +484,8 @@ export function CommunityHub({
             favorites={favorites}
             recent={recent}
             primary={primary}
+            aspect={cardAspect}
+            aspectCustom={cardAspectCustom}
             onOpen={handleOpen}
             onBack={() => setView({ kind: "home" })}
           />
