@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, Clock, LayoutGrid, List, Play, PlayCircle } from "lucide-react";
+import { aspectRatioStyle } from "@/lib/card-aspect";
 
 type Lesson = {
   id: string;
@@ -23,6 +24,8 @@ type Course = {
   id: string;
   primary_color?: string | null;
   accent_color?: string | null;
+  card_aspect_video?: string | null;
+  card_aspect_custom?: string | null;
 };
 
 type ViewMode = "grid" | "list";
@@ -138,14 +141,13 @@ export function LessonCatalog({
       >
         <button onClick={() => select(l.id)} className="block w-full text-left">
           <div
-            className="relative aspect-video"
-            style={
-              (l.thumbnail_url || l.cover_url)
+            className="relative"
+            style={{
+              ...aspectRatioStyle(course.card_aspect_video, course.card_aspect_custom),
+              ...((l.thumbnail_url || l.cover_url)
                 ? { backgroundImage: `url(${l.thumbnail_url || l.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                : {
-                    background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)`,
-                  }
-            }
+                : { background: `linear-gradient(135deg, ${course.primary_color ?? "#4f46e5"}33, ${course.accent_color ?? "#1e1e5a"}aa)` }),
+            }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/20 to-transparent" />
             <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur text-[10px] font-bold text-white/90 tracking-wider">

@@ -81,17 +81,23 @@ function HomePage() {
           Portal de acesso
         </div>
 
-        <h1 className="font-display font-bold leading-[1.02] tracking-tight text-[clamp(2.25rem,5.2vw,4.5rem)] max-w-3xl mx-auto">
-          <span className="block text-soft-white">BEM-VINDO AO UNIVERSO DO</span>
+        <h1
+          className="leading-[1.04] tracking-[-0.02em] text-[clamp(2rem,4.6vw,3.75rem)] font-medium max-w-3xl mx-auto"
+          style={{ fontFamily: "Sora, system-ui, sans-serif" }}
+        >
+          <span className="block text-soft-white/95">Bem-vindo ao universo do</span>
           <span
             className="block bg-clip-text text-transparent"
             style={{ backgroundImage: "var(--gradient-cosmic)" }}
           >
-            CONHECIMENTO E DA EVOLUÇÃO.
+            conhecimento e da evolução.
           </span>
         </h1>
 
-        <p className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-stellar-silver md:text-lg">
+        <p
+          className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-stellar-silver md:text-[17px]"
+          style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
+        >
           Aprenda, evolua e acesse experiências educacionais em um único ambiente.
         </p>
 
