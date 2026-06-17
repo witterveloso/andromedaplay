@@ -188,6 +188,8 @@ export function CommunityHub({
 
   const primary = course.primary_color || "#6c4dff";
   const accent = course.accent_color || "#00b8ff";
+  const cardAspect: string = course.card_aspect_community || "2:3";
+  const cardAspectCustom: string | null = course.card_aspect_custom ?? null;
 
   const { data: posts } = useQuery({
     enabled: !!course?.id,
