@@ -502,7 +502,7 @@ export function CommunityHub({
 }
 
 function FilteredView({
-  view, all, channels, byChannel, lives, materials, favorites, recent, primary, onOpen, onBack,
+  view, all, channels, byChannel, lives, materials, favorites, recent, primary, onOpen, onBack, aspect, aspectCustom,
 }: {
   view: View;
   all: any[];
@@ -515,6 +515,8 @@ function FilteredView({
   primary: string;
   onOpen: (p: any) => void;
   onBack: () => void;
+  aspect?: string | null;
+  aspectCustom?: string | null;
 }) {
   let title = "";
   let description = "";
@@ -552,7 +554,7 @@ function FilteredView({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
           {list.map((p) => (
-            <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill />
+            <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill aspect={aspect} aspectCustom={aspectCustom} />
           ))}
         </div>
       )}
