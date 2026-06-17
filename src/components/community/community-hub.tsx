@@ -273,7 +273,7 @@ export function CommunityHub({
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 lg:top-16 left-0 z-50 h-screen lg:h-[calc(100vh-4rem)] w-[260px] shrink-0 transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen lg:h-screen w-[260px] shrink-0 transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="m-3 lg:m-4 h-[calc(100%-1.5rem)] lg:h-[calc(100%-2rem)] rounded-3xl border border-white/10 bg-black/60 backdrop-blur-xl p-5 flex flex-col"
           style={{ boxShadow: `0 30px 80px -30px ${primary}55, inset 0 1px 0 rgba(255,255,255,0.05)` }}
