@@ -237,8 +237,10 @@ export function CourseForm({
                     <SelectItem value="community">Comunidade interativa</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
             </div>
           </Card>
+        </TabsContent>
         </TabsContent>
 
         <TabsContent value="visual" className="mt-4">
