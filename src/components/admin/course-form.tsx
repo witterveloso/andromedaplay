@@ -28,6 +28,10 @@ type Course = {
   font_family: string;
   theme_mode: string;
   custom_css: string | null;
+  card_aspect_video?: string;
+  card_aspect_community?: string;
+  card_aspect_custom?: string | null;
+  featured_format?: string;
 };
 
 const defaults: Omit<Course, "id"> = {
@@ -45,6 +49,10 @@ const defaults: Omit<Course, "id"> = {
   font_family: "Inter",
   theme_mode: "dark",
   custom_css: "",
+  card_aspect_video: "16:9",
+  card_aspect_community: "2:3",
+  card_aspect_custom: "",
+  featured_format: "banner",
 };
 
 function slugify(s: string) {
