@@ -305,6 +305,9 @@ export type Database = {
         Row: {
           accent_color: string
           background_color: string
+          card_aspect_community: string
+          card_aspect_custom: string | null
+          card_aspect_video: string
           course_type: Database["public"]["Enums"]["course_type"]
           cover_url: string | null
           created_at: string
@@ -316,6 +319,7 @@ export type Database = {
           featured_cta_url: string | null
           featured_description: string | null
           featured_enabled: boolean
+          featured_format: string
           featured_image_url: string | null
           featured_kind: string | null
           featured_title: string | null
@@ -333,6 +337,9 @@ export type Database = {
         Insert: {
           accent_color?: string
           background_color?: string
+          card_aspect_community?: string
+          card_aspect_custom?: string | null
+          card_aspect_video?: string
           course_type?: Database["public"]["Enums"]["course_type"]
           cover_url?: string | null
           created_at?: string
@@ -344,6 +351,7 @@ export type Database = {
           featured_cta_url?: string | null
           featured_description?: string | null
           featured_enabled?: boolean
+          featured_format?: string
           featured_image_url?: string | null
           featured_kind?: string | null
           featured_title?: string | null
@@ -361,6 +369,9 @@ export type Database = {
         Update: {
           accent_color?: string
           background_color?: string
+          card_aspect_community?: string
+          card_aspect_custom?: string | null
+          card_aspect_video?: string
           course_type?: Database["public"]["Enums"]["course_type"]
           cover_url?: string | null
           created_at?: string
@@ -372,6 +383,7 @@ export type Database = {
           featured_cta_url?: string | null
           featured_description?: string | null
           featured_enabled?: boolean
+          featured_format?: string
           featured_image_url?: string | null
           featured_kind?: string | null
           featured_title?: string | null
