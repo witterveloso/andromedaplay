@@ -51,7 +51,16 @@ function postIcon(p: any) {
   return MessageSquare;
 }
 
-function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string; onOpen: (p: any) => void; fill?: boolean }) {
+function PostCard({
+  post, primary, onOpen, fill, aspect, aspectCustom,
+}: {
+  post: any;
+  primary: string;
+  onOpen: (p: any) => void;
+  fill?: boolean;
+  aspect?: string | null;
+  aspectCustom?: string | null;
+}) {
   const badge = postBadge(post);
   const Icon = postIcon(post);
   const thumb = post.cover_url || post.image_url;
@@ -59,12 +68,14 @@ function PostCard({ post, primary, onOpen, fill }: { post: any; primary: string;
   const dateLabel = created
     ? created.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
     : "";
+  const widthClass = fill ? "w-full" : `shrink-0 ${cardWidthClass(aspect)}`;
+  const ratio = aspectRatioStyle(aspect, aspectCustom);
 
   return (
     <button
       onClick={() => onOpen(post)}
-      className={`group relative ${fill ? "w-full" : "shrink-0 w-[170px] sm:w-[190px] md:w-[210px] lg:w-[225px]"} aspect-[2/3] rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_24px_60px_-20px_var(--hub-glow)]`}
-      style={{ ["--hub-glow" as any]: `${primary}88` }}
+      className={`group relative ${widthClass} rounded-xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#141432] to-[#0a0a18] text-left transition-all duration-500 hover:scale-[1.04] hover:border-white/30 hover:z-10 hover:shadow-[0_24px_60px_-20px_var(--hub-glow)]`}
+      style={{ ["--hub-glow" as any]: `${primary}88`, ...ratio }}
 
     >
       {thumb ? (
