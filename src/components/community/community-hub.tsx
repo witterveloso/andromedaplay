@@ -131,7 +131,7 @@ function PostCard({
 
 
 function Rail({
-  title, description, posts, primary, onOpen, onSeeAll,
+  title, description, posts, primary, onOpen, onSeeAll, aspect, aspectCustom,
 }: {
   title: string;
   description?: string;
@@ -139,6 +139,8 @@ function Rail({
   primary: string;
   onOpen: (p: any) => void;
   onSeeAll?: () => void;
+  aspect?: string | null;
+  aspectCustom?: string | null;
 }) {
   if (!posts.length) return null;
   return (
@@ -158,7 +160,7 @@ function Rail({
         <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin">
           {posts.map((p) => (
             <div key={p.id} className="snap-start">
-              <PostCard post={p} primary={primary} onOpen={onOpen} />
+              <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
             </div>
           ))}
         </div>
