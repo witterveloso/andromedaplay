@@ -21,7 +21,7 @@ const KIND_META: Record<FeaturedKind, { label: string; Icon: typeof Sparkles }> 
   notice: { label: "Aviso", Icon: Bell },
 };
 
-export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | undefined }) {
+export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | null | undefined; format?: string | null }) {
   const [open, setOpen] = useState(false);
 
   if (!data?.featured_enabled) return null;
@@ -36,7 +36,6 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
   const isVideoUrl = !!ctaUrl && !!extractYouTubeId(ctaUrl);
   const videoEmbed = isVideoUrl ? toYouTubeEmbed(ctaUrl) : null;
   const hasMedia = !!data.featured_image_url || !!videoEmbed;
-  // Use modal whenever we can show media (image/video). Otherwise fall back to link.
   const useModal = hasMedia;
   const isExternalLink = !useModal && /^https?:\/\//i.test(ctaUrl);
 
@@ -46,6 +45,13 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
       setOpen(true);
     }
   };
+
+  const fmt = (format ?? "banner").toLowerCase();
+  const mediaAspectClass =
+    fmt === "card-16-9" ? "aspect-video max-w-3xl mx-auto" :
+    fmt === "card-9-16" ? "aspect-[9/16] max-w-sm mx-auto" :
+    fmt === "hero-full" ? "aspect-[21/9]" :
+    "aspect-[16/6] sm:aspect-[21/6] min-h-[150px]";
 
   return (
     <section className="relative w-full">
@@ -59,7 +65,7 @@ export function FeaturedMoment({ data }: { data: FeaturedMomentData | null | und
             }}
           />
 
-          <div className="relative w-full aspect-[16/6] sm:aspect-[21/6] min-h-[150px]">
+          <div className={`relative w-full ${mediaAspectClass}`}>
             {data.featured_image_url ? (
               <img
                 src={data.featured_image_url}

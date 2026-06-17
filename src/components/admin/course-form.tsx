@@ -28,6 +28,10 @@ type Course = {
   font_family: string;
   theme_mode: string;
   custom_css: string | null;
+  card_aspect_video?: string;
+  card_aspect_community?: string;
+  card_aspect_custom?: string | null;
+  featured_format?: string;
 };
 
 const defaults: Omit<Course, "id"> = {
@@ -45,6 +49,10 @@ const defaults: Omit<Course, "id"> = {
   font_family: "Inter",
   theme_mode: "dark",
   custom_css: "",
+  card_aspect_video: "16:9",
+  card_aspect_community: "2:3",
+  card_aspect_custom: "",
+  featured_format: "banner",
 };
 
 function slugify(s: string) {
@@ -304,6 +312,82 @@ export function CourseForm({
                 >
                   Começar agora
                 </button>
+              </div>
+            </div>
+
+            {/* Formato dos Cards */}
+            <div className="pt-2 border-t border-border/50">
+              <h3 className="font-semibold mb-1 mt-4">Formato dos Cards</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Defina a proporção visual dos cards na área do aluno. Cada produto pode ter sua própria identidade.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>Cards das aulas (Hospedagem de vídeo)</Label>
+                  <Select
+                    value={form.card_aspect_video ?? "16:9"}
+                    onValueChange={(v) => update("card_aspect_video", v)}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="16:9">16:9 — YouTube</SelectItem>
+                      <SelectItem value="4:5">4:5 — Feed Instagram</SelectItem>
+                      <SelectItem value="1:1">1:1 — Quadrado</SelectItem>
+                      <SelectItem value="9:16">9:16 — Story / Reels</SelectItem>
+                      <SelectItem value="2:3">2:3 — Pôster Netflix</SelectItem>
+                      <SelectItem value="custom">Personalizado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Cards da comunidade</Label>
+                  <Select
+                    value={form.card_aspect_community ?? "2:3"}
+                    onValueChange={(v) => update("card_aspect_community", v)}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="16:9">16:9 — YouTube</SelectItem>
+                      <SelectItem value="4:5">4:5 — Feed Instagram</SelectItem>
+                      <SelectItem value="1:1">1:1 — Quadrado</SelectItem>
+                      <SelectItem value="9:16">9:16 — Story / Reels</SelectItem>
+                      <SelectItem value="2:3">2:3 — Pôster Netflix</SelectItem>
+                      <SelectItem value="custom">Personalizado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(form.card_aspect_video === "custom" || form.card_aspect_community === "custom") && (
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label>Proporção personalizada</Label>
+                    <Input
+                      placeholder="Ex.: 3/4, 5/6, 21/9"
+                      value={form.card_aspect_custom ?? ""}
+                      onChange={(e) => update("card_aspect_custom", e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use o formato largura/altura. Aplica-se aos campos marcados como “Personalizado”.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label>Momento em destaque</Label>
+                  <Select
+                    value={form.featured_format ?? "banner"}
+                    onValueChange={(v) => update("featured_format", v)}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="banner">Banner horizontal</SelectItem>
+                      <SelectItem value="card-16-9">Card 16:9</SelectItem>
+                      <SelectItem value="card-9-16">Card 9:16</SelectItem>
+                      <SelectItem value="hero-full">Full Width Hero</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </Card>
