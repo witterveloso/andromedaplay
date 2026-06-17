@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { aspectRatioStyle, cardWidthClass } from "@/lib/card-aspect";
 import {
   Home, Hash, Layers, Radio, FileText, Star, Clock, ChevronRight,
   PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X,
