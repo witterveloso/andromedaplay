@@ -241,7 +241,6 @@ export function CourseForm({
             </div>
           </Card>
         </TabsContent>
-        </TabsContent>
 
         <TabsContent value="visual" className="mt-4">
           <Card className="p-6 space-y-6">
