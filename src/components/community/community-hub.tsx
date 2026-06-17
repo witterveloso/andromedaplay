@@ -355,18 +355,18 @@ export function CommunityHub({
       <div className="lg:pl-[260px]">
         {view.kind === "home" && (
           <>
-            {/* Hero cinematográfico */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "56vh" }}>
+            {/* Hero cinematográfico — colado no topo */}
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
                   : { background: `linear-gradient(135deg, ${primary}, ${accent})` }
               } />
               {/* Cinematic layered overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/80 to-[#06060f]/30" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/95 via-[#06060f]/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-[#06060f]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#06060f]/90 via-[#06060f]/35 to-transparent" />
               <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(6,6,15,0.5) 70%, rgba(6,6,15,0.95) 100%)"
+                background: "radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(6,6,15,0.45) 70%, rgba(6,6,15,0.9) 100%)"
               }} />
               {/* Animated glows */}
               <div className="absolute top-1/4 left-1/4 w-[700px] h-[700px] rounded-full blur-[180px] animate-indigo-pulse"
@@ -380,13 +380,13 @@ export function CommunityHub({
                 }}
               />
 
-              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-12 pt-20 lg:pt-24" style={{ minHeight: "56vh" }}>
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-10 pt-14 lg:pt-16" style={{ minHeight: "62vh" }}>
                 <span className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-4 backdrop-blur"
                   style={{ background: `${primary}cc`, boxShadow: `0 0 28px ${primary}99` }}>
                   Comunidade
                 </span>
-                <h1 className="font-cinema-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] drop-shadow-2xl max-w-4xl">
-                  {(course.title ?? "").toUpperCase()}
+                <h1 className="font-cinema-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[0.98] drop-shadow-2xl max-w-4xl">
+                  {course.title}
                 </h1>
                 {course.description && (
                   <p className="mt-4 text-white/85 text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-lg line-clamp-2">{course.description}</p>
@@ -418,21 +418,24 @@ export function CommunityHub({
             </section>
 
 
-            <FeaturedMoment data={course as any} />
+            <FeaturedMoment data={course as any} format={course.featured_format} />
 
             <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-10">
               {liveNow.length > 0 && (
                 <Rail title="Acontecendo agora" description="Encontros ao vivo abertos para participação"
-                  posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })} />
+                  posts={liveNow} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "lives" })}
+                  aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
 
               {recent.length > 0 && (
-                <Rail title="Continue de onde parou" posts={recent.slice(0, 10)} primary={primary} onOpen={handleOpen} />
+                <Rail title="Continue de onde parou" posts={recent.slice(0, 10)} primary={primary} onOpen={handleOpen}
+                  aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
 
               {newest.length > 0 && (
                 <Rail title="Novidades" description="Publicações mais recentes da comunidade"
-                  posts={newest} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "todos" })} />
+                  posts={newest} primary={primary} onOpen={handleOpen} onSeeAll={() => setView({ kind: "todos" })}
+                  aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
 
               <div id="hub-topics" className="space-y-12 pt-2">
@@ -448,6 +451,8 @@ export function CommunityHub({
                       primary={primary}
                       onOpen={handleOpen}
                       onSeeAll={() => setView({ kind: "topic", id: c.id })}
+                      aspect={cardAspect}
+                      aspectCustom={cardAspectCustom}
                     />
                   );
                 })}
@@ -455,7 +460,8 @@ export function CommunityHub({
 
               {materials.length > 0 && (
                 <Rail title="Materiais de apoio" posts={materials} primary={primary} onOpen={handleOpen}
-                  onSeeAll={() => setView({ kind: "materiais" })} />
+                  onSeeAll={() => setView({ kind: "materiais" })}
+                  aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
 
               {all.length === 0 && (
