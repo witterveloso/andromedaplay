@@ -356,7 +356,7 @@ export function CommunityHub({
         {view.kind === "home" && (
           <>
             {/* Hero cinematográfico — colado no topo */}
-            <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
+            <section className="relative w-full overflow-hidden" style={{ minHeight: "42vh" }}>
               <div className="absolute inset-0 animate-ken-burns" style={
                 course.cover_url
                   ? { backgroundImage: `url(${course.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
@@ -380,8 +380,8 @@ export function CommunityHub({
                 }}
               />
 
-              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-10 pt-14 lg:pt-16" style={{ minHeight: "62vh" }}>
-                <span className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-4 backdrop-blur"
+              <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-6 pt-6 lg:pt-8" style={{ minHeight: "42vh" }}>
+                <span className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-[0.28em] w-fit mb-3 backdrop-blur"
                   style={{ background: `${primary}cc`, boxShadow: `0 0 28px ${primary}99` }}>
                   Comunidade
                 </span>
@@ -389,7 +389,7 @@ export function CommunityHub({
                   {course.title}
                 </h1>
                 {course.description && (
-                  <p className="mt-4 text-white/85 text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-lg line-clamp-2">{course.description}</p>
+                  <p className="mt-3 text-white/85 text-base md:text-lg max-w-2xl leading-relaxed drop-shadow-lg line-clamp-2">{course.description}</p>
                 )}
                 <div className="flex flex-wrap gap-3 mt-6">
 
