@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
-import { ArrowRight, UserPlus } from "lucide-react";
+import heroAsset from "@/assets/andromeda-hero.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -10,123 +9,109 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Entre no ecossistema premium da Andromeda Play." },
       { property: "og:title", content: "Andromeda Play" },
       { property: "og:description", content: "Portal de acesso ao ecossistema Andromeda Play." },
+      { property: "og:image", content: heroAsset.url },
     ],
   }),
   component: HomePage,
 });
 
-function CinematicBackdrop() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Base cosmic gradient */}
-      <div className="absolute inset-0" style={{ background: "var(--gradient-aurora)" }} />
-      {/* Deep vignette */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 0%, rgba(6,6,15,0.35) 55%, rgba(6,6,15,0.95) 100%)",
-        }}
-      />
-      {/* Twin nebula glows */}
-      <div
-        className="absolute -top-40 -left-40 h-[640px] w-[640px] rounded-full blur-[180px] opacity-50"
-        style={{ background: "radial-gradient(circle, #6C4DFF 0%, transparent 70%)" }}
-      />
-      <div
-        className="absolute -bottom-40 -right-40 h-[640px] w-[640px] rounded-full blur-[180px] opacity-40"
-        style={{ background: "radial-gradient(circle, #00B8FF 0%, transparent 70%)" }}
-      />
-      {/* Star field */}
-      <div
-        className="absolute inset-0 opacity-70"
-        style={{
-          backgroundImage:
-            "radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 75% 65%, #fff, transparent), radial-gradient(1.5px 1.5px at 40% 80%, #BFC6D6, transparent), radial-gradient(1px 1px at 85% 15%, #00B8FF, transparent), radial-gradient(1px 1px at 10% 70%, #6C4DFF, transparent), radial-gradient(1.5px 1.5px at 60% 40%, #fff, transparent), radial-gradient(1px 1px at 30% 55%, #fff, transparent), radial-gradient(1px 1px at 92% 88%, #fff, transparent)",
-          backgroundSize: "700px 700px",
-        }}
-      />
-      {/* Subtle scanline grain */}
-      <div
-        className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 3px)",
-        }}
-      />
-    </div>
-  );
-}
-
+/**
+ * Full-screen hero. The reference artwork is the experience itself:
+ * it already contains the logo, headline, subtitle and CTAs painted in.
+ * We render it as a 100vh cover background and overlay invisible click
+ * targets on top of the painted "Entrar" / "Criar conta" buttons so they
+ * become functional without disturbing the composition.
+ *
+ * Painted button positions (relative to the artwork, 1536 x 1024):
+ *   Entrar       → ~ x: 520..758  y: 504..587
+ *   Criar conta  → ~ x: 770..1004 y: 504..587
+ */
 function HomePage() {
   const { session, isAdmin, isExpert, isStudent } = useAuth();
   const inAppDest = isAdmin ? "/admin" : isExpert ? "/expert" : isStudent ? "/aluno" : "/login";
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
-      style={{ background: "var(--color-cosmic-navy)", color: "var(--color-soft-white)" }}
+      className="relative min-h-screen w-full overflow-hidden"
+      style={{ background: "#05050d", color: "var(--color-soft-white)" }}
     >
-      <CinematicBackdrop />
+      {/* Hero artwork — full screen, never cropped at the center */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover"
+        style={{ backgroundImage: `url(${heroAsset.url})` }}
+      />
 
-      <main className="relative z-10 w-full max-w-2xl text-center">
-        <div className="mb-10 flex justify-center">
-          <div className="scale-125">
-            <AndromedaLogo />
-          </div>
-        </div>
+      {/* Subtle readability overlay (per spec) */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
 
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[10px] uppercase tracking-[0.32em] text-stellar-silver backdrop-blur-md">
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00B8FF", boxShadow: "0 0 10px #00B8FF" }} />
-          Portal de acesso
-        </div>
-
-        <h1
-          className="leading-[1.04] tracking-[-0.02em] text-[clamp(2rem,4.6vw,3.75rem)] font-medium max-w-3xl mx-auto"
-          style={{ fontFamily: "Sora, system-ui, sans-serif" }}
-        >
-          <span className="block text-soft-white/95">Bem-vindo ao universo do</span>
-          <span
-            className="block bg-clip-text text-transparent"
-            style={{ backgroundImage: "var(--gradient-cosmic)" }}
-          >
-            conhecimento e da evolução.
-          </span>
-        </h1>
-
-        <p
-          className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-stellar-silver md:text-[17px]"
-          style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
-        >
+      {/* Functional layer — invisible click targets aligned with the painted CTAs.
+          On narrow viewports the artwork's CTAs may not align, so we also render
+          a visible fallback row anchored to the bottom. */}
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1536px] flex-col">
+        {/* Visually-hidden semantic content for SEO / a11y */}
+        <h1 className="sr-only">Bem-vindo ao universo do conhecimento e da evolução.</h1>
+        <p className="sr-only">
           Aprenda, evolua e acesse experiências educacionais em um único ambiente.
         </p>
 
-
-        <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        {/* Click hotspots over the painted CTAs — only on wide screens where
+            the artwork is shown in full composition. */}
+        <div className="pointer-events-none absolute inset-0 hidden lg:block">
           <Link
             to={session ? inAppDest : "/login"}
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-soft-white transition-all hover:scale-[1.02] sm:w-auto"
+            aria-label={session ? "Acessar plataforma" : "Entrar"}
+            className="pointer-events-auto absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/70"
+            style={{
+              left: "33.85%",
+              top: "49.2%",
+              width: "15.5%",
+              height: "8.1%",
+            }}
+          />
+          {!session && (
+            <Link
+              to="/login"
+              search={{ mode: "signup" }}
+              aria-label="Criar conta"
+              className="pointer-events-auto absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/70"
+              style={{
+                left: "50.15%",
+                top: "49.2%",
+                width: "15.3%",
+                height: "8.1%",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Mobile / tablet CTAs — anchored bottom, never on top of the globe */}
+        <div className="mt-auto flex w-full flex-col items-center gap-3 px-6 pb-10 lg:hidden">
+          <Link
+            to={session ? inAppDest : "/login"}
+            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-soft-white"
             style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
           >
             {session ? "Acessar plataforma" : "Entrar"}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           {!session && (
             <Link
               to="/login"
               search={{ mode: "signup" }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/[0.04] px-8 py-3.5 text-sm font-semibold text-soft-white backdrop-blur-md transition hover:border-white/30 hover:bg-white/[0.08] sm:w-auto"
+              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-md border border-white/25 bg-black/40 px-8 py-3.5 text-sm font-semibold text-soft-white backdrop-blur-md"
             >
-              <UserPlus className="h-4 w-4" />
               Criar conta
             </Link>
           )}
         </div>
-
-        <p className="mt-14 text-[10px] uppercase tracking-[0.35em] text-stellar-silver/60">
-          Andromeda Play · © {new Date().getFullYear()}
-        </p>
-      </main>
+      </div>
     </div>
   );
 }
