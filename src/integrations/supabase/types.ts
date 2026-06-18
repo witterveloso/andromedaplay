@@ -784,6 +784,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_post: {
+        Args: { _post_id: string; _user_id: string }
+        Returns: boolean
+      }
       claim_invitations_for_user: {
         Args: { _email: string; _user_id: string }
         Returns: number
@@ -797,6 +801,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_course_owner_or_admin: {
+        Args: { _course_id: string; _user_id: string }
         Returns: boolean
       }
       is_enrolled: {
