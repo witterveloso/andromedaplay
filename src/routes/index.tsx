@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
-import { ArrowRight, UserPlus } from "lucide-react";
 import heroAsset from "@/assets/andromeda-hero.png.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -17,6 +15,17 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+/**
+ * Full-screen hero. The reference artwork is the experience itself:
+ * it already contains the logo, headline, subtitle and CTAs painted in.
+ * We render it as a 100vh cover background and overlay invisible click
+ * targets on top of the painted "Entrar" / "Criar conta" buttons so they
+ * become functional without disturbing the composition.
+ *
+ * Painted button positions (relative to the artwork, 1536 x 1024):
+ *   Entrar       → ~ x: 520..758  y: 504..587
+ *   Criar conta  → ~ x: 770..1004 y: 504..587
+ */
 function HomePage() {
   const { session, isAdmin, isExpert, isStudent } = useAuth();
   const inAppDest = isAdmin ? "/admin" : isExpert ? "/expert" : isStudent ? "/aluno" : "/login";
@@ -26,14 +35,14 @@ function HomePage() {
       className="relative min-h-screen w-full overflow-hidden"
       style={{ background: "#05050d", color: "var(--color-soft-white)" }}
     >
-      {/* Hero background image — full screen */}
+      {/* Hero artwork — full screen, never cropped at the center */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-center bg-cover"
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover"
         style={{ backgroundImage: `url(${heroAsset.url})` }}
       />
 
-      {/* Readability overlay */}
+      {/* Subtle readability overlay (per spec) */}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -43,70 +52,66 @@ function HomePage() {
         }}
       />
 
-      <main className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center px-6 py-10 text-center">
-        <div className="mb-8 flex justify-center">
-          <AndromedaLogo size={56} />
-        </div>
-
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-4 py-1.5 text-[10px] uppercase tracking-[0.32em] text-stellar-silver backdrop-blur-md">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ background: "#00B8FF", boxShadow: "0 0 10px #00B8FF" }}
-          />
-          Portal de acesso
-        </div>
-
-        <h1
-          className="mx-auto max-w-4xl text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.02em]"
-          style={{
-            fontFamily: "Sora, system-ui, sans-serif",
-            textShadow: "0 4px 32px rgba(0,0,0,0.6)",
-          }}
-        >
-          <span className="block text-soft-white/95">Bem-vindo ao universo do</span>
-          <span
-            className="block bg-clip-text text-transparent"
-            style={{ backgroundImage: "var(--gradient-cosmic)" }}
-          >
-            conhecimento e da evolução.
-          </span>
-        </h1>
-
-        <p
-          className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-stellar-silver md:text-[17px]"
-          style={{
-            fontFamily: "Manrope, system-ui, sans-serif",
-            textShadow: "0 2px 16px rgba(0,0,0,0.6)",
-          }}
-        >
+      {/* Functional layer — invisible click targets aligned with the painted CTAs.
+          On narrow viewports the artwork's CTAs may not align, so we also render
+          a visible fallback row anchored to the bottom. */}
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1536px] flex-col">
+        {/* Visually-hidden semantic content for SEO / a11y */}
+        <h1 className="sr-only">Bem-vindo ao universo do conhecimento e da evolução.</h1>
+        <p className="sr-only">
           Aprenda, evolua e acesse experiências educacionais em um único ambiente.
         </p>
 
-        <div className="mt-10 flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:max-w-none">
+        {/* Click hotspots over the painted CTAs — only on wide screens where
+            the artwork is shown in full composition. */}
+        <div className="pointer-events-none absolute inset-0 hidden lg:block">
           <Link
             to={session ? inAppDest : "/login"}
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-soft-white transition-all hover:scale-[1.02] sm:w-auto"
+            aria-label={session ? "Acessar plataforma" : "Entrar"}
+            className="pointer-events-auto absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/70"
+            style={{
+              left: "33.85%",
+              top: "49.2%",
+              width: "15.5%",
+              height: "8.1%",
+            }}
+          />
+          {!session && (
+            <Link
+              to="/login"
+              search={{ mode: "signup" }}
+              aria-label="Criar conta"
+              className="pointer-events-auto absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/70"
+              style={{
+                left: "50.15%",
+                top: "49.2%",
+                width: "15.3%",
+                height: "8.1%",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Mobile / tablet CTAs — anchored bottom, never on top of the globe */}
+        <div className="mt-auto flex w-full flex-col items-center gap-3 px-6 pb-10 lg:hidden">
+          <Link
+            to={session ? inAppDest : "/login"}
+            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-soft-white"
             style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
           >
             {session ? "Acessar plataforma" : "Entrar"}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           {!session && (
             <Link
               to="/login"
               search={{ mode: "signup" }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/20 bg-black/30 px-8 py-3.5 text-sm font-semibold text-soft-white backdrop-blur-md transition hover:border-white/40 hover:bg-black/45 sm:w-auto"
+              className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-md border border-white/25 bg-black/40 px-8 py-3.5 text-sm font-semibold text-soft-white backdrop-blur-md"
             >
-              <UserPlus className="h-4 w-4" />
               Criar conta
             </Link>
           )}
         </div>
-
-        <p className="mt-12 text-[10px] uppercase tracking-[0.35em] text-stellar-silver/70">
-          Andromeda Play · © {new Date().getFullYear()}
-        </p>
-      </main>
+      </div>
     </div>
   );
 }
