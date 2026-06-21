@@ -4,14 +4,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 import { Eye, EyeOff } from "lucide-react";
 import { signupWithInvitation } from "@/lib/auth-access.functions";
+import loginDesktop from "@/assets/andromeda-login-desktop.png.asset.json";
+import homeMobile from "@/assets/andromeda-home-mobile.png.asset.json";
 
 type LoginSearch = { mode?: "signin" | "signup"; email?: string };
 
@@ -20,31 +20,15 @@ export const Route = createFileRoute("/login")({
     mode: search.mode === "signup" ? "signup" : "signin",
     email: typeof search.email === "string" ? search.email : undefined,
   }),
+  head: () => ({
+    meta: [
+      { title: "Entrar — Andromeda Play" },
+      { name: "description", content: "Acesse sua conta na Andromeda Play." },
+      { property: "og:image", content: loginDesktop.url },
+    ],
+  }),
   component: LoginPage,
 });
-
-function CinematicBackdrop() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0" style={{ background: "var(--gradient-aurora)" }} />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 0%, rgba(6,6,15,0.35) 55%, rgba(6,6,15,0.95) 100%)",
-        }}
-      />
-      <div
-        className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full blur-[180px] opacity-50"
-        style={{ background: "radial-gradient(circle, #6C4DFF 0%, transparent 70%)" }}
-      />
-      <div
-        className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full blur-[180px] opacity-40"
-        style={{ background: "radial-gradient(circle, #00B8FF 0%, transparent 70%)" }}
-      />
-    </div>
-  );
-}
 
 function LoginPage() {
   const { session, loading, isAdmin, isExpert, isStudent } = useAuth();
@@ -60,11 +44,12 @@ function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
 
   const dest = isAdmin ? "/admin" : isExpert ? "/expert" : isStudent ? "/aluno" : null;
 
   useEffect(() => {
-    if (search.mode) setMode(search.mode);
+    if (search.mode === "signup") setSignupOpen(true);
     if (search.email) setEmail(search.email.trim().toLowerCase());
   }, [search.mode, search.email]);
 
@@ -77,6 +62,7 @@ function LoginPage() {
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password) return;
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
     setSubmitting(false);
@@ -90,10 +76,10 @@ function LoginPage() {
     setSubmitting(true);
     try {
       await signupFn({ data: { email: normalizedEmail, password, full_name: name } });
-      // Auto sign-in
       const { error: signErr } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
       if (signErr) throw signErr;
       toast.success("Conta criada com sucesso");
+      setSignupOpen(false);
     } catch (err: any) {
       toast.error(err?.message ?? "Falha ao criar conta");
     } finally {
@@ -108,138 +94,226 @@ function LoginPage() {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setForgotSubmitting(false);
-    toast.success("Se este e-mail estiver cadastrado, enviaremos as instruções de recuperação.");
+    toast.success("Se este e-mail estiver cadastrado, enviaremos as instruções.");
     setForgotOpen(false);
     setForgotEmail("");
   }
 
-  const isSignup = mode === "signup";
+  // Inputs transparentes que aparentam fazer parte da arte.
+  const invisibleInput =
+    "w-full h-full bg-transparent border-0 outline-none text-white placeholder:text-transparent focus:ring-0 px-14 text-base";
 
   return (
-    <div
-      className="relative flex min-h-screen items-center justify-center px-4 py-12"
-      style={{ background: "var(--color-cosmic-navy)" }}
-    >
-      <CinematicBackdrop />
+    <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
+      {/* Desktop artwork */}
+      <div
+        className="absolute inset-0 hidden md:block"
+        style={{
+          backgroundImage: `url(${loginDesktop.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+        aria-label="Andromeda Play — Entrar"
+      />
+      {/* Mobile fallback artwork (reuses mobile home art) */}
+      <div
+        className="absolute inset-0 md:hidden"
+        style={{
+          backgroundImage: `url(${homeMobile.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+        aria-label="Andromeda Play"
+      />
 
-      <div className="relative z-10 w-full max-w-md space-y-8">
-        <div className="space-y-4 text-center">
-          <Link to="/" className="inline-block">
-            <div className="flex justify-center">
-              <AndromedaLogo className="scale-125" />
-            </div>
-          </Link>
-          <p className="text-sm text-stellar-silver md:text-base">
-            {isSignup
-              ? "Crie sua conta com o e-mail liberado pelo seu produtor"
-              : "Seu universo de aprendizado, comunidade e conteúdo premium"}
-          </p>
+      <h1 className="sr-only">Entrar na Andromeda Play</h1>
+
+      {/* DESKTOP: overlay form on top of artwork */}
+      <form
+        onSubmit={handleSignIn}
+        className="absolute inset-0 hidden md:block"
+        autoComplete="on"
+      >
+        {/* Criar conta — top right pill */}
+        <button
+          type="button"
+          onClick={() => setSignupOpen(true)}
+          aria-label="Criar conta"
+          className="absolute rounded-xl focus:outline-none focus:ring-2 focus:ring-white/40"
+          style={{ top: "3.5%", right: "2%", width: "13%", height: "7.5%" }}
+        />
+
+        {/* Email input — transparent over art */}
+        <div
+          className="absolute"
+          style={{ top: "42.5%", left: "14.4%", width: "27.5%", height: "8%" }}
+        >
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            aria-label="Email"
+            className={invisibleInput}
+          />
         </div>
 
-        <Card
-          className="border-white/10 p-8 shadow-2xl backdrop-blur-xl"
-          style={{ background: "rgba(11, 11, 15, 0.65)", boxShadow: "0 30px 80px -20px rgba(108,77,255,0.35)" }}
+        {/* Password input — transparent over art */}
+        <div
+          className="absolute"
+          style={{ top: "55.3%", left: "14.4%", width: "27.5%", height: "8%" }}
         >
-          <div className="mb-6 flex rounded-lg border border-white/10 bg-white/[0.03] p-1">
-            <button
-              type="button"
-              onClick={() => setMode("signin")}
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition ${
-                !isSignup ? "text-soft-white" : "text-stellar-silver hover:text-soft-white"
-              }`}
-              style={!isSignup ? { background: "var(--gradient-cosmic)", boxShadow: "0 0 18px rgba(108,77,255,0.4)" } : {}}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("signup")}
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition ${
-                isSignup ? "text-soft-white" : "text-stellar-silver hover:text-soft-white"
-              }`}
-              style={isSignup ? { background: "var(--gradient-cosmic)", boxShadow: "0 0 18px rgba(108,77,255,0.4)" } : {}}
-            >
-              Criar conta
-            </button>
-          </div>
+          <input
+            type={showPwd ? "text" : "password"}
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="senha"
+            aria-label="Senha"
+            className={invisibleInput + " pr-12"}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPwd((s) => !s)}
+            aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+          >
+            {showPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
+        </div>
 
-          <form onSubmit={isSignup ? handleSignUp : handleSignIn} className="space-y-5">
-            {isSignup && (
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-soft-white">Nome</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Seu nome"
-                  className="border-white/10 bg-white/5 text-soft-white placeholder:text-stellar-silver/50 focus:border-electric-blue focus:ring-electric-blue/20"
-                />
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-soft-white">Email</Label>
+        {/* Esqueci minha senha */}
+        <button
+          type="button"
+          onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+          aria-label="Esqueci minha senha"
+          className="absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/40"
+          style={{ top: "65.9%", left: "30.5%", width: "11.4%", height: "3.5%" }}
+        />
+
+        {/* Entrar — main button */}
+        <button
+          type="submit"
+          disabled={submitting}
+          aria-label="Entrar"
+          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-60"
+          style={{ top: "70.7%", left: "14.4%", width: "27.5%", height: "8.5%" }}
+        />
+
+        {/* Criar conta — secondary button */}
+        <button
+          type="button"
+          onClick={() => setSignupOpen(true)}
+          aria-label="Criar conta"
+          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40"
+          style={{ top: "84%", left: "14.4%", width: "27.5%", height: "7.5%" }}
+        />
+      </form>
+
+      {/* MOBILE: visible card form (mobile login art was not provided) */}
+      <div className="absolute inset-0 flex items-center justify-center px-6 md:hidden">
+        <div className="w-full max-w-sm space-y-4 rounded-2xl border border-white/15 bg-black/55 p-6 backdrop-blur-xl">
+          <h2 className="text-center text-2xl font-semibold text-white">Entrar</h2>
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="m-email" className="text-white/90">E-mail</Label>
               <Input
-                id="email"
+                id="m-email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="border-white/10 bg-white/5 text-soft-white placeholder:text-stellar-silver/50 focus:border-electric-blue focus:ring-electric-blue/20"
+                className="border-white/15 bg-white/5 text-white placeholder:text-white/40"
               />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-soft-white">Senha</Label>
-                {!isSignup && (
-                  <button
-                    type="button"
-                    onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
-                    className="text-xs text-stellar-silver hover:text-soft-white underline-offset-2 hover:underline"
-                  >
-                    Esqueci minha senha
-                  </button>
-                )}
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="m-pwd" className="text-white/90">Senha</Label>
               <div className="relative">
                 <Input
-                  id="password"
+                  id="m-pwd"
                   type={showPwd ? "text" : "password"}
                   required
-                  minLength={isSignup ? 6 : undefined}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="border-white/10 bg-white/5 text-soft-white placeholder:text-stellar-silver/50 focus:border-electric-blue focus:ring-electric-blue/20 pr-10"
+                  className="border-white/15 bg-white/5 pr-10 text-white placeholder:text-white/40"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
                   aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stellar-silver hover:text-soft-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70"
                 >
                   {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+                className="ml-auto block text-xs text-white/70 underline-offset-2 hover:underline"
+              >
+                Esqueci minha senha
+              </button>
             </div>
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full border-0 font-semibold text-soft-white transition hover:scale-[1.02] hover:opacity-90"
-              style={{ background: "var(--gradient-cosmic)", boxShadow: "var(--shadow-glow)" }}
+              className="w-full border-0 font-semibold text-white"
+              style={{ background: "var(--gradient-cosmic, linear-gradient(90deg,#3B6BFF,#8A5BFF))" }}
             >
-              {submitting ? (isSignup ? "Criando…" : "Entrando…") : isSignup ? "Criar conta" : "Entrar"}
+              {submitting ? "Entrando…" : "Entrar"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSignupOpen(true)}
+              className="w-full border-white/20 bg-transparent text-white hover:bg-white/10"
+            >
+              Criar conta
             </Button>
           </form>
-        </Card>
-
-        <p className="text-center text-xs text-stellar-silver/60">
-          <Link to="/" className="hover:text-soft-white">← Voltar ao portal</Link>
-        </p>
+          <p className="text-center text-xs text-white/60">
+            <Link to="/" className="hover:text-white">← Voltar</Link>
+          </p>
+        </div>
       </div>
 
+      {/* Signup dialog */}
+      <Dialog open={signupOpen} onOpenChange={setSignupOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar conta</DialogTitle>
+            <DialogDescription>
+              Use o e-mail liberado pelo seu produtor.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="s-name">Nome</Label>
+              <Input id="s-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="s-email">E-mail</Label>
+              <Input id="s-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="s-pwd">Senha</Label>
+              <Input id="s-pwd" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
+            </div>
+            <Button type="submit" disabled={submitting} className="w-full">
+              {submitting ? "Criando…" : "Criar conta"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forgot password dialog */}
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
         <DialogContent>
           <DialogHeader>
@@ -266,6 +340,6 @@ function LoginPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 }
