@@ -168,15 +168,14 @@ function LoginPage() {
                 className={inputBase}
                 style={inputFont}
               />
+              {/* Invisible hotspot over the artwork's reveal-password eye */}
               <button
                 type="button"
                 onClick={() => setShowPwd((s) => !s)}
                 aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
-                className="absolute top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-transparent border-0 p-0"
-                style={{ right: "8%" }}
-              >
-                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+                className={hotspotBase}
+                style={{ top: "24%", left: "89%", width: "7%", height: "28%" }}
+              />
             </div>
 
             {/* Esqueci minha senha */}
