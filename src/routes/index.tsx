@@ -19,6 +19,13 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+// Aspect ratios match the source artwork
+const DESKTOP_AR = "1672 / 941";
+const MOBILE_AR = "941 / 1672";
+
+const hotspotBase =
+  "absolute block bg-transparent border-0 outline-none appearance-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40";
+
 function HomePage() {
   const { session, loading, isAdmin, isExpert, isStudent } = useAuth();
   const dest = isAdmin ? "/admin" : isExpert ? "/expert" : isStudent ? "/aluno" : null;
@@ -26,68 +33,69 @@ function HomePage() {
 
   return (
     <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
-      {/* Desktop artwork */}
-      <div
-        className="absolute inset-0 hidden md:block"
-        style={{
-          backgroundImage: `url(${homeDesktop.url})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Andromeda Play"
-      />
-      {/* Mobile artwork */}
-      <div
-        className="absolute inset-0 md:hidden"
-        style={{
-          backgroundImage: `url(${homeMobile.url})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Andromeda Play"
-      />
+      {/* DESKTOP frame — image sized to fit viewport while preserving aspect ratio */}
+      <div className="absolute inset-0 hidden md:grid place-items-center">
+        <div
+          className="relative"
+          style={{
+            aspectRatio: DESKTOP_AR,
+            width: `min(100vw, 100svh * (1672/941))`,
+            height: `min(100svh, 100vw * (941/1672))`,
+            backgroundImage: `url(${homeDesktop.url})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+          }}
+          aria-label="Andromeda Play"
+        >
+          {/* Entrar — top right pill */}
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "3.5%", right: "2%", width: "10%", height: "7.5%" }}
+          />
+          {/* Entrar — hero CTA */}
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "65%", left: "3.5%", width: "19%", height: "12%" }}
+          />
+        </div>
+      </div>
+
+      {/* MOBILE frame */}
+      <div className="absolute inset-0 grid place-items-center md:hidden">
+        <div
+          className="relative"
+          style={{
+            aspectRatio: MOBILE_AR,
+            width: `min(100vw, 100svh * (941/1672))`,
+            height: `min(100svh, 100vw * (1672/941))`,
+            backgroundImage: `url(${homeMobile.url})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+          }}
+          aria-label="Andromeda Play"
+        >
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "2%", right: "5%", width: "30%", height: "5.5%" }}
+          />
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "49%", left: "20%", width: "60%", height: "7.5%" }}
+          />
+        </div>
+      </div>
 
       <h1 className="sr-only">
         Bem-vindo ao universo do conhecimento e da evolução
       </h1>
-
-      {/* DESKTOP overlays */}
-      <div className="absolute inset-0 hidden md:block">
-        {/* Entrar — top right pill */}
-        <Link
-          to="/login"
-          aria-label="Entrar"
-          className="absolute rounded-xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "3.5%", right: "2%", width: "10%", height: "7.5%" }}
-        />
-        {/* Entrar — hero button */}
-        <Link
-          to="/login"
-          aria-label="Entrar"
-          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "65%", left: "3.5%", width: "19%", height: "12%" }}
-        />
-      </div>
-
-      {/* MOBILE overlays */}
-      <div className="absolute inset-0 md:hidden">
-        {/* Entrar — top right pill */}
-        <Link
-          to="/login"
-          aria-label="Entrar"
-          className="absolute rounded-xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "2%", right: "5%", width: "30%", height: "5.5%" }}
-        />
-        {/* Entrar — hero button */}
-        <Link
-          to="/login"
-          aria-label="Entrar"
-          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "49%", left: "20%", width: "60%", height: "7.5%" }}
-        />
-      </div>
     </main>
   );
 }
