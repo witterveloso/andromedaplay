@@ -30,12 +30,19 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+const hotspotBase =
+  "absolute block bg-transparent border-0 outline-none appearance-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60";
+
+// Transparent inputs that visually belong to the artwork.
+// Font sizes are container-query based so they scale with the frame.
+const inputBase =
+  "absolute w-full h-full bg-transparent border-0 outline-none ring-0 text-white placeholder:text-white/40 focus:outline-none focus:ring-0 caret-white";
+
 function LoginPage() {
   const { session, loading, isAdmin, isExpert, isStudent } = useAuth();
   const navigate = useNavigate();
   const search = Route.useSearch();
   const signupFn = useServerFn(signupWithInvitation);
-  const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -99,190 +106,191 @@ function LoginPage() {
     setForgotEmail("");
   }
 
-  // Inputs transparentes que aparentam fazer parte da arte.
-  const invisibleInput =
-    "w-full h-full bg-transparent border-0 outline-none text-white placeholder:text-transparent focus:ring-0 px-14 text-base";
+  // Font scales with the frame width via container queries.
+  const inputFont = { fontSize: "clamp(12px, 1.15cqw, 16px)", paddingLeft: "12%", paddingRight: "12%" } as const;
 
   return (
     <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
-      {/* Desktop artwork */}
-      <div
-        className="absolute inset-0 hidden md:block"
-        style={{
-          backgroundImage: `url(${loginDesktop.url})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Andromeda Play — Entrar"
-      />
-      {/* Mobile fallback artwork (reuses mobile home art) */}
-      <div
-        className="absolute inset-0 md:hidden"
-        style={{
-          backgroundImage: `url(${homeMobile.url})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Andromeda Play"
-      />
-
-      <h1 className="sr-only">Entrar na Andromeda Play</h1>
-
-      {/* DESKTOP: overlay form on top of artwork */}
-      <form
-        onSubmit={handleSignIn}
-        className="absolute inset-0 hidden md:block"
-        autoComplete="on"
-      >
-        {/* Criar conta — top right pill */}
-        <button
-          type="button"
-          onClick={() => setSignupOpen(true)}
-          aria-label="Criar conta"
-          className="absolute rounded-xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "3.5%", right: "2%", width: "13%", height: "7.5%" }}
-        />
-
-        {/* Email input — transparent over art */}
+      {/* DESKTOP frame — image sized to viewport preserving aspect ratio */}
+      <div className="absolute inset-0 hidden md:grid place-items-center">
         <div
-          className="absolute"
-          style={{ top: "42.5%", left: "14.4%", width: "27.5%", height: "8%" }}
+          className="relative"
+          style={{
+            aspectRatio: "1672 / 941",
+            width: `min(100vw, 100svh * (1672/941))`,
+            height: `min(100svh, 100vw * (941/1672))`,
+            backgroundImage: `url(${loginDesktop.url})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+            containerType: "inline-size",
+          }}
+          aria-label="Andromeda Play — Entrar"
         >
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@email.com"
-            aria-label="Email"
-            className={invisibleInput}
-          />
-        </div>
+          <form onSubmit={handleSignIn} className="absolute inset-0" autoComplete="on">
+            {/* Criar conta — top right pill */}
+            <button
+              type="button"
+              onClick={() => setSignupOpen(true)}
+              aria-label="Criar conta"
+              className={hotspotBase}
+              style={{ top: "3.5%", right: "2%", width: "13%", height: "7.5%" }}
+            />
 
-        {/* Password input — transparent over art */}
-        <div
-          className="absolute"
-          style={{ top: "55.3%", left: "14.4%", width: "27.5%", height: "8%" }}
-        >
-          <input
-            type={showPwd ? "text" : "password"}
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="senha"
-            aria-label="Senha"
-            className={invisibleInput + " pr-12"}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPwd((s) => !s)}
-            aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-          >
-            {showPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-          </button>
-        </div>
-
-        {/* Esqueci minha senha */}
-        <button
-          type="button"
-          onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
-          aria-label="Esqueci minha senha"
-          className="absolute rounded-md focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "65.9%", left: "30.5%", width: "11.4%", height: "3.5%" }}
-        />
-
-        {/* Entrar — main button */}
-        <button
-          type="submit"
-          disabled={submitting}
-          aria-label="Entrar"
-          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-60"
-          style={{ top: "70.7%", left: "14.4%", width: "27.5%", height: "8.5%" }}
-        />
-
-        {/* Criar conta — secondary button */}
-        <button
-          type="button"
-          onClick={() => setSignupOpen(true)}
-          aria-label="Criar conta"
-          className="absolute rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/40"
-          style={{ top: "84%", left: "14.4%", width: "27.5%", height: "7.5%" }}
-        />
-      </form>
-
-      {/* MOBILE: visible card form (mobile login art was not provided) */}
-      <div className="absolute inset-0 flex items-center justify-center px-6 md:hidden">
-        <div className="w-full max-w-sm space-y-4 rounded-2xl border border-white/15 bg-black/55 p-6 backdrop-blur-xl">
-          <h2 className="text-center text-2xl font-semibold text-white">Entrar</h2>
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="m-email" className="text-white/90">E-mail</Label>
-              <Input
-                id="m-email"
+            {/* Email field */}
+            <div
+              className="absolute"
+              style={{ top: "42.5%", left: "14.4%", width: "27.5%", height: "8%" }}
+            >
+              <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                className="border-white/15 bg-white/5 text-white placeholder:text-white/40"
+                aria-label="Email"
+                className={inputBase}
+                style={inputFont}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="m-pwd" className="text-white/90">Senha</Label>
-              <div className="relative">
-                <Input
-                  id="m-pwd"
-                  type={showPwd ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="border-white/15 bg-white/5 pr-10 text-white placeholder:text-white/40"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPwd((s) => !s)}
-                  aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70"
-                >
-                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+
+            {/* Password field */}
+            <div
+              className="absolute"
+              style={{ top: "55.3%", left: "14.4%", width: "27.5%", height: "8%" }}
+            >
+              <input
+                type={showPwd ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-label="Senha"
+                className={inputBase}
+                style={inputFont}
+              />
               <button
                 type="button"
-                onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
-                className="ml-auto block text-xs text-white/70 underline-offset-2 hover:underline"
+                onClick={() => setShowPwd((s) => !s)}
+                aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
+                className="absolute top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-transparent border-0 p-0"
+                style={{ right: "8%" }}
               >
-                Esqueci minha senha
+                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <Button
+
+            {/* Esqueci minha senha */}
+            <button
+              type="button"
+              onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+              aria-label="Esqueci minha senha"
+              className={hotspotBase}
+              style={{ top: "65.9%", left: "30.5%", width: "11.4%", height: "3.5%" }}
+            />
+
+            {/* Entrar — main */}
+            <button
               type="submit"
               disabled={submitting}
-              className="w-full border-0 font-semibold text-white"
-              style={{ background: "var(--gradient-cosmic, linear-gradient(90deg,#3B6BFF,#8A5BFF))" }}
-            >
-              {submitting ? "Entrando…" : "Entrar"}
-            </Button>
-            <Button
+              aria-label="Entrar"
+              className={hotspotBase}
+              style={{ top: "70.7%", left: "14.4%", width: "27.5%", height: "8.5%" }}
+            />
+
+            {/* Criar conta — secondary */}
+            <button
               type="button"
-              variant="outline"
               onClick={() => setSignupOpen(true)}
-              className="w-full border-white/20 bg-transparent text-white hover:bg-white/10"
-            >
-              Criar conta
-            </Button>
+              aria-label="Criar conta"
+              className={hotspotBase}
+              style={{ top: "84%", left: "14.4%", width: "27.5%", height: "7.5%" }}
+            />
           </form>
-          <p className="text-center text-xs text-white/60">
-            <Link to="/" className="hover:text-white">← Voltar</Link>
-          </p>
         </div>
       </div>
+
+      {/* MOBILE frame with artwork backdrop + visible card */}
+      <div className="absolute inset-0 grid place-items-center md:hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${homeMobile.url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 w-full max-w-sm px-6">
+          <div className="space-y-4 rounded-2xl border border-white/15 bg-black/60 p-6 backdrop-blur-xl">
+            <h2 className="text-center text-2xl font-semibold text-white">Entrar</h2>
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="m-email" className="text-white/90">E-mail</Label>
+                <Input
+                  id="m-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="border-white/15 bg-white/5 text-white placeholder:text-white/40"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-pwd" className="text-white/90">Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="m-pwd"
+                    type={showPwd ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="border-white/15 bg-white/5 pr-10 text-white placeholder:text-white/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd((s) => !s)}
+                    aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70"
+                  >
+                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+                  className="ml-auto block text-xs text-white/70 underline-offset-2 hover:underline"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full border-0 font-semibold text-white"
+                style={{ background: "var(--gradient-cosmic, linear-gradient(90deg,#3B6BFF,#8A5BFF))" }}
+              >
+                {submitting ? "Entrando…" : "Entrar"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSignupOpen(true)}
+                className="w-full border-white/20 bg-transparent text-white hover:bg-white/10"
+              >
+                Criar conta
+              </Button>
+            </form>
+            <p className="text-center text-xs text-white/60">
+              <Link to="/" className="hover:text-white">← Voltar</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h1 className="sr-only">Entrar na Andromeda Play</h1>
 
       {/* Signup dialog */}
       <Dialog open={signupOpen} onOpenChange={setSignupOpen}>
