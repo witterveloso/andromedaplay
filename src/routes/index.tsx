@@ -33,8 +33,43 @@ function HomePage() {
 
   return (
     <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
+      {/* Ambient blurred backdrop — extends artwork to fill black bars */}
+      <div
+        aria-hidden
+        className="absolute inset-0 hidden md:block"
+        style={{
+          backgroundImage: `url(${homeDesktop.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(28px)",
+          transform: "scale(1.12)",
+          opacity: 0.65,
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 md:hidden"
+        style={{
+          backgroundImage: `url(${homeMobile.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(28px)",
+          transform: "scale(1.12)",
+          opacity: 0.65,
+        }}
+      />
+      {/* Soft overlay to harmonize the edges */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
+
       {/* DESKTOP frame — image sized to fit viewport while preserving aspect ratio */}
-      <div className="absolute inset-0 hidden md:grid place-items-center">
+      <div className="absolute inset-0 hidden md:grid place-items-center z-10">
         <div
           className="relative"
           style={{
@@ -52,20 +87,20 @@ function HomePage() {
             to="/login"
             aria-label="Entrar"
             className={hotspotBase}
-            style={{ top: "3.5%", right: "2%", width: "10%", height: "7.5%" }}
+            style={{ top: "3.5%", right: "2%", width: "10%", height: "7.5%", zIndex: 20 }}
           />
           {/* Entrar — hero CTA */}
           <Link
             to="/login"
             aria-label="Entrar"
             className={hotspotBase}
-            style={{ top: "65%", left: "3.5%", width: "19%", height: "12%" }}
+            style={{ top: "65%", left: "3.5%", width: "19%", height: "12%", zIndex: 20 }}
           />
         </div>
       </div>
 
       {/* MOBILE frame */}
-      <div className="absolute inset-0 grid place-items-center md:hidden">
+      <div className="absolute inset-0 grid place-items-center md:hidden z-10">
         <div
           className="relative"
           style={{
@@ -82,13 +117,13 @@ function HomePage() {
             to="/login"
             aria-label="Entrar"
             className={hotspotBase}
-            style={{ top: "2%", right: "5%", width: "30%", height: "5.5%" }}
+            style={{ top: "2%", right: "5%", width: "30%", height: "5.5%", zIndex: 20 }}
           />
           <Link
             to="/login"
             aria-label="Entrar"
             className={hotspotBase}
-            style={{ top: "49%", left: "20%", width: "60%", height: "7.5%" }}
+            style={{ top: "49%", left: "20%", width: "60%", height: "7.5%", zIndex: 20 }}
           />
         </div>
       </div>
