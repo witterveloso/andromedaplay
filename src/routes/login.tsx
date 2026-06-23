@@ -31,12 +31,12 @@ export const Route = createFileRoute("/login")({
 });
 
 const hotspotBase =
-  "absolute block bg-transparent border-0 outline-none appearance-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60";
+  "absolute z-30 flex items-center justify-center bg-transparent border-0 outline-none appearance-none cursor-pointer pointer-events-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60";
 
 // Transparent inputs that visually belong to the artwork.
 // Font sizes are container-query based so they scale with the frame.
 const inputBase =
-  "absolute w-full h-full bg-transparent border-0 outline-none ring-0 text-white placeholder:text-white/40 focus:outline-none focus:ring-0 caret-white";
+  "absolute inset-0 w-full h-full bg-transparent border-0 outline-none ring-0 text-white placeholder:text-transparent focus:outline-none focus:ring-0 caret-white";
 
 function LoginPage() {
   const { session, loading, isAdmin, isExpert, isStudent } = useAuth();
