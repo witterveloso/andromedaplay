@@ -126,7 +126,7 @@ function LoginPage() {
           }}
           aria-label="Andromeda Play — Entrar"
         >
-          <form onSubmit={handleSignIn} className="absolute inset-0" autoComplete="on">
+          <form onSubmit={handleSignIn} className="absolute inset-0 pointer-events-none" autoComplete="on">
             {/* Criar conta — top right pill */}
             <button
               type="button"
@@ -138,9 +138,15 @@ function LoginPage() {
 
             {/* Email field */}
             <div
-              className="absolute"
+              className="absolute z-20 pointer-events-auto overflow-hidden rounded-md"
               style={{ top: "42.5%", left: "14.4%", width: "27.5%", height: "8%" }}
             >
+              {/* Mask the artwork placeholder when focused/filled */}
+              <div
+                aria-hidden
+                className={`absolute inset-0 transition-opacity duration-150 ${email ? "opacity-100" : "opacity-0 focus-within:opacity-100"}`}
+                style={{ background: "rgba(8,10,24,0.78)", backdropFilter: "blur(6px)" }}
+              />
               <input
                 type="email"
                 required
@@ -150,14 +156,27 @@ function LoginPage() {
                 aria-label="Email"
                 className={inputBase}
                 style={inputFont}
+                onFocus={(e) => {
+                  const mask = e.currentTarget.previousElementSibling as HTMLElement | null;
+                  if (mask) mask.style.opacity = "1";
+                }}
+                onBlur={(e) => {
+                  const mask = e.currentTarget.previousElementSibling as HTMLElement | null;
+                  if (mask && !email) mask.style.opacity = "0";
+                }}
               />
             </div>
 
             {/* Password field */}
             <div
-              className="absolute"
+              className="absolute z-20 pointer-events-auto overflow-hidden rounded-md"
               style={{ top: "55.3%", left: "14.4%", width: "27.5%", height: "8%" }}
             >
+              <div
+                aria-hidden
+                className={`absolute inset-0 transition-opacity duration-150 ${password ? "opacity-100" : "opacity-0"}`}
+                style={{ background: "rgba(8,10,24,0.78)", backdropFilter: "blur(6px)" }}
+              />
               <input
                 type={showPwd ? "text" : "password"}
                 required
@@ -167,6 +186,14 @@ function LoginPage() {
                 aria-label="Senha"
                 className={inputBase}
                 style={inputFont}
+                onFocus={(e) => {
+                  const mask = e.currentTarget.previousElementSibling as HTMLElement | null;
+                  if (mask) mask.style.opacity = "1";
+                }}
+                onBlur={(e) => {
+                  const mask = e.currentTarget.previousElementSibling as HTMLElement | null;
+                  if (mask && !password) mask.style.opacity = "0";
+                }}
               />
               {/* Invisible hotspot over the artwork's reveal-password eye */}
               <button
@@ -202,7 +229,7 @@ function LoginPage() {
               onClick={() => setSignupOpen(true)}
               aria-label="Criar conta"
               className={hotspotBase}
-              style={{ top: "84%", left: "14.4%", width: "27.5%", height: "7.5%" }}
+              style={{ top: "80.5%", left: "14.4%", width: "27.5%", height: "9.5%" }}
             />
           </form>
         </div>
