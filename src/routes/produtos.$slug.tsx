@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useServerFn } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

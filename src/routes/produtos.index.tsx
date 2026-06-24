@@ -1,9 +1,10 @@
-import { createFileRoute, Link, useServerFn } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listProducts } from "@/lib/products.functions";
 import { ArrowRight, Sparkles } from "lucide-react";
 
-export const Route = createFileRoute("/produtos")({
+export const Route = createFileRoute("/produtos/")({
   head: () => ({
     meta: [
       { title: "Produtos — Andromeda Play" },
