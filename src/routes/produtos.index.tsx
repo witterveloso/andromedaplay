@@ -92,7 +92,7 @@ function ProductsPage() {
         )}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {data?.products.map((p) => (
+          {data?.products.map((p: any) => (
             <Link
               key={p.id}
               to="/produtos/$slug"

@@ -47,7 +47,7 @@ function AdminProductsPage() {
       {isLoading && <Loader2 className="animate-spin" />}
 
       <div className="space-y-3">
-        {data?.courses.map((c) => {
+        {data?.courses.map((c: any) => {
           const open = openId === c.id;
           return (
             <div key={c.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
