@@ -304,6 +304,7 @@ export type Database = {
       courses: {
         Row: {
           accent_color: string
+          access_duration_days: number | null
           background_color: string
           card_aspect_community: string
           card_aspect_custom: string | null
@@ -312,6 +313,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           created_by: string | null
+          currency: string
           custom_css: string | null
           description: string | null
           expert_id: string | null
@@ -325,8 +327,16 @@ export type Database = {
           featured_title: string | null
           font_family: string
           id: string
+          is_for_sale: boolean
           logo_url: string | null
+          price_cents: number | null
           primary_color: string
+          sales_bullets: Json
+          sales_description: string | null
+          sales_headline: string | null
+          sales_hero_url: string | null
+          sales_subheadline: string | null
+          sales_video_url: string | null
           slug: string
           status: Database["public"]["Enums"]["course_status"]
           text_color: string
@@ -336,6 +346,7 @@ export type Database = {
         }
         Insert: {
           accent_color?: string
+          access_duration_days?: number | null
           background_color?: string
           card_aspect_community?: string
           card_aspect_custom?: string | null
@@ -344,6 +355,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
@@ -357,8 +369,16 @@ export type Database = {
           featured_title?: string | null
           font_family?: string
           id?: string
+          is_for_sale?: boolean
           logo_url?: string | null
+          price_cents?: number | null
           primary_color?: string
+          sales_bullets?: Json
+          sales_description?: string | null
+          sales_headline?: string | null
+          sales_hero_url?: string | null
+          sales_subheadline?: string | null
+          sales_video_url?: string | null
           slug: string
           status?: Database["public"]["Enums"]["course_status"]
           text_color?: string
@@ -368,6 +388,7 @@ export type Database = {
         }
         Update: {
           accent_color?: string
+          access_duration_days?: number | null
           background_color?: string
           card_aspect_community?: string
           card_aspect_custom?: string | null
@@ -376,6 +397,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
@@ -389,8 +411,16 @@ export type Database = {
           featured_title?: string | null
           font_family?: string
           id?: string
+          is_for_sale?: boolean
           logo_url?: string | null
+          price_cents?: number | null
           primary_color?: string
+          sales_bullets?: Json
+          sales_description?: string | null
+          sales_headline?: string | null
+          sales_hero_url?: string | null
+          sales_subheadline?: string | null
+          sales_video_url?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["course_status"]
           text_color?: string
@@ -698,6 +728,65 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          amount_cents: number
+          buyer_email: string
+          buyer_id: string | null
+          buyer_name: string | null
+          course_id: string
+          created_at: string
+          currency: string
+          id: string
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          mp_status_detail: string | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          buyer_email: string
+          buyer_id?: string | null
+          buyer_name?: string | null
+          course_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          mp_status_detail?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          buyer_email?: string
+          buyer_id?: string | null
+          buyer_name?: string | null
+          course_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          mp_status_detail?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           accent_color: string
@@ -819,6 +908,12 @@ export type Database = {
       course_type: "video" | "community"
       expert_status: "active" | "paused" | "blocked"
       lesson_status: "published" | "draft" | "locked"
+      order_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "refunded"
+        | "cancelled"
       post_status: "published" | "draft" | "hidden"
     }
     CompositeTypes: {
@@ -952,6 +1047,13 @@ export const Constants = {
       course_type: ["video", "community"],
       expert_status: ["active", "paused", "blocked"],
       lesson_status: ["published", "draft", "locked"],
+      order_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "refunded",
+        "cancelled",
+      ],
       post_status: ["published", "draft", "hidden"],
     },
   },

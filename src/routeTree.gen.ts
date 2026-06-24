@@ -14,14 +14,20 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
 import { Route as ExpertIndexRouteImport } from './routes/expert.index'
 import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
 import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
 import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
+import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
+import { Route as CheckoutPendenteRouteImport } from './routes/checkout.pendente'
+import { Route as CheckoutFalhouRouteImport } from './routes/checkout.falhou'
 import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
@@ -32,6 +38,7 @@ import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
 import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
 import { Route as ExpertCoursesIdRouteImport } from './routes/expert.courses.$id'
+import { Route as ApiPublicMpWebhookRouteImport } from './routes/api/public/mp-webhook'
 import { Route as AlunoCSlugRouteImport } from './routes/aluno.c.$slug'
 import { Route as AdminExpertsNewRouteImport } from './routes/admin.experts.new'
 import { Route as AdminExpertsIdRouteImport } from './routes/admin.experts.$id'
@@ -63,6 +70,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProdutosIndexRoute = ProdutosIndexRouteImport.update({
+  id: '/produtos/',
+  path: '/produtos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpertIndexRoute = ExpertIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -78,6 +90,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
+  id: '/produtos/$slug',
+  path: '/produtos/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpertProfileRoute = ExpertProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -87,6 +104,21 @@ const ExpertPreviewRoute = ExpertPreviewRouteImport.update({
   id: '/preview',
   path: '/preview',
   getParentRoute: () => ExpertRoute,
+} as any)
+const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
+  id: '/checkout/sucesso',
+  path: '/checkout/sucesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutPendenteRoute = CheckoutPendenteRouteImport.update({
+  id: '/checkout/pendente',
+  path: '/checkout/pendente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutFalhouRoute = CheckoutFalhouRouteImport.update({
+  id: '/checkout/falhou',
+  path: '/checkout/falhou',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
   id: '/aluno/perfil',
@@ -101,6 +133,11 @@ const AdminSupportRoute = AdminSupportRouteImport.update({
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProdutosRoute = AdminProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMaintenanceRoute = AdminMaintenanceRouteImport.update({
@@ -153,6 +190,11 @@ const ExpertCoursesIdRoute = ExpertCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => ExpertRoute,
 } as any)
+const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
+  id: '/api/public/mp-webhook',
+  path: '/api/public/mp-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlunoCSlugRoute = AlunoCSlugRouteImport.update({
   id: '/aluno/c/$slug',
   path: '/aluno/c/$slug',
@@ -192,17 +234,24 @@ export interface FileRoutesByFullPath {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
+  '/admin/produtos': typeof AdminProdutosRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
+  '/checkout/falhou': typeof CheckoutFalhouRoute
+  '/checkout/pendente': typeof CheckoutPendenteRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
+  '/produtos/': typeof ProdutosIndexRoute
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts/': typeof AdminExpertsIndexRoute
@@ -220,17 +269,24 @@ export interface FileRoutesByTo {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
+  '/admin/produtos': typeof AdminProdutosRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
+  '/checkout/falhou': typeof CheckoutFalhouRoute
+  '/checkout/pendente': typeof CheckoutPendenteRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin': typeof AdminIndexRoute
   '/aluno': typeof AlunoIndexRoute
   '/expert': typeof ExpertIndexRoute
+  '/produtos': typeof ProdutosIndexRoute
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts': typeof AdminExpertsIndexRoute
@@ -251,17 +307,24 @@ export interface FileRoutesById {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
+  '/admin/produtos': typeof AdminProdutosRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
+  '/checkout/falhou': typeof CheckoutFalhouRoute
+  '/checkout/pendente': typeof CheckoutPendenteRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
+  '/produtos/': typeof ProdutosIndexRoute
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts/': typeof AdminExpertsIndexRoute
@@ -283,17 +346,24 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/invitations'
     | '/admin/maintenance'
+    | '/admin/produtos'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
+    | '/checkout/falhou'
+    | '/checkout/pendente'
+    | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/produtos/$slug'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
+    | '/produtos/'
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
+    | '/api/public/mp-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts/'
@@ -311,17 +381,24 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/invitations'
     | '/admin/maintenance'
+    | '/admin/produtos'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
+    | '/checkout/falhou'
+    | '/checkout/pendente'
+    | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/produtos/$slug'
     | '/admin'
     | '/aluno'
     | '/expert'
+    | '/produtos'
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
+    | '/api/public/mp-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts'
@@ -341,17 +418,24 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/invitations'
     | '/admin/maintenance'
+    | '/admin/produtos'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
+    | '/checkout/falhou'
+    | '/checkout/pendente'
+    | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/produtos/$slug'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
+    | '/produtos/'
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
+    | '/api/public/mp-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts/'
@@ -367,8 +451,14 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AlunoPerfilRoute: typeof AlunoPerfilRoute
+  CheckoutFalhouRoute: typeof CheckoutFalhouRoute
+  CheckoutPendenteRoute: typeof CheckoutPendenteRoute
+  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
+  ProdutosSlugRoute: typeof ProdutosSlugRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
+  ProdutosIndexRoute: typeof ProdutosIndexRoute
   AlunoCSlugRoute: typeof AlunoCSlugRoute
+  ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -408,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/produtos/': {
+      id: '/produtos/'
+      path: '/produtos'
+      fullPath: '/produtos/'
+      preLoaderRoute: typeof ProdutosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expert/': {
       id: '/expert/'
       path: '/'
@@ -429,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/produtos/$slug': {
+      id: '/produtos/$slug'
+      path: '/produtos/$slug'
+      fullPath: '/produtos/$slug'
+      preLoaderRoute: typeof ProdutosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expert/profile': {
       id: '/expert/profile'
       path: '/profile'
@@ -442,6 +546,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/expert/preview'
       preLoaderRoute: typeof ExpertPreviewRouteImport
       parentRoute: typeof ExpertRoute
+    }
+    '/checkout/sucesso': {
+      id: '/checkout/sucesso'
+      path: '/checkout/sucesso'
+      fullPath: '/checkout/sucesso'
+      preLoaderRoute: typeof CheckoutSucessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/pendente': {
+      id: '/checkout/pendente'
+      path: '/checkout/pendente'
+      fullPath: '/checkout/pendente'
+      preLoaderRoute: typeof CheckoutPendenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/falhou': {
+      id: '/checkout/falhou'
+      path: '/checkout/falhou'
+      fullPath: '/checkout/falhou'
+      preLoaderRoute: typeof CheckoutFalhouRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/aluno/perfil': {
       id: '/aluno/perfil'
@@ -462,6 +587,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/admin/students'
       preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/produtos': {
+      id: '/admin/produtos'
+      path: '/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminProdutosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/maintenance': {
@@ -534,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpertCoursesIdRouteImport
       parentRoute: typeof ExpertRoute
     }
+    '/api/public/mp-webhook': {
+      id: '/api/public/mp-webhook'
+      path: '/api/public/mp-webhook'
+      fullPath: '/api/public/mp-webhook'
+      preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aluno/c/$slug': {
       id: '/aluno/c/$slug'
       path: '/aluno/c/$slug'
@@ -579,6 +718,7 @@ interface AdminRouteChildren {
   AdminCoursesRoute: typeof AdminCoursesRoute
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMaintenanceRoute: typeof AdminMaintenanceRoute
+  AdminProdutosRoute: typeof AdminProdutosRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -594,6 +734,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCoursesRoute: AdminCoursesRoute,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMaintenanceRoute: AdminMaintenanceRoute,
+  AdminProdutosRoute: AdminProdutosRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -646,19 +787,15 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AlunoPerfilRoute: AlunoPerfilRoute,
+  CheckoutFalhouRoute: CheckoutFalhouRoute,
+  CheckoutPendenteRoute: CheckoutPendenteRoute,
+  CheckoutSucessoRoute: CheckoutSucessoRoute,
+  ProdutosSlugRoute: ProdutosSlugRoute,
   AlunoIndexRoute: AlunoIndexRoute,
+  ProdutosIndexRoute: ProdutosIndexRoute,
   AlunoCSlugRoute: AlunoCSlugRoute,
+  ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
