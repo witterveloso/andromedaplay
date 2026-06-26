@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
-import { createCheckoutPreference, getProduct } from "@/lib/products.functions";
+import { createCheckoutSession, getProduct } from "@/lib/products.functions";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/produtos/$slug")({

@@ -47,9 +47,9 @@ export const getProduct = createServerFn({ method: "GET" })
   });
 
 /* ============================================================
- * Create Mercado Pago checkout preference (guest-friendly)
+ * Create Stripe Checkout Session (guest-friendly)
  * ============================================================ */
-export const createCheckoutPreference = createServerFn({ method: "POST" })
+export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
       .object({
@@ -61,14 +61,15 @@ export const createCheckoutPreference = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    const accessToken = process.env.MP_ACCESS_TOKEN;
-    if (!accessToken) throw new Error("Pagamentos ainda não configurados. Tente novamente em instantes.");
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey)
+      throw new Error("Pagamentos ainda não configurados. Tente novamente em instantes.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: course, error } = await supabaseAdmin
       .from("courses")
-      .select("id, title, slug, price_cents, currency, is_for_sale, status")
+      .select("id, title, slug, price_cents, currency, is_for_sale, status, sales_hero_url, cover_url")
       .eq("id", data.course_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -77,7 +78,7 @@ export const createCheckoutPreference = createServerFn({ method: "POST" })
     if (!course.price_cents || course.price_cents < 100)
       throw new Error("Produto sem preço configurado");
 
-    // Try to attach to existing user if email matches an account
+    // Best-effort: link to existing user if email matches
     let buyerId: string | null = null;
     try {
       let page = 1;
@@ -102,7 +103,6 @@ export const createCheckoutPreference = createServerFn({ method: "POST" })
       buyerId = null;
     }
 
-    // Create order row first to get an id
     const { data: order, error: insErr } = await supabaseAdmin
       .from("orders")
       .insert({
@@ -119,61 +119,56 @@ export const createCheckoutPreference = createServerFn({ method: "POST" })
     if (insErr || !order) throw new Error(insErr?.message ?? "Falha ao criar pedido");
 
     const origin = data.origin?.replace(/\/$/, "") ?? "";
-    const backUrls = {
-      success: `${origin}/checkout/sucesso?order=${order.id}`,
-      pending: `${origin}/checkout/pendente?order=${order.id}`,
-      failure: `${origin}/checkout/falhou?order=${order.id}`,
-    };
-    const notification_url = `${origin}/api/public/mp-webhook`;
 
-    const prefBody = {
-      items: [
+    const Stripe = (await import("stripe")).default;
+    const stripe = new Stripe(secretKey, { apiVersion: "2024-12-18.acacia" as any });
+
+    const productImages: string[] = [];
+    if (course.sales_hero_url) productImages.push(course.sales_hero_url);
+    else if (course.cover_url) productImages.push(course.cover_url);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      customer_email: data.buyer_email,
+      client_reference_id: order.id,
+      line_items: [
         {
-          id: course.id,
-          title: course.title,
           quantity: 1,
-          currency_id: course.currency ?? "BRL",
-          unit_price: Number((course.price_cents / 100).toFixed(2)),
+          price_data: {
+            currency: (course.currency ?? "BRL").toLowerCase(),
+            unit_amount: course.price_cents,
+            product_data: {
+              name: course.title,
+              images: productImages,
+            },
+          },
         },
       ],
-      payer: { email: data.buyer_email, name: data.buyer_name ?? undefined },
-      external_reference: order.id,
-      back_urls: backUrls,
-      auto_return: "approved",
-      notification_url,
-      metadata: { order_id: order.id, course_id: course.id, buyer_email: data.buyer_email },
-    };
-
-    const resp = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+      success_url: `${origin}/checkout/sucesso?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/checkout/falhou?order=${order.id}`,
+      metadata: {
+        order_id: order.id,
+        course_id: course.id,
+        buyer_email: data.buyer_email,
+        buyer_name: data.buyer_name ?? "",
       },
-      body: JSON.stringify(prefBody),
+      payment_intent_data: {
+        metadata: {
+          order_id: order.id,
+          course_id: course.id,
+        },
+      },
     });
-
-    if (!resp.ok) {
-      const txt = await resp.text();
-      console.error("MP preference create failed", resp.status, txt);
-      throw new Error("Falha ao iniciar pagamento. Tente novamente.");
-    }
-
-    const pref = (await resp.json()) as {
-      id: string;
-      init_point?: string;
-      sandbox_init_point?: string;
-    };
 
     await supabaseAdmin
       .from("orders")
-      .update({ mp_preference_id: pref.id })
+      .update({ mp_preference_id: session.id })
       .eq("id", order.id);
 
-    const checkoutUrl = pref.init_point ?? pref.sandbox_init_point;
-    if (!checkoutUrl) throw new Error("Mercado Pago não retornou URL de checkout");
+    if (!session.url) throw new Error("Stripe não retornou URL de checkout");
 
-    return { order_id: order.id, checkout_url: checkoutUrl };
+    return { order_id: order.id, checkout_url: session.url };
   });
 
 /* ============================================================
