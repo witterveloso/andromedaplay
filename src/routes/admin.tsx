@@ -31,7 +31,7 @@ const nav: NavItem[] = [
   { to: "/admin/experts", label: "Produtores", icon: Users },
   { to: "/admin/students", label: "Alunos", icon: GraduationCap },
   { to: "/admin/courses", label: "Produtos / Cursos", icon: BookOpen },
-  { to: "/admin/produtos", label: "Vendas (Mercado Pago)", icon: ShoppingBag },
+  { to: "/admin/produtos", label: "Vendas (Stripe)", icon: ShoppingBag },
   { to: "/admin/communities", label: "Comunidades", icon: MessagesSquare },
   { to: "/admin/content", label: "Conteúdos", icon: FileStack },
   { to: "/admin/access", label: "Acessos", icon: KeyRound },

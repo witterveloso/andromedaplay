@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
-import { createCheckoutPreference, getProduct } from "@/lib/products.functions";
+import { createCheckoutSession, getProduct } from "@/lib/products.functions";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/produtos/$slug")({
@@ -24,7 +24,7 @@ function formatPrice(cents: number | null | undefined, currency = "BRL") {
 function ProductPage() {
   const { slug } = Route.useParams();
   const fetchProduct = useServerFn(getProduct);
-  const createPref = useServerFn(createCheckoutPreference);
+  const createPref = useServerFn(createCheckoutSession);
   const { user } = useAuth();
 
   const { data, isLoading, error } = useQuery({
@@ -221,7 +221,7 @@ function ProductPage() {
               )}
 
               <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-white/55">
-                <ShieldCheck className="h-3 w-3" /> Pagamento seguro via Mercado Pago
+                <ShieldCheck className="h-3 w-3" /> Pagamento seguro via Stripe
               </div>
             </form>
           </div>

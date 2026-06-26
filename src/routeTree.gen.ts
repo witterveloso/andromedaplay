@@ -38,7 +38,7 @@ import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
 import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
 import { Route as ExpertCoursesIdRouteImport } from './routes/expert.courses.$id'
-import { Route as ApiPublicMpWebhookRouteImport } from './routes/api/public/mp-webhook'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as AlunoCSlugRouteImport } from './routes/aluno.c.$slug'
 import { Route as AdminExpertsNewRouteImport } from './routes/admin.experts.new'
 import { Route as AdminExpertsIdRouteImport } from './routes/admin.experts.$id'
@@ -190,9 +190,9 @@ const ExpertCoursesIdRoute = ExpertCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => ExpertRoute,
 } as any)
-const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
-  id: '/api/public/mp-webhook',
-  path: '/api/public/mp-webhook',
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlunoCSlugRoute = AlunoCSlugRouteImport.update({
@@ -251,7 +251,7 @@ export interface FileRoutesByFullPath {
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
-  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts/': typeof AdminExpertsIndexRoute
@@ -286,7 +286,7 @@ export interface FileRoutesByTo {
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
-  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts': typeof AdminExpertsIndexRoute
@@ -324,7 +324,7 @@ export interface FileRoutesById {
   '/admin/experts/$id': typeof AdminExpertsIdRoute
   '/admin/experts/new': typeof AdminExpertsNewRoute
   '/aluno/c/$slug': typeof AlunoCSlugRoute
-  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/expert/courses/$id': typeof ExpertCoursesIdRouteWithChildren
   '/expert/courses/new': typeof ExpertCoursesNewRoute
   '/admin/experts/': typeof AdminExpertsIndexRoute
@@ -363,7 +363,7 @@ export interface FileRouteTypes {
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
-    | '/api/public/mp-webhook'
+    | '/api/public/stripe-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts/'
@@ -398,7 +398,7 @@ export interface FileRouteTypes {
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
-    | '/api/public/mp-webhook'
+    | '/api/public/stripe-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts'
@@ -435,7 +435,7 @@ export interface FileRouteTypes {
     | '/admin/experts/$id'
     | '/admin/experts/new'
     | '/aluno/c/$slug'
-    | '/api/public/mp-webhook'
+    | '/api/public/stripe-webhook'
     | '/expert/courses/$id'
     | '/expert/courses/new'
     | '/admin/experts/'
@@ -458,7 +458,7 @@ export interface RootRouteChildren {
   AlunoIndexRoute: typeof AlunoIndexRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
   AlunoCSlugRoute: typeof AlunoCSlugRoute
-  ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -666,11 +666,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpertCoursesIdRouteImport
       parentRoute: typeof ExpertRoute
     }
-    '/api/public/mp-webhook': {
-      id: '/api/public/mp-webhook'
-      path: '/api/public/mp-webhook'
-      fullPath: '/api/public/mp-webhook'
-      preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aluno/c/$slug': {
@@ -794,7 +794,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlunoIndexRoute: AlunoIndexRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
   AlunoCSlugRoute: AlunoCSlugRoute,
-  ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
