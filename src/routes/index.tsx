@@ -32,15 +32,22 @@ function HomePage() {
   if (!loading && session && dest) return <Navigate to={dest} />;
 
   return (
-    <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
-      {/* DESKTOP — artwork covers full viewport (overflows if needed) */}
-      <div className="absolute inset-0 hidden md:grid place-items-center overflow-hidden z-10">
+    <main
+      className="relative h-[100svh] w-screen overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at center, #1a0b3d 0%, #0a0420 45%, #000000 100%)",
+      }}
+    >
+      {/* DESKTOP — full artwork visible (contain), background extends sides */}
+      <div className="absolute inset-0 hidden md:grid place-items-center z-10">
         <div
           className="relative"
           style={{
             aspectRatio: DESKTOP_AR,
-            width: `max(100vw, 100svh * (1672/941))`,
-            height: `max(100svh, 100vw * (941/1672))`,
+            height: "100svh",
+            maxWidth: "100vw",
+            width: "min(100vw, 100svh * (1672/941))",
             backgroundImage: `url(${homeDesktop.url})`,
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
@@ -63,14 +70,14 @@ function HomePage() {
         </div>
       </div>
 
-      {/* MOBILE — artwork covers full viewport */}
-      <div className="absolute inset-0 grid place-items-center md:hidden overflow-hidden z-10">
+      {/* MOBILE — full artwork visible (contain), background extends sides */}
+      <div className="absolute inset-0 grid place-items-center md:hidden z-10">
         <div
           className="relative"
           style={{
             aspectRatio: MOBILE_AR,
-            width: `max(100vw, 100svh * (941/1672))`,
-            height: `max(100svh, 100vw * (1672/941))`,
+            height: "min(100svh, 100vw * (1672/941))",
+            width: "min(100vw, 100svh * (941/1672))",
             backgroundImage: `url(${homeMobile.url})`,
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
@@ -92,6 +99,7 @@ function HomePage() {
           />
         </div>
       </div>
+
 
       {/* Floating "Produtos" link at the top — minimal, over the artwork */}
       <Link
