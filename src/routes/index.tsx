@@ -93,43 +93,13 @@ function HomePage() {
         </div>
       </div>
 
-
-      {/* MOBILE frame */}
-      <div className="absolute inset-0 grid place-items-center md:hidden z-10">
-        <div
-          className="relative"
-          style={{
-            aspectRatio: MOBILE_AR,
-            width: `min(100vw, 100svh * (941/1672))`,
-            height: `min(100svh, 100vw * (1672/941))`,
-            backgroundImage: `url(${homeMobile.url})`,
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-          }}
-          aria-label="Andromeda Play"
-        >
-          <Link
-            to="/login"
-            aria-label="Entrar"
-            className={hotspotBase}
-            style={{ top: "2%", right: "5%", width: "30%", height: "5.5%", zIndex: 20 }}
-          />
-          <Link
-            to="/login"
-            aria-label="Entrar"
-            className={hotspotBase}
-            style={{ top: "49%", left: "20%", width: "60%", height: "7.5%", zIndex: 20 }}
-          />
-        </div>
-      </div>
-
       {/* Floating "Produtos" link at the top — minimal, over the artwork */}
       <Link
         to="/produtos"
-        aria-label="Produtos"
+        aria-label="PRODUTOS"
         className="absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/85 backdrop-blur-md transition hover:border-white/35 hover:bg-black/60 hover:text-white md:top-6 md:text-xs"
       >
-        Produtos
+        PRODUTOS
       </Link>
 
       <h1 className="sr-only">
