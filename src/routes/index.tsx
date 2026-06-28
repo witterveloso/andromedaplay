@@ -32,22 +32,15 @@ function HomePage() {
   if (!loading && session && dest) return <Navigate to={dest} />;
 
   return (
-    <main
-      className="relative h-[100svh] w-screen overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse at center, #1a0b3d 0%, #0a0420 45%, #000000 100%)",
-      }}
-    >
-      {/* DESKTOP — full artwork visible (contain), background extends sides */}
-      <div className="absolute inset-0 hidden md:grid place-items-center z-10">
+    <main className="relative h-[100svh] w-screen overflow-hidden bg-black">
+      {/* DESKTOP — artwork covers full viewport (overflows if needed) */}
+      <div className="absolute inset-0 hidden md:grid place-items-center overflow-hidden z-10">
         <div
           className="relative"
           style={{
             aspectRatio: DESKTOP_AR,
-            height: "100svh",
-            maxWidth: "100vw",
-            width: "min(100vw, 100svh * (1672/941))",
+            width: `max(100vw, 100svh * (1672/941))`,
+            height: `max(100svh, 100vw * (941/1672))`,
             backgroundImage: `url(${homeDesktop.url})`,
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
@@ -70,14 +63,14 @@ function HomePage() {
         </div>
       </div>
 
-      {/* MOBILE — full artwork visible (contain), background extends sides */}
-      <div className="absolute inset-0 grid place-items-center md:hidden z-10">
+      {/* MOBILE — artwork covers full viewport */}
+      <div className="absolute inset-0 grid place-items-center md:hidden overflow-hidden z-10">
         <div
           className="relative"
           style={{
             aspectRatio: MOBILE_AR,
-            height: "min(100svh, 100vw * (1672/941))",
-            width: "min(100vw, 100svh * (941/1672))",
+            width: `max(100vw, 100svh * (941/1672))`,
+            height: `max(100svh, 100vw * (1672/941))`,
             backgroundImage: `url(${homeMobile.url})`,
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
@@ -101,13 +94,42 @@ function HomePage() {
       </div>
 
 
+      {/* MOBILE frame */}
+      <div className="absolute inset-0 grid place-items-center md:hidden z-10">
+        <div
+          className="relative"
+          style={{
+            aspectRatio: MOBILE_AR,
+            width: `min(100vw, 100svh * (941/1672))`,
+            height: `min(100svh, 100vw * (1672/941))`,
+            backgroundImage: `url(${homeMobile.url})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+          }}
+          aria-label="Andromeda Play"
+        >
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "2%", right: "5%", width: "30%", height: "5.5%", zIndex: 20 }}
+          />
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className={hotspotBase}
+            style={{ top: "49%", left: "20%", width: "60%", height: "7.5%", zIndex: 20 }}
+          />
+        </div>
+      </div>
+
       {/* Floating "Produtos" link at the top — minimal, over the artwork */}
       <Link
         to="/produtos"
-        aria-label="PRODUTOS"
+        aria-label="Produtos"
         className="absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/85 backdrop-blur-md transition hover:border-white/35 hover:bg-black/60 hover:text-white md:top-6 md:text-xs"
       >
-        PRODUTOS
+        Produtos
       </Link>
 
       <h1 className="sr-only">
