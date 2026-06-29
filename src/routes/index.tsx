@@ -82,7 +82,7 @@ function HomePage() {
       <Link
         to="/produtos"
         aria-label="Produtos"
-        className="absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/85 backdrop-blur-md transition hover:border-white/35 hover:bg-black/60 hover:text-white md:top-6 md:text-xs"
+        className="absolute left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/85 backdrop-blur-md transition hover:border-white/35 hover:bg-black/60 hover:text-white max-md:bottom-5 max-md:top-auto md:top-6 md:text-xs"
       >
         Produtos
       </Link>
