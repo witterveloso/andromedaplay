@@ -69,13 +69,13 @@ function HomePage() {
           to="/login"
           aria-label="Entrar"
           className={hotspotBase}
-          style={{ top: "2%", right: "5%", width: "30%", height: "5.5%", zIndex: 20 }}
+          style={{ top: "1.5%", right: "2%", width: "21%", height: "5.5%", zIndex: 25 }}
         />
         <Link
           to="/login"
           aria-label="Entrar"
           className={hotspotBase}
-          style={{ top: "49%", left: "20%", width: "60%", height: "7.5%", zIndex: 20 }}
+          style={{ top: "41%", left: "19%", width: "60%", height: "7.5%", zIndex: 25 }}
         />
       </div>
 
