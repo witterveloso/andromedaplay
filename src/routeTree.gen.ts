@@ -18,6 +18,7 @@ import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
 import { Route as ExpertIndexRouteImport } from './routes/expert.index'
 import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ProdutosComunicaPascomRouteImport } from './routes/produtos.comunica-pascom'
 import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
 import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
 import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
@@ -89,6 +90,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ProdutosComunicaPascomRoute = ProdutosComunicaPascomRouteImport.update({
+  id: '/produtos/comunica-pascom',
+  path: '/produtos/comunica-pascom',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
   id: '/produtos/$slug',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
+  '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
+  '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/admin': typeof AdminIndexRoute
   '/aluno': typeof AlunoIndexRoute
   '/expert': typeof ExpertIndexRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
+  '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/expert/preview'
     | '/expert/profile'
     | '/produtos/$slug'
+    | '/produtos/comunica-pascom'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/expert/preview'
     | '/expert/profile'
     | '/produtos/$slug'
+    | '/produtos/comunica-pascom'
     | '/admin'
     | '/aluno'
     | '/expert'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/expert/preview'
     | '/expert/profile'
     | '/produtos/$slug'
+    | '/produtos/comunica-pascom'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
@@ -455,6 +467,7 @@ export interface RootRouteChildren {
   CheckoutPendenteRoute: typeof CheckoutPendenteRoute
   CheckoutSucessoRoute: typeof CheckoutSucessoRoute
   ProdutosSlugRoute: typeof ProdutosSlugRoute
+  ProdutosComunicaPascomRoute: typeof ProdutosComunicaPascomRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
   AlunoCSlugRoute: typeof AlunoCSlugRoute
@@ -525,6 +538,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/produtos/comunica-pascom': {
+      id: '/produtos/comunica-pascom'
+      path: '/produtos/comunica-pascom'
+      fullPath: '/produtos/comunica-pascom'
+      preLoaderRoute: typeof ProdutosComunicaPascomRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/produtos/$slug': {
       id: '/produtos/$slug'
@@ -791,6 +811,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutPendenteRoute: CheckoutPendenteRoute,
   CheckoutSucessoRoute: CheckoutSucessoRoute,
   ProdutosSlugRoute: ProdutosSlugRoute,
+  ProdutosComunicaPascomRoute: ProdutosComunicaPascomRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
   AlunoCSlugRoute: AlunoCSlugRoute,
