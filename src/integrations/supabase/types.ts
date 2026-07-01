@@ -317,6 +317,7 @@ export type Database = {
           custom_css: string | null
           description: string | null
           expert_id: string | null
+          external_checkout_url: string | null
           featured_cta_label: string | null
           featured_cta_url: string | null
           featured_description: string | null
@@ -359,6 +360,7 @@ export type Database = {
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
+          external_checkout_url?: string | null
           featured_cta_label?: string | null
           featured_cta_url?: string | null
           featured_description?: string | null
@@ -401,6 +403,7 @@ export type Database = {
           custom_css?: string | null
           description?: string | null
           expert_id?: string | null
+          external_checkout_url?: string | null
           featured_cta_label?: string | null
           featured_cta_url?: string | null
           featured_description?: string | null
