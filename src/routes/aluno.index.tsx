@@ -202,11 +202,7 @@ function StudentHome() {
                 >
                   <div
                     className="absolute inset-0"
-                    style={
-                      c.cover_url
-                        ? { backgroundImage: `url(${c.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                        : { background: `linear-gradient(135deg, ${c.primary_color ?? "#4f46e5"}, ${c.accent_color ?? "#1e1e5a"})` }
-                    }
+                    style={coverStyle(c)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/30 to-transparent" />
                   <div className="absolute top-0 right-0 p-3">
