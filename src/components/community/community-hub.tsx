@@ -250,12 +250,16 @@ export function CommunityHub({
     return m;
   }, [all]);
 
+  const historySet = useMemo(() => new Set(history), [history]);
   const lives = all.filter((p) => p.post_type === "live");
   const liveNow = lives.filter((p) => p.is_live_active);
   const materials = all.filter((p) => p.post_type === "material" || p.audio_url);
   const favorites = all.filter((p) => myReactions?.has(p.id));
   const recent = history.map((id) => all.find((p) => p.id === id)).filter(Boolean) as any[];
-  const newest = [...all].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 12);
+  const newest = [...all]
+    .filter((p) => !historySet.has(p.id))
+    .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+    .slice(0, 12);
 
   const handleOpen = (p: any) => {
     setOpenPost(p);
@@ -265,13 +269,14 @@ export function CommunityHub({
 
   const menu = [
     { key: "home", label: "Início", icon: Home, onClick: () => setView({ kind: "home" }) },
-    { key: "topics", label: "Tópicos", icon: Layers, onClick: () => { setView({ kind: "home" }); setTimeout(() => document.getElementById("hub-topics")?.scrollIntoView({ behavior: "smooth" }), 50); } },
     { key: "todos", label: "Conteúdos", icon: Hash, onClick: () => setView({ kind: "todos" }) },
     { key: "lives", label: "Lives", icon: Radio, onClick: () => setView({ kind: "lives" }), badge: liveNow.length || undefined },
     { key: "materiais", label: "Materiais", icon: FileText, onClick: () => setView({ kind: "materiais" }) },
     { key: "favoritos", label: "Favoritos", icon: Star, onClick: () => setView({ kind: "favoritos" }) },
+    { key: "anotacoes", label: "Anotações", icon: NotebookPen, onClick: () => setView({ kind: "anotacoes" }) },
     { key: "historico", label: "Histórico", icon: Clock, onClick: () => setView({ kind: "historico" }) },
   ];
+
 
   return (
     <div className="relative min-h-screen">
