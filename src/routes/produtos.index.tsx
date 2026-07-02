@@ -122,11 +122,11 @@ function ProductsPage() {
                     {p.price_cents
                       ? formatPrice(p.price_cents, p.currency ?? "BRL")
                       : p.external_checkout_url
-                        ? "Saiba mais"
+                        ? ""
                         : "Em breve"}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
-                    Saiba mais
+                    {"\n"}
                     <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
                   </span>
                 </div>
