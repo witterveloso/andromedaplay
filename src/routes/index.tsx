@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
+
 import homeDesktop from "@/assets/andromeda-home-desktop.png.asset.json";
 import homeMobile from "@/assets/andromeda-home-mobile.png.asset.json";
 
