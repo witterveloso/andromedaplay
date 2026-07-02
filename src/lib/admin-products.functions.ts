@@ -20,7 +20,7 @@ export const listAdminProducts = createServerFn({ method: "POST" })
     const { data, error } = await supabaseAdmin
       .from("courses")
       .select(
-        "id, slug, title, description, status, is_for_sale, price_cents, currency, cover_url, logo_url, accent_color, external_checkout_url, sales_headline, sales_subheadline, sales_description, sales_hero_url, sales_bullets, access_duration_days",
+        "id, slug, title, description, status, is_for_sale, price_cents, currency, cover_url, logo_url, accent_color, cover_fit, cover_position, external_checkout_url, sales_headline, sales_subheadline, sales_description, sales_hero_url, sales_bullets, access_duration_days",
       )
       .order("title");
     if (error) throw new Error(error.message);
