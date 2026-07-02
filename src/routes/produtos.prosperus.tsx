@@ -205,10 +205,12 @@ function GoldButton({
   children,
   href,
   size = "md",
+  external = false,
 }: {
   children: React.ReactNode;
   href?: string;
   size?: "md" | "lg";
+  external?: boolean;
 }) {
   const cls = `inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-wide transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
     size === "lg" ? "px-8 py-4 text-base" : "px-6 py-3 text-sm"
@@ -227,7 +229,12 @@ function GoldButton({
   );
   if (href)
     return (
-      <a href={href} className={cls} style={style}>
+      <a
+        href={href}
+        className={cls}
+        style={style}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {content}
       </a>
     );
@@ -237,6 +244,8 @@ function GoldButton({
     </button>
   );
 }
+
+const PROSPERUS_CHECKOUT_URL = "https://buy.stripe.com/28EeVd2vWcNd9GWf8a1sQ01";
 
 /* --- Data -------------------------------------------------------------- */
 
