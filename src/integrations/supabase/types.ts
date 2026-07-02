@@ -355,6 +355,8 @@ export type Database = {
           card_aspect_custom: string | null
           card_aspect_video: string
           course_type: Database["public"]["Enums"]["course_type"]
+          cover_fit: string
+          cover_position: string
           cover_url: string | null
           created_at: string
           created_by: string | null
@@ -398,6 +400,8 @@ export type Database = {
           card_aspect_custom?: string | null
           card_aspect_video?: string
           course_type?: Database["public"]["Enums"]["course_type"]
+          cover_fit?: string
+          cover_position?: string
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -441,6 +445,8 @@ export type Database = {
           card_aspect_custom?: string | null
           card_aspect_video?: string
           course_type?: Database["public"]["Enums"]["course_type"]
+          cover_fit?: string
+          cover_position?: string
           cover_url?: string | null
           created_at?: string
           created_by?: string | null

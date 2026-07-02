@@ -31,6 +31,8 @@ type ProductForm = {
   cover_url: string;
   logo_url: string;
   accent_color: string;
+  cover_fit: "cover" | "contain";
+  cover_position: "center" | "top" | "bottom" | "left" | "right";
   status: "draft" | "published" | "archived";
   is_for_sale: boolean;
   external_checkout_url: string;
@@ -48,6 +50,8 @@ function emptyForm(): ProductForm {
     cover_url: "",
     logo_url: "",
     accent_color: "#8b5cf6",
+    cover_fit: "cover",
+    cover_position: "center",
     status: "draft",
     is_for_sale: false,
     external_checkout_url: "",
@@ -66,6 +70,8 @@ function fromCourse(c: any): ProductForm {
     cover_url: c.cover_url ?? "",
     logo_url: c.logo_url ?? "",
     accent_color: c.accent_color ?? "#8b5cf6",
+    cover_fit: (c.cover_fit as any) ?? "cover",
+    cover_position: (c.cover_position as any) ?? "center",
     status: (c.status as any) ?? "draft",
     is_for_sale: !!c.is_for_sale,
     external_checkout_url: c.external_checkout_url ?? "",
@@ -84,6 +90,8 @@ function toPayload(f: ProductForm) {
     cover_url: f.cover_url || null,
     logo_url: f.logo_url || null,
     accent_color: f.accent_color || null,
+    cover_fit: f.cover_fit,
+    cover_position: f.cover_position,
     status: f.status,
     is_for_sale: f.is_for_sale,
     external_checkout_url: f.external_checkout_url || null,
@@ -425,6 +433,42 @@ function ProductEditor({
                   previewClassName="h-40 w-full"
                 />
               </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-xs">Enquadramento da capa</Label>
+                  <Select value={f.cover_fit} onValueChange={(v) => set("cover_fit", v as any)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">Preencher (corta se necessário)</SelectItem>
+                      <SelectItem value="contain">Inteira (sem cortar)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-[11px] text-white/50">
+                    Use "Inteira" para logos com texto que não podem ser cortados.
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs">Posição da imagem (quando cortar)</Label>
+                  <Select
+                    value={f.cover_position}
+                    onValueChange={(v) => set("cover_position", v as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="center">Centro</SelectItem>
+                      <SelectItem value="top">Topo</SelectItem>
+                      <SelectItem value="bottom">Base</SelectItem>
+                      <SelectItem value="left">Esquerda</SelectItem>
+                      <SelectItem value="right">Direita</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -454,10 +498,12 @@ function CardPreview({ form }: { form: ProductForm }) {
       style={bg}
     >
       <div
-        className="h-40 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-56 md:rounded-l-2xl md:rounded-tr-none"
+        className="h-40 w-full shrink-0 rounded-t-2xl bg-no-repeat md:h-auto md:w-56 md:rounded-l-2xl md:rounded-tr-none"
         style={{
           backgroundImage: form.cover_url ? `url(${form.cover_url})` : undefined,
-          backgroundColor: "#ffffff",
+          backgroundColor: form.accent_color || "#0a0a14",
+          backgroundSize: form.cover_fit === "contain" ? "contain" : "cover",
+          backgroundPosition: form.cover_position || "center",
         }}
       />
       <div className="flex flex-1 flex-col justify-between gap-4 p-5 md:flex-row md:items-center md:gap-6">
