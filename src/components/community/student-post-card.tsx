@@ -110,6 +110,52 @@ export function StudentPostCard({ post }: { post: any }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const noteQ = useQuery({
+    enabled: !!user && !!post?.id,
+    queryKey: ["my-note", post.id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("community_notes")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("post_id", post.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const [noteText, setNoteText] = useState("");
+  const [noteHydrated, setNoteHydrated] = useState(false);
+  useEffect(() => {
+    if (noteQ.data && !noteHydrated) {
+      setNoteText(noteQ.data.content ?? "");
+      setNoteHydrated(true);
+    }
+  }, [noteQ.data, noteHydrated]);
+
+  const saveNote = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Faça login");
+      const payload = {
+        user_id: user.id,
+        course_id: post.course_id,
+        post_id: post.id,
+        content: noteText,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await supabase
+        .from("community_notes")
+        .upsert(payload, { onConflict: "user_id,post_id" });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Anotação salva");
+      qc.invalidateQueries({ queryKey: ["my-note", post.id] });
+      qc.invalidateQueries({ queryKey: ["hub-my-notes", post.course_id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const counts: Record<string, number> = {};
   const mine = new Set<string>();
   for (const r of (reactionsQ.data ?? []) as any[]) {
