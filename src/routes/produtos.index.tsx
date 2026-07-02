@@ -97,13 +97,13 @@ function ProductsPage() {
               key={p.id}
               to="/produtos/$slug"
               params={{ slug: p.slug }}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] md:flex-row"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row"
             >
               <div
-                className="h-48 w-full shrink-0 bg-contain bg-center bg-no-repeat md:h-auto md:w-72 lg:w-96"
+                className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                 style={{
                   backgroundImage: `url(${p.sales_hero_url ?? p.cover_url ?? ""})`,
-                  backgroundColor: "#0a0a1a",
+                  backgroundColor: "#ffffff",
                 }}
               />
               <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
@@ -126,7 +126,7 @@ function ProductsPage() {
                         : "Em breve"}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
-                    {p.external_checkout_url || p.price_cents ? "Comprar" : "Saiba mais"}
+                    Saiba mais
                     <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
                   </span>
                 </div>
