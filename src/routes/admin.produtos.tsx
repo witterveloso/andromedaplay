@@ -433,6 +433,42 @@ function ProductEditor({
                   previewClassName="h-40 w-full"
                 />
               </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-xs">Enquadramento da capa</Label>
+                  <Select value={f.cover_fit} onValueChange={(v) => set("cover_fit", v as any)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">Preencher (corta se necessário)</SelectItem>
+                      <SelectItem value="contain">Inteira (sem cortar)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-[11px] text-white/50">
+                    Use "Inteira" para logos com texto que não podem ser cortados.
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs">Posição da imagem (quando cortar)</Label>
+                  <Select
+                    value={f.cover_position}
+                    onValueChange={(v) => set("cover_position", v as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="center">Centro</SelectItem>
+                      <SelectItem value="top">Topo</SelectItem>
+                      <SelectItem value="bottom">Base</SelectItem>
+                      <SelectItem value="left">Esquerda</SelectItem>
+                      <SelectItem value="right">Direita</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
 
