@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listProducts } from "@/lib/products.functions";
 import { ArrowRight, Sparkles } from "lucide-react";
-import prosperusCoverAsset from "@/assets/prosperus-cover.png.asset.json";
+
 
 export const Route = createFileRoute("/produtos/")({
   head: () => ({
