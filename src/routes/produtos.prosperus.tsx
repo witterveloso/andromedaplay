@@ -406,23 +406,39 @@ function ProsperusPage() {
       </header>
 
       {/* HERO */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,199,0,0.10), transparent 60%), radial-gradient(ellipse 60% 40% at 20% 80%, rgba(0,163,254,0.10), transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,61,26,0.08), transparent 60%)",
-        }}
-      >
-        <LightStreaks />
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 sm:px-6 sm:py-20 md:grid-cols-[1.1fr_1fr] md:gap-12 md:py-28">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-white/60 sm:text-[11px]">
+      <section className="relative overflow-hidden" style={{ background: BG }}>
+        {/* Background artwork */}
+        <img
+          src={prosperusHeroAsset.url}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover object-right"
+        />
+        {/* Readability gradient — dark on the left where text sits, letting the neon figures shine on the right */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(4,6,15,0.92) 0%, rgba(4,6,15,0.78) 35%, rgba(4,6,15,0.35) 65%, rgba(4,6,15,0.05) 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(4,6,15,0.55) 0%, transparent 25%, transparent 70%, rgba(4,6,15,0.85) 100%)",
+          }}
+        />
+
+        <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl items-center px-5 py-20 sm:min-h-[640px] sm:px-6 sm:py-24 md:min-h-[720px] md:py-32">
+          <div className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur sm:text-[11px]">
               <Sparkles className="h-3 w-3" /> Comunidade Andromeda Play
             </div>
             <h1 className="font-display leading-[0.95]">
               <ProsperusWordmark className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl" />
             </h1>
-            <p className="mt-6 max-w-xl text-base text-white/75 sm:text-lg md:text-xl">
+            <p className="mt-6 max-w-xl text-base text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-lg md:text-xl">
               Temperamento entendido. Comportamento ajustado.{" "}
               <span className="text-white">Crescimento profissional sustentável.</span>
             </p>
@@ -432,19 +448,11 @@ function ProsperusPage() {
               </GoldButton>
               <a
                 href="#sobre"
-                className="text-xs uppercase tracking-widest text-white/60 hover:text-white sm:text-sm"
+                className="text-xs uppercase tracking-widest text-white/70 hover:text-white sm:text-sm"
               >
                 Saiba mais ↓
               </a>
             </div>
-          </div>
-          <div className="relative h-64 sm:h-80 md:h-[26rem]">
-            <img
-              src={prosperusHeroAsset.url}
-              alt="Prosperus — 4 temperamentos em ascensão"
-              className="absolute inset-0 h-full w-full object-cover object-right rounded-2xl"
-              style={{ maskImage: "radial-gradient(ellipse 90% 80% at 60% 50%, #000 55%, transparent 100%)", WebkitMaskImage: "radial-gradient(ellipse 90% 80% at 60% 50%, #000 55%, transparent 100%)" }}
-            />
           </div>
         </div>
       </section>
