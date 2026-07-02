@@ -18,6 +18,7 @@ import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
 import { Route as ExpertIndexRouteImport } from './routes/expert.index'
 import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ProdutosProsperusRouteImport } from './routes/produtos.prosperus'
 import { Route as ProdutosComunicaPascomRouteImport } from './routes/produtos.comunica-pascom'
 import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
 import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
@@ -90,6 +91,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ProdutosProsperusRoute = ProdutosProsperusRouteImport.update({
+  id: '/produtos/prosperus',
+  path: '/produtos/prosperus',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutosComunicaPascomRoute = ProdutosComunicaPascomRouteImport.update({
   id: '/produtos/comunica-pascom',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
+  '/produtos/prosperus': typeof ProdutosProsperusRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
@@ -287,6 +294,7 @@ export interface FileRoutesByTo {
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
+  '/produtos/prosperus': typeof ProdutosProsperusRoute
   '/admin': typeof AdminIndexRoute
   '/aluno': typeof AlunoIndexRoute
   '/expert': typeof ExpertIndexRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/expert/profile': typeof ExpertProfileRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
+  '/produtos/prosperus': typeof ProdutosProsperusRoute
   '/admin/': typeof AdminIndexRoute
   '/aluno/': typeof AlunoIndexRoute
   '/expert/': typeof ExpertIndexRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/expert/profile'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
+    | '/produtos/prosperus'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/expert/profile'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
+    | '/produtos/prosperus'
     | '/admin'
     | '/aluno'
     | '/expert'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/expert/profile'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
+    | '/produtos/prosperus'
     | '/admin/'
     | '/aluno/'
     | '/expert/'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   CheckoutSucessoRoute: typeof CheckoutSucessoRoute
   ProdutosSlugRoute: typeof ProdutosSlugRoute
   ProdutosComunicaPascomRoute: typeof ProdutosComunicaPascomRoute
+  ProdutosProsperusRoute: typeof ProdutosProsperusRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
   AlunoCSlugRoute: typeof AlunoCSlugRoute
@@ -538,6 +551,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/produtos/prosperus': {
+      id: '/produtos/prosperus'
+      path: '/produtos/prosperus'
+      fullPath: '/produtos/prosperus'
+      preLoaderRoute: typeof ProdutosProsperusRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/produtos/comunica-pascom': {
       id: '/produtos/comunica-pascom'
@@ -812,6 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutSucessoRoute: CheckoutSucessoRoute,
   ProdutosSlugRoute: ProdutosSlugRoute,
   ProdutosComunicaPascomRoute: ProdutosComunicaPascomRoute,
+  ProdutosProsperusRoute: ProdutosProsperusRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
   AlunoCSlugRoute: AlunoCSlugRoute,
@@ -820,13 +841,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
