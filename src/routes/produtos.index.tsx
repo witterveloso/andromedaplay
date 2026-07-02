@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listProducts } from "@/lib/products.functions";
 import { ArrowRight, Sparkles } from "lucide-react";
+import prosperusCoverAsset from "@/assets/prosperus-cover.png.asset.json";
 
 export const Route = createFileRoute("/produtos/")({
   head: () => ({
@@ -102,7 +103,7 @@ function ProductsPage() {
               <div
                 className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                 style={{
-                  backgroundImage: `url(${p.sales_hero_url ?? p.cover_url ?? ""})`,
+                  backgroundImage: `url(${p.slug === "prosperus" ? prosperusCoverAsset.url : (p.sales_hero_url ?? p.cover_url ?? "")})`,
                   backgroundColor: "#ffffff",
                 }}
               />

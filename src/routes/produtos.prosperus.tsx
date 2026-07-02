@@ -82,6 +82,50 @@ function LightStreaks({ className = "" }: { className?: string }) {
   );
 }
 
+function NeonDivider() {
+  return (
+    <div className="pointer-events-none relative h-6 w-full overflow-hidden" style={{ background: BG }}>
+      {/* Center glow pool */}
+      <div
+        className="absolute left-1/2 top-1/2 h-px w-[80%] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${RED} 18%, ${GOLD} 38%, ${BLUE} 62%, ${GREEN} 82%, transparent 100%)`,
+          boxShadow: `0 0 16px ${RED}, 0 0 32px ${BLUE}40`,
+        }}
+      />
+      {/* Individual neon threads */}
+      <div
+        className="absolute left-[10%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${RED}, transparent)`,
+          boxShadow: `0 0 10px ${RED}, 0 0 20px ${RED}60`,
+        }}
+      />
+      <div
+        className="absolute left-[30%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)`,
+          boxShadow: `0 0 10px ${GOLD}, 0 0 20px ${GOLD}60`,
+        }}
+      />
+      <div
+        className="absolute left-[52%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${BLUE}, transparent)`,
+          boxShadow: `0 0 10px ${BLUE}, 0 0 20px ${BLUE}60`,
+        }}
+      />
+      <div
+        className="absolute left-[74%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${GREEN}, transparent)`,
+          boxShadow: `0 0 10px ${GREEN}, 0 0 20px ${GREEN}60`,
+        }}
+      />
+    </div>
+  );
+}
+
 /* Signature graphic: 4 silhouettes rising over neon growth bars */
 function GrowthArtwork({ className = "" }: { className?: string }) {
   const bars = [
@@ -458,6 +502,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
 
       {/* Abertura / dor */}
       <section id="sobre" className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
@@ -481,6 +526,7 @@ function ProsperusPage() {
         </p>
       </section>
 
+      <NeonDivider />
       {/* Problema */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-4xl">
@@ -495,6 +541,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* O que é */}
       <section className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle eyebrow="O que é" title="O que é a Prosperus?" />
@@ -507,6 +554,7 @@ function ProsperusPage() {
         </p>
       </section>
 
+      <NeonDivider />
       {/* Para quem é */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-5xl">
@@ -529,6 +577,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Você vai aprender a identificar */}
       <section className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle
@@ -547,6 +596,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Os 4 temperamentos — brand colors */}
       <section
         className="relative overflow-hidden border-y border-white/5 px-5 py-16 sm:px-6 sm:py-24"
@@ -611,6 +661,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Pilares */}
       <section className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle
@@ -646,6 +697,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Por que isso importa */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-4xl">
@@ -669,12 +721,14 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* O que a Prosperus NÃO é */}
       <section className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle eyebrow="Delimitação" title="O que a Prosperus não é" />
         <BulletList items={NOT_IS} tone="negative" />
       </section>
 
+      <NeonDivider />
       {/* O que muda */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-4xl">
@@ -692,6 +746,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Prosperar não é correr mais — poético */}
       <section
         className="relative overflow-hidden px-5 py-20 sm:px-6 sm:py-28"
@@ -717,12 +772,14 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Para quem NÃO é */}
       <section className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle eyebrow="Delimitação" title="Para quem a Prosperus não é" />
         <BulletList items={NOT_FOR} tone="negative" />
       </section>
 
+      <NeonDivider />
       {/* O que você recebe */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-4xl">
@@ -757,6 +814,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Checklist final */}
       <section className="mx-auto max-w-5xl px-5 py-16 sm:px-6 sm:py-20">
         <SectionTitle eyebrow="Diagnóstico" title="A Prosperus é para você se:" />
@@ -773,6 +831,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* Expert — Ana Veloso */}
       <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[auto_1fr] md:gap-14">
@@ -827,6 +886,7 @@ function ProsperusPage() {
         </div>
       </section>
 
+      <NeonDivider />
       {/* CTA final */}
       <section
         id="entrar"
