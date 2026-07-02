@@ -93,47 +93,59 @@ function ProductsPage() {
         )}
 
         <div className="flex flex-col gap-5">
-          {data?.products.map((p: any) => (
-            <Link
-              key={p.id}
-              to="/produtos/$slug"
-              params={{ slug: p.slug }}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row"
-            >
-              <div
-                className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
-                style={{
-                  backgroundImage: `url(${p.slug === "prosperus" ? prosperusCoverAsset.url : (p.sales_hero_url ?? p.cover_url ?? "")})`,
-                  backgroundColor: p.slug === "prosperus" ? "#04060F" : "#ffffff",
-                }}
-              />
-              <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-display text-xl font-semibold leading-tight md:text-2xl">
-                    {p.title}
-                  </h3>
-                  {p.sales_subheadline && (
-                    <p className="mt-2 line-clamp-2 text-sm text-white/60 md:text-base">
-                      {p.sales_subheadline}
-                    </p>
-                  )}
+          {data?.products.map((p: any) => {
+            const isProsperus = p.slug === "prosperus";
+            const cardBg = isProsperus ? "#04060F" : undefined;
+            const imgBg = isProsperus ? "#04060F" : "#ffffff";
+            const heroSrc = isProsperus
+              ? prosperusCoverAsset.url
+              : (p.sales_hero_url ?? p.cover_url ?? "");
+            return (
+              <Link
+                key={p.id}
+                to="/produtos/$slug"
+                params={{ slug: p.slug }}
+                className={
+                  "group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 backdrop-blur transition hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row " +
+                  (isProsperus ? "" : "bg-white/[0.03] hover:bg-white/[0.05]")
+                }
+                style={cardBg ? { backgroundColor: cardBg } : undefined}
+              >
+                <div
+                  className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
+                  style={{
+                    backgroundImage: `url(${heroSrc})`,
+                    backgroundColor: imgBg,
+                  }}
+                />
+                <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display text-xl font-semibold leading-tight md:text-2xl">
+                      {p.title}
+                    </h3>
+                    {p.sales_subheadline && (
+                      <p className="mt-2 line-clamp-2 text-sm text-white/60 md:text-base">
+                        {p.sales_subheadline}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:justify-center">
+                    <span className="text-lg font-semibold text-white md:text-xl">
+                      {p.price_cents
+                        ? formatPrice(p.price_cents, p.currency ?? "BRL")
+                        : p.external_checkout_url
+                          ? ""
+                          : "Em breve"}
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
+                      Saiba mais
+                      <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:justify-center">
-                  <span className="text-lg font-semibold text-white md:text-xl">
-                    {p.price_cents
-                      ? formatPrice(p.price_cents, p.currency ?? "BRL")
-                      : p.external_checkout_url
-                        ? ""
-                        : "Em breve"}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
-                    Saiba mais
-                    <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
     </main>
