@@ -35,7 +35,7 @@ export const getProduct = createServerFn({ method: "GET" })
     const { data: row, error } = await supabase
       .from("courses")
       .select(
-        "id, slug, title, description, cover_url, logo_url, price_cents, currency, sales_headline, sales_subheadline, sales_description, sales_hero_url, sales_video_url, sales_bullets, access_duration_days",
+        "id, slug, title, description, cover_url, logo_url, price_cents, currency, sales_headline, sales_subheadline, sales_description, sales_hero_url, sales_video_url, sales_bullets, access_duration_days, external_checkout_url",
       )
       .eq("slug", data.slug)
       .eq("is_for_sale", true)
