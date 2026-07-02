@@ -8,8 +8,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { aspectRatioStyle, cardWidthClass } from "@/lib/card-aspect";
 import {
   Home, Hash, Layers, Radio, FileText, Star, Clock, ChevronRight,
-  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X,
+  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X, NotebookPen, Download,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
 
 type View =
   | { kind: "home" }
@@ -18,7 +20,9 @@ type View =
   | { kind: "materiais" }
   | { kind: "favoritos" }
   | { kind: "historico" }
+  | { kind: "anotacoes" }
   | { kind: "todos" };
+
 
 const HISTORY_KEY = "andromeda:hub-history";
 
