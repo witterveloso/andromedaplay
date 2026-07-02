@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
+
 import homeDesktop from "@/assets/andromeda-home-desktop.png.asset.json";
 import homeMobile from "@/assets/andromeda-home-mobile.png.asset.json";
 
@@ -80,29 +80,28 @@ function HomePage() {
         />
       </div>
 
-      {/* Top navigation bar */}
-      <header className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-5">
-        <Link to="/" aria-label="Andromeda Play">
-          <AndromedaLogo size={32} />
-        </Link>
+      {/* Only "Produtos" pill is added on top of the artwork — logo & "Entrar"
+          are already painted into the background image (hotspots above make
+          them clickable). Positioned in the empty gap between them. */}
+      {/* Desktop pill */}
+      <Link
+        to="/produtos"
+        aria-label="Produtos"
+        className="absolute z-40 hidden md:inline-flex items-center rounded-full border border-white/15 bg-black/30 backdrop-blur-sm px-4 py-1.5 text-xs uppercase tracking-[0.28em] text-white/85 transition hover:border-white/35 hover:bg-black/50 hover:text-white"
+        style={{ top: "4%", left: "50%", transform: "translateX(-50%)" }}
+      >
+        Produtos
+      </Link>
+      {/* Mobile pill */}
+      <Link
+        to="/produtos"
+        aria-label="Produtos"
+        className="absolute z-40 md:hidden inline-flex items-center rounded-full border border-white/15 bg-black/30 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/85"
+        style={{ top: "2.2%", left: "62%", transform: "translateX(-50%)" }}
+      >
+        Produtos
+      </Link>
 
-        <nav className="flex items-center gap-4">
-          <Link
-            to="/produtos"
-            aria-label="Produtos"
-            className="text-xs uppercase tracking-[0.28em] text-white/70 transition hover:text-white"
-          >
-            Produtos
-          </Link>
-          <Link
-            to="/login"
-            aria-label="Entrar"
-            className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs uppercase tracking-[0.28em] text-white/90 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
-          >
-            Entrar
-          </Link>
-        </nav>
-      </header>
 
       <h1 className="sr-only">
         Bem-vindo ao universo do conhecimento e da evolução
