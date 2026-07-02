@@ -161,7 +161,7 @@ function Rail({
         )}
       </div>
       <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin justify-center [&:has(>*:nth-child(6))]:justify-start lg:[&:has(>*:nth-child(5))]:justify-start md:[&:has(>*:nth-child(4))]:justify-start sm:[&:has(>*:nth-child(3))]:justify-start [&:has(>*:nth-child(2))]:justify-start">
           {posts.map((p) => (
             <div key={p.id} className="snap-start">
               <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
@@ -169,6 +169,7 @@ function Rail({
           ))}
         </div>
       </div>
+
     </section>
 
   );
