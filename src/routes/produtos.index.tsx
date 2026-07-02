@@ -70,7 +70,7 @@ function ProductsPage() {
             <Sparkles className="h-3 w-3" /> Catálogo
           </div>
           <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
-            Produtos da Andromeda Play
+            Conheça os nossos produtos
           </h1>
           <p className="mt-4 text-white/65 md:text-lg">
             Cursos, mentorias e experiências educacionais selecionadas. Acesso liberado
