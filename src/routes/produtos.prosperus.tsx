@@ -14,6 +14,9 @@ import {
   MessageSquare,
   ShieldCheck,
 } from "lucide-react";
+import prosperusLogoAsset from "@/assets/prosperus-logo.png.asset.json";
+import prosperusHeroAsset from "@/assets/prosperus-hero.png.asset.json";
+import anaVelosoAsset from "@/assets/ana-veloso.png.asset.json";
 
 export const Route = createFileRoute("/produtos/prosperus")({
   head: () => ({
