@@ -219,8 +219,24 @@ export function CommunityHub({
       const { data } = await supabase
         .from("community_reactions")
         .select("post_id")
-        .eq("user_id", user!.id);
+        .eq("user_id", user!.id)
+        .eq("reaction", "favorite");
       return new Set((data ?? []).map((r: any) => r.post_id));
+    },
+  });
+
+  const { data: myNotes } = useQuery({
+    enabled: !!user && !!course?.id,
+    queryKey: ["hub-my-notes", course.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_notes")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("course_id", course.id)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
