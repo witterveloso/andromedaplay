@@ -493,7 +493,7 @@ export function CommunityHub({
           </>
         )}
 
-        {view.kind !== "home" && (
+        {view.kind !== "home" && view.kind !== "anotacoes" && (
           <FilteredView
             view={view}
             all={all}
@@ -510,6 +510,18 @@ export function CommunityHub({
             onBack={() => setView({ kind: "home" })}
           />
         )}
+
+        {view.kind === "anotacoes" && (
+          <NotesView
+            notes={myNotes ?? []}
+            posts={all}
+            course={course}
+            primary={primary}
+            onOpen={handleOpen}
+            onBack={() => setView({ kind: "home" })}
+          />
+        )}
+
       </div>
 
       <Dialog open={!!openPost} onOpenChange={(o) => !o && setOpenPost(null)}>
