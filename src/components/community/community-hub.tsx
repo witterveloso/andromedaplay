@@ -7,7 +7,7 @@ import { StudentPostCard } from "@/components/community/student-post-card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { aspectRatioStyle, cardWidthClass } from "@/lib/card-aspect";
 import {
-  Home, Hash, Layers, Radio, FileText, Star, Clock, ChevronRight,
+  Home, Hash, Radio, FileText, Star, Clock, ChevronRight,
   PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X, NotebookPen, Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
