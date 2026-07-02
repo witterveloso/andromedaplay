@@ -104,7 +104,7 @@ function ProductsPage() {
                 className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                 style={{
                   backgroundImage: `url(${p.slug === "prosperus" ? prosperusCoverAsset.url : (p.sales_hero_url ?? p.cover_url ?? "")})`,
-                  backgroundColor: "#ffffff",
+                  backgroundColor: p.slug === "prosperus" ? "#04060F" : "#ffffff",
                 }}
               />
               <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
