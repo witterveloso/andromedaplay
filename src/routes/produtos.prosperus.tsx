@@ -439,7 +439,12 @@ function ProsperusPage() {
             </div>
           </div>
           <div className="relative h-64 sm:h-80 md:h-[26rem]">
-            <GrowthArtwork className="h-full w-full" />
+            <img
+              src={prosperusHeroAsset.url}
+              alt="Prosperus — 4 temperamentos em ascensão"
+              className="absolute inset-0 h-full w-full object-cover object-right rounded-2xl"
+              style={{ maskImage: "radial-gradient(ellipse 90% 80% at 60% 50%, #000 55%, transparent 100%)", WebkitMaskImage: "radial-gradient(ellipse 90% 80% at 60% 50%, #000 55%, transparent 100%)" }}
+            />
           </div>
         </div>
       </section>
