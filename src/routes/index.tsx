@@ -92,15 +92,16 @@ function HomePage() {
       >
         Produtos
       </Link>
-      {/* Mobile pill */}
+      {/* Mobile pill — centered in the gap between logo (left) and small "Entrar" hotspot (right: 5%, width: 21%, so starts at 74%) */}
       <Link
         to="/produtos"
         aria-label="Produtos"
-        className="absolute z-40 md:hidden inline-flex items-center rounded-full border border-white/15 bg-black/30 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/85"
-        style={{ top: "2.2%", left: "62%", transform: "translateX(-50%)" }}
+        className="absolute z-40 md:hidden inline-flex items-center rounded-full border border-white/15 bg-black/30 backdrop-blur-sm px-2.5 py-1 text-[9px] uppercase tracking-[0.22em] text-white/85"
+        style={{ top: "2.2%", right: "28%" }}
       >
         Produtos
       </Link>
+
 
 
       <h1 className="sr-only">
