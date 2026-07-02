@@ -252,8 +252,13 @@ export function CommunityHub({
       if (!m.has(p.channel_id)) m.set(p.channel_id, []);
       m.get(p.channel_id)!.push(p);
     }
+    // Sort each channel chronologically (oldest first) so publications appear in posting order.
+    for (const [k, list] of m) {
+      m.set(k, [...list].sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at)));
+    }
     return m;
   }, [all]);
+
 
   const historySet = useMemo(() => new Set(history), [history]);
   const lives = all.filter((p) => p.post_type === "live");
