@@ -323,13 +323,8 @@ export function CommunityHub({
 
           <nav className="space-y-1 flex-1 overflow-y-auto">
             {menu.map((m) => {
-              const active =
-                (m.key === "home" && view.kind === "home") ||
-                (m.key === "todos" && view.kind === "todos") ||
-                (m.key === "lives" && view.kind === "lives") ||
-                (m.key === "materiais" && view.kind === "materiais") ||
-                (m.key === "favoritos" && view.kind === "favoritos") ||
-                (m.key === "historico" && view.kind === "historico");
+              const active = m.key === view.kind;
+
               return (
                 <button
                   key={m.key}
