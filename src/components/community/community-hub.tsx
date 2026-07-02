@@ -161,14 +161,17 @@ function Rail({
         )}
       </div>
       <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
-        <div className={`flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin ${posts.length <= 2 ? "justify-center" : ""}`}>
-          {posts.map((p) => (
-            <div key={p.id} className="snap-start">
-              <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
-            </div>
-          ))}
+        <div className="overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 scrollbar-thin">
+          <div className="flex gap-3 sm:gap-4 snap-x snap-mandatory w-max mx-auto">
+            {posts.map((p) => (
+              <div key={p.id} className="snap-start">
+                <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
 
 
     </section>
