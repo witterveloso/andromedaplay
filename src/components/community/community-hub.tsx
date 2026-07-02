@@ -161,14 +161,19 @@ function Rail({
         )}
       </div>
       <div className="relative -mx-4 sm:-mx-6 lg:-mx-10">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 snap-x snap-mandatory scrollbar-thin">
-          {posts.map((p) => (
-            <div key={p.id} className="snap-start">
-              <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
-            </div>
-          ))}
+        <div className="overflow-x-auto px-4 sm:px-6 lg:px-10 pb-4 pt-1 scrollbar-thin">
+          <div className="flex gap-3 sm:gap-4 snap-x snap-mandatory w-max mx-auto">
+            {posts.map((p) => (
+              <div key={p.id} className="snap-start">
+                <PostCard post={p} primary={primary} onOpen={onOpen} aspect={aspect} aspectCustom={aspectCustom} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+
+
     </section>
 
   );
@@ -247,8 +252,13 @@ export function CommunityHub({
       if (!m.has(p.channel_id)) m.set(p.channel_id, []);
       m.get(p.channel_id)!.push(p);
     }
+    // Sort each channel chronologically (oldest first) so publications appear in posting order.
+    for (const [k, list] of m) {
+      m.set(k, [...list].sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at)));
+    }
     return m;
   }, [all]);
+
 
   const historySet = useMemo(() => new Set(history), [history]);
   const lives = all.filter((p) => p.post_type === "live");
@@ -448,9 +458,10 @@ export function CommunityHub({
               )}
 
               {recent.length > 0 && (
-                <Rail title="Continue de onde parou" posts={recent.slice(0, 10)} primary={primary} onOpen={handleOpen}
+                <Rail title="Continue de onde parou" posts={recent.slice(0, 1)} primary={primary} onOpen={handleOpen}
                   aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
+
 
               {newest.length > 0 && (
                 <Rail title="Novidades" description="Publicações mais recentes da comunidade"

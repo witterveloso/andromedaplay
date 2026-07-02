@@ -200,13 +200,23 @@ export function StudentPostCard({ post }: { post: any }) {
           {post.title && <h3 className="font-semibold text-lg leading-snug">{post.title}</h3>}
           {post.body && <p className="text-[15px] leading-relaxed opacity-90 whitespace-pre-wrap">{post.body}</p>}
           {post.cover_url && (
-            <img src={post.cover_url} alt="" className="rounded-xl w-full aspect-video object-cover" />
+            <img
+              src={post.cover_url}
+              alt=""
+              className="rounded-xl w-full aspect-video object-cover mx-auto block"
+              style={{ objectPosition: "center" }}
+            />
           )}
-          {post.image_url && <img src={post.image_url} alt="" className="rounded-xl w-full" />}
+          {post.image_url && (
+            <img src={post.image_url} alt="" className="rounded-xl w-full mx-auto block" />
+          )}
           {post.youtube_url && (
-            <YouTubeLivePlayer url={post.youtube_url} title={post.title ?? ""} />
+            <div className="mx-auto w-full">
+              <YouTubeLivePlayer url={post.youtube_url} title={post.title ?? ""} />
+            </div>
           )}
-          {post.audio_url && <audio controls src={post.audio_url} className="w-full" />}
+          {post.audio_url && <audio controls src={post.audio_url} className="w-full mx-auto block" />}
+
         </div>
       </div>
 
