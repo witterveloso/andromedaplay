@@ -7,9 +7,11 @@ import { StudentPostCard } from "@/components/community/student-post-card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { aspectRatioStyle, cardWidthClass } from "@/lib/card-aspect";
 import {
-  Home, Hash, Layers, Radio, FileText, Star, Clock, ChevronRight,
-  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X,
+  Home, Hash, Radio, FileText, Star, Clock, ChevronRight,
+  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X, NotebookPen, Download,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
 
 type View =
   | { kind: "home" }
@@ -18,7 +20,9 @@ type View =
   | { kind: "materiais" }
   | { kind: "favoritos" }
   | { kind: "historico" }
+  | { kind: "anotacoes" }
   | { kind: "todos" };
+
 
 const HISTORY_KEY = "andromeda:hub-history";
 
@@ -215,8 +219,24 @@ export function CommunityHub({
       const { data } = await supabase
         .from("community_reactions")
         .select("post_id")
-        .eq("user_id", user!.id);
+        .eq("user_id", user!.id)
+        .eq("reaction", "favorite");
       return new Set((data ?? []).map((r: any) => r.post_id));
+    },
+  });
+
+  const { data: myNotes } = useQuery({
+    enabled: !!user && !!course?.id,
+    queryKey: ["hub-my-notes", course.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_notes")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("course_id", course.id)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
@@ -230,12 +250,16 @@ export function CommunityHub({
     return m;
   }, [all]);
 
+  const historySet = useMemo(() => new Set(history), [history]);
   const lives = all.filter((p) => p.post_type === "live");
   const liveNow = lives.filter((p) => p.is_live_active);
   const materials = all.filter((p) => p.post_type === "material" || p.audio_url);
   const favorites = all.filter((p) => myReactions?.has(p.id));
   const recent = history.map((id) => all.find((p) => p.id === id)).filter(Boolean) as any[];
-  const newest = [...all].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 12);
+  const newest = [...all]
+    .filter((p) => !historySet.has(p.id))
+    .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+    .slice(0, 12);
 
   const handleOpen = (p: any) => {
     setOpenPost(p);
@@ -245,13 +269,14 @@ export function CommunityHub({
 
   const menu = [
     { key: "home", label: "Início", icon: Home, onClick: () => setView({ kind: "home" }) },
-    { key: "topics", label: "Tópicos", icon: Layers, onClick: () => { setView({ kind: "home" }); setTimeout(() => document.getElementById("hub-topics")?.scrollIntoView({ behavior: "smooth" }), 50); } },
     { key: "todos", label: "Conteúdos", icon: Hash, onClick: () => setView({ kind: "todos" }) },
     { key: "lives", label: "Lives", icon: Radio, onClick: () => setView({ kind: "lives" }), badge: liveNow.length || undefined },
     { key: "materiais", label: "Materiais", icon: FileText, onClick: () => setView({ kind: "materiais" }) },
     { key: "favoritos", label: "Favoritos", icon: Star, onClick: () => setView({ kind: "favoritos" }) },
+    { key: "anotacoes", label: "Anotações", icon: NotebookPen, onClick: () => setView({ kind: "anotacoes" }) },
     { key: "historico", label: "Histórico", icon: Clock, onClick: () => setView({ kind: "historico" }) },
   ];
+
 
   return (
     <div className="relative min-h-screen">
@@ -298,13 +323,8 @@ export function CommunityHub({
 
           <nav className="space-y-1 flex-1 overflow-y-auto">
             {menu.map((m) => {
-              const active =
-                (m.key === "home" && view.kind === "home") ||
-                (m.key === "todos" && view.kind === "todos") ||
-                (m.key === "lives" && view.kind === "lives") ||
-                (m.key === "materiais" && view.kind === "materiais") ||
-                (m.key === "favoritos" && view.kind === "favoritos") ||
-                (m.key === "historico" && view.kind === "historico");
+              const active = m.key === view.kind;
+
               return (
                 <button
                   key={m.key}
@@ -473,7 +493,7 @@ export function CommunityHub({
           </>
         )}
 
-        {view.kind !== "home" && (
+        {view.kind !== "home" && view.kind !== "anotacoes" && (
           <FilteredView
             view={view}
             all={all}
@@ -490,6 +510,18 @@ export function CommunityHub({
             onBack={() => setView({ kind: "home" })}
           />
         )}
+
+        {view.kind === "anotacoes" && (
+          <NotesView
+            notes={myNotes ?? []}
+            posts={all}
+            course={course}
+            primary={primary}
+            onOpen={handleOpen}
+            onBack={() => setView({ kind: "home" })}
+          />
+        )}
+
       </div>
 
       <Dialog open={!!openPost} onOpenChange={(o) => !o && setOpenPost(null)}>
@@ -556,6 +588,126 @@ function FilteredView({
           {list.map((p) => (
             <PostCard key={p.id} post={p} primary={primary} onOpen={onOpen} fill aspect={aspect} aspectCustom={aspectCustom} />
           ))}
+        </div>
+      )}
+    </main>
+  );
+}
+
+function NotesView({
+  notes, posts, course, primary, onOpen, onBack,
+}: {
+  notes: any[];
+  posts: any[];
+  course: any;
+  primary: string;
+  onOpen: (p: any) => void;
+  onBack: () => void;
+}) {
+  const postMap = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
+
+  const downloadPdf = () => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 48;
+    let y = margin;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(`Anotações — ${course.title ?? ""}`, margin, y);
+    y += 24;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(new Date().toLocaleString("pt-BR"), margin, y);
+    y += 24;
+    doc.setTextColor(0);
+
+    for (const n of notes) {
+      const p = n.post_id ? postMap.get(n.post_id) : null;
+      const heading = p?.title || p?.body?.slice(0, 80) || "Anotação geral";
+      const when = new Date(n.updated_at ?? n.created_at).toLocaleString("pt-BR");
+
+      if (y > pageHeight - margin - 60) { doc.addPage(); y = margin; }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      const titleLines = doc.splitTextToSize(heading, pageWidth - margin * 2);
+      doc.text(titleLines, margin, y);
+      y += titleLines.length * 14 + 2;
+
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      doc.text(when, margin, y);
+      y += 14;
+      doc.setTextColor(0);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      const bodyLines = doc.splitTextToSize(n.content || "(vazio)", pageWidth - margin * 2);
+      for (const line of bodyLines) {
+        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += 14;
+      }
+      y += 14;
+    }
+
+    doc.save(`anotacoes-${(course.slug ?? course.id ?? "curso")}.pdf`);
+  };
+
+  return (
+    <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-8">
+      <header className="space-y-2">
+        <button onClick={onBack} className="text-xs uppercase tracking-[0.22em] text-white/50 hover:text-white">← Voltar ao hub</button>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">Anotações</h1>
+            <p className="text-white/60 mt-1">Seu caderno pessoal desta comunidade</p>
+          </div>
+          {notes.length > 0 && (
+            <Button onClick={downloadPdf} className="gap-2" style={{ background: primary }}>
+              <Download className="h-4 w-4" /> Baixar em PDF
+            </Button>
+          )}
+        </div>
+      </header>
+
+      {notes.length === 0 ? (
+        <div className="rounded-3xl border border-white/5 bg-white/[0.03] p-16 text-center text-white/60">
+          Você ainda não fez anotações. Abra uma publicação e use o campo "Minhas anotações".
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {notes.map((n) => {
+            const p = n.post_id ? postMap.get(n.post_id) : null;
+            const when = new Date(n.updated_at ?? n.created_at).toLocaleString("pt-BR");
+            return (
+              <div key={n.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                  <div className="text-xs uppercase tracking-[0.2em] text-white/50">{when}</div>
+                  {p && (
+                    <button
+                      onClick={() => onOpen(p)}
+                      className="text-xs text-white/80 hover:text-white underline underline-offset-4"
+                    >
+                      Ir para publicação →
+                    </button>
+                  )}
+                </div>
+                {p && (
+                  <div className="font-semibold mb-2 line-clamp-1">
+                    {p.title || p.body?.slice(0, 80) || "Publicação"}
+                  </div>
+                )}
+                <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">
+                  {n.content || <span className="opacity-50">(vazio)</span>}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </main>
