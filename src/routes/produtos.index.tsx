@@ -97,7 +97,7 @@ function ProductsPage() {
               key={p.id}
               to="/produtos/$slug"
               params={{ slug: p.slug }}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] md:flex-row"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row"
             >
               <div
                 className="h-48 w-full shrink-0 bg-contain bg-center bg-no-repeat md:h-auto md:w-72 lg:w-96"
