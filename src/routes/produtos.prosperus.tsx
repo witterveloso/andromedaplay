@@ -763,6 +763,60 @@ function ProsperusPage() {
         </div>
       </section>
 
+      {/* Expert — Ana Veloso */}
+      <section className="border-y border-white/5 bg-white/[0.015] px-5 py-16 sm:px-6 sm:py-24">
+        <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[auto_1fr] md:gap-14">
+          <div className="relative mx-auto md:mx-0">
+            <div
+              className="absolute -inset-3 rounded-full opacity-70 blur-2xl"
+              style={{
+                background: `conic-gradient(from 180deg, ${RED}, ${GOLD}, ${BLUE}, ${GREEN}, ${RED})`,
+              }}
+            />
+            <div
+              className="relative h-56 w-56 overflow-hidden rounded-full ring-2 ring-white/20 sm:h-64 sm:w-64 md:h-72 md:w-72"
+              style={{ boxShadow: `0 0 60px rgba(255,199,0,0.25)` }}
+            >
+              <img
+                src={anaVelosoAsset.url}
+                alt="Ana Veloso — mentora da Prosperus"
+                className="h-full w-full object-cover object-top"
+              />
+            </div>
+          </div>
+          <div>
+            <div className="mb-3 text-[11px] uppercase tracking-[0.32em] text-white/50">
+              Quem conduz
+            </div>
+            <h2 className="font-display text-3xl font-bold leading-tight text-white sm:text-4xl">
+              Ana Veloso
+            </h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-widest text-white/60">
+              <span style={{ color: RED }}>Ação</span>
+              <span className="opacity-30">·</span>
+              <span style={{ color: GOLD }}>Comunicação</span>
+              <span className="opacity-30">·</span>
+              <span style={{ color: BLUE }}>Análise</span>
+              <span className="opacity-30">·</span>
+              <span style={{ color: GREEN }}>Estabilidade</span>
+            </div>
+            <p className="mt-6 text-base leading-relaxed text-white/80 sm:text-lg">
+              Ana Veloso é jornalista, estrategista comportamental e especialista em
+              temperamentos aplicados ao ambiente profissional. Com mais de{" "}
+              <span className="text-white">16 anos de experiência</span> em
+              comunicação, liderança de equipes e desenvolvimento humano, une sua
+              vivência prática no mercado com estudos em temperamentos, carreira e
+              neurociência.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
+              Seu trabalho ajuda profissionais a entenderem seu próprio funcionamento,
+              ajustarem comportamentos e construírem uma trajetória mais consciente,
+              madura e sustentável.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA final */}
       <section
         id="entrar"
