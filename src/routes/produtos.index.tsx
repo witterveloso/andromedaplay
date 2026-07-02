@@ -70,7 +70,7 @@ function ProductsPage() {
             <Sparkles className="h-3 w-3" /> Catálogo
           </div>
           <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
-            Produtos da Andromeda Play
+            Conheça os nossos produtos
           </h1>
           <p className="mt-4 text-white/65 md:text-lg">
             Cursos, mentorias e experiências educacionais selecionadas. Acesso liberado
@@ -100,10 +100,10 @@ function ProductsPage() {
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] md:flex-row"
             >
               <div
-                className="h-48 w-full shrink-0 bg-cover bg-center md:h-auto md:w-72 lg:w-96"
+                className="h-48 w-full shrink-0 bg-contain bg-center bg-no-repeat md:h-auto md:w-72 lg:w-96"
                 style={{
                   backgroundImage: `url(${p.sales_hero_url ?? p.cover_url ?? ""})`,
-                  backgroundColor: "#10102a",
+                  backgroundColor: "#0a0a1a",
                 }}
               />
               <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
