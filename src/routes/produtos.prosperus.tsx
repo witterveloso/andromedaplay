@@ -406,43 +406,43 @@ function ProsperusPage() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden" style={{ background: BG }}>
-        {/* Background artwork */}
+      <section className="relative w-full overflow-hidden" style={{ background: BG }}>
+        {/* Background artwork — natural aspect ratio, no expansion/crop */}
         <img
           src={prosperusHeroAsset.url}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-right"
+          className="block w-full h-auto select-none"
         />
         {/* Readability gradient — dark on the left where text sits, letting the neon figures shine on the right */}
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(4,6,15,0.92) 0%, rgba(4,6,15,0.78) 35%, rgba(4,6,15,0.35) 65%, rgba(4,6,15,0.05) 100%)",
+              "linear-gradient(90deg, rgba(4,6,15,0.92) 0%, rgba(4,6,15,0.78) 30%, rgba(4,6,15,0.35) 60%, rgba(4,6,15,0.05) 100%)",
           }}
         />
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
               "linear-gradient(180deg, rgba(4,6,15,0.55) 0%, transparent 25%, transparent 70%, rgba(4,6,15,0.85) 100%)",
           }}
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl items-center px-5 py-20 sm:min-h-[640px] sm:px-6 sm:py-24 md:min-h-[720px] md:py-32">
+        <div className="absolute inset-0 z-10 mx-auto flex max-w-6xl items-center px-5 py-10 sm:px-6 sm:py-14 md:py-20">
           <div className="max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur sm:text-[11px]">
               <Sparkles className="h-3 w-3" /> Comunidade Andromeda Play
             </div>
             <h1 className="font-display leading-[0.95]">
-              <ProsperusWordmark className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl" />
+              <ProsperusWordmark className="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl" />
             </h1>
-            <p className="mt-6 max-w-xl text-base text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-lg md:text-xl">
+            <p className="mt-4 max-w-xl text-sm text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:mt-6 sm:text-lg md:text-xl">
               Temperamento entendido. Comportamento ajustado.{" "}
               <span className="text-white">Crescimento profissional sustentável.</span>
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3 sm:mt-8">
               <GoldButton size="lg" href={PROSPERUS_CHECKOUT_URL} external>
                 Entrar para a Prosperus
               </GoldButton>
@@ -456,6 +456,7 @@ function ProsperusPage() {
           </div>
         </div>
       </section>
+
 
       {/* Abertura / dor */}
       <section id="sobre" className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
