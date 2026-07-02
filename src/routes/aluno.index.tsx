@@ -44,6 +44,20 @@ function StudentHome() {
   const featured = useMemo(() => courses?.[0], [courses]);
   const continueWatching = useMemo(() => (courses ?? []).slice(0, 3), [courses]);
 
+  const coverStyle = (c: any): React.CSSProperties => {
+    if (!c?.cover_url) {
+      return { background: `linear-gradient(135deg, ${c?.primary_color ?? "#4f46e5"}, ${c?.accent_color ?? "#1e1e5a"})` };
+    }
+    const fit = c.cover_fit === "contain" ? "contain" : "cover";
+    return {
+      backgroundImage: `url(${c.cover_url})`,
+      backgroundSize: fit,
+      backgroundPosition: c.cover_position || "center",
+      backgroundRepeat: "no-repeat",
+      backgroundColor: c.accent_color || "#0a0a14",
+    };
+  };
+
   if (loading || !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
