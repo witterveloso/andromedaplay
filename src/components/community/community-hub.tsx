@@ -458,9 +458,10 @@ export function CommunityHub({
               )}
 
               {recent.length > 0 && (
-                <Rail title="Continue de onde parou" posts={recent.slice(0, 10)} primary={primary} onOpen={handleOpen}
+                <Rail title="Continue de onde parou" posts={recent.slice(0, 1)} primary={primary} onOpen={handleOpen}
                   aspect={cardAspect} aspectCustom={cardAspectCustom} />
               )}
+
 
               {newest.length > 0 && (
                 <Rail title="Novidades" description="Publicações mais recentes da comunidade"
