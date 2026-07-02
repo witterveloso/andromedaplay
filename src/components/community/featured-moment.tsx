@@ -51,7 +51,7 @@ export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | nu
     fmt === "card-16-9" ? "aspect-video max-w-3xl mx-auto" :
     fmt === "card-9-16" ? "aspect-[9/16] max-w-sm mx-auto" :
     fmt === "hero-full" ? "aspect-[21/9]" :
-    "aspect-[16/6] sm:aspect-[21/6] min-h-[150px]";
+    "aspect-[16/3] sm:aspect-[21/3] min-h-[75px]";
 
   return (
     <section className="relative w-full">
