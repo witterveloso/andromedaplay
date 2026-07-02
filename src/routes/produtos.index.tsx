@@ -103,7 +103,7 @@ function ProductsPage() {
               <div
                 className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                 style={{
-                  backgroundImage: `url(${p.sales_hero_url ?? p.cover_url ?? ""})`,
+                  backgroundImage: `url(${p.slug === "prosperus" ? prosperusCoverAsset.url : (p.sales_hero_url ?? p.cover_url ?? "")})`,
                   backgroundColor: "#ffffff",
                 }}
               />
