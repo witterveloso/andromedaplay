@@ -572,6 +572,35 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_moment_views: {
+        Row: {
+          course_id: string
+          signature: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          course_id: string
+          signature: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          course_id?: string
+          signature?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_moment_views_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_materials: {
         Row: {
           created_at: string
