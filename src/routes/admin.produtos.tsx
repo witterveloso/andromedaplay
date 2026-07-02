@@ -498,10 +498,12 @@ function CardPreview({ form }: { form: ProductForm }) {
       style={bg}
     >
       <div
-        className="h-40 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-56 md:rounded-l-2xl md:rounded-tr-none"
+        className="h-40 w-full shrink-0 rounded-t-2xl bg-no-repeat md:h-auto md:w-56 md:rounded-l-2xl md:rounded-tr-none"
         style={{
           backgroundImage: form.cover_url ? `url(${form.cover_url})` : undefined,
-          backgroundColor: "#ffffff",
+          backgroundColor: form.accent_color || "#0a0a14",
+          backgroundSize: form.cover_fit === "contain" ? "contain" : "cover",
+          backgroundPosition: form.cover_position || "center",
         }}
       />
       <div className="flex flex-1 flex-col justify-between gap-4 p-5 md:flex-row md:items-center md:gap-6">
