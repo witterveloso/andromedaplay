@@ -31,6 +31,8 @@ type ProductForm = {
   cover_url: string;
   logo_url: string;
   accent_color: string;
+  cover_fit: "cover" | "contain";
+  cover_position: "center" | "top" | "bottom" | "left" | "right";
   status: "draft" | "published" | "archived";
   is_for_sale: boolean;
   external_checkout_url: string;
