@@ -166,44 +166,52 @@ function ProductPage() {
               className="mt-6 space-y-3"
               onSubmit={(e) => {
                 e.preventDefault();
+                if (p.external_checkout_url) {
+                  window.location.href = p.external_checkout_url;
+                  return;
+                }
                 buyMutation.mutate();
               }}
             >
-              <div>
-                <Label htmlFor="buyer-name" className="text-xs text-white/70">
-                  Nome
-                </Label>
-                <Input
-                  id="buyer-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Seu nome"
-                  className="mt-1 bg-white/[0.04]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="buyer-email" className="text-xs text-white/70">
-                  E-mail
-                </Label>
-                <Input
-                  id="buyer-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="voce@email.com"
-                  className="mt-1 bg-white/[0.04]"
-                />
-                <p className="mt-1 text-[11px] text-white/50">
-                  É neste e-mail que você acessará seu curso após o pagamento.
-                </p>
-              </div>
+              {!p.external_checkout_url && (
+                <>
+                  <div>
+                    <Label htmlFor="buyer-name" className="text-xs text-white/70">
+                      Nome
+                    </Label>
+                    <Input
+                      id="buyer-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Seu nome"
+                      className="mt-1 bg-white/[0.04]"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="buyer-email" className="text-xs text-white/70">
+                      E-mail
+                    </Label>
+                    <Input
+                      id="buyer-email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="voce@email.com"
+                      className="mt-1 bg-white/[0.04]"
+                    />
+                    <p className="mt-1 text-[11px] text-white/50">
+                      É neste e-mail que você acessará seu curso após o pagamento.
+                    </p>
+                  </div>
+                </>
+              )}
 
               <Button
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={buyMutation.isPending || !email}
+                disabled={!p.external_checkout_url && (buyMutation.isPending || !email)}
               >
                 {buyMutation.isPending ? (
                   <>
