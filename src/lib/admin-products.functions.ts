@@ -56,6 +56,8 @@ const productPatchSchema = z.object({
   sales_video_url: z.string().url().nullable().optional().or(z.literal("")),
   sales_bullets: z.array(z.string().max(500)).max(20).optional(),
   access_duration_days: z.number().int().min(0).nullable().optional(),
+  cover_fit: z.enum(["cover", "contain"]).optional(),
+  cover_position: z.enum(["center", "top", "bottom", "left", "right"]).optional(),
 });
 
 function normalizeEmptyToNull(patch: Record<string, any>) {
