@@ -82,6 +82,50 @@ function LightStreaks({ className = "" }: { className?: string }) {
   );
 }
 
+function NeonDivider() {
+  return (
+    <div className="pointer-events-none relative h-6 w-full overflow-hidden" style={{ background: BG }}>
+      {/* Center glow pool */}
+      <div
+        className="absolute left-1/2 top-1/2 h-px w-[80%] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${RED} 18%, ${GOLD} 38%, ${BLUE} 62%, ${GREEN} 82%, transparent 100%)`,
+          boxShadow: `0 0 16px ${RED}, 0 0 32px ${BLUE}40`,
+        }}
+      />
+      {/* Individual neon threads */}
+      <div
+        className="absolute left-[10%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${RED}, transparent)`,
+          boxShadow: `0 0 10px ${RED}, 0 0 20px ${RED}60`,
+        }}
+      />
+      <div
+        className="absolute left-[30%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)`,
+          boxShadow: `0 0 10px ${GOLD}, 0 0 20px ${GOLD}60`,
+        }}
+      />
+      <div
+        className="absolute left-[52%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${BLUE}, transparent)`,
+          boxShadow: `0 0 10px ${BLUE}, 0 0 20px ${BLUE}60`,
+        }}
+      />
+      <div
+        className="absolute left-[74%] top-1/2 h-px w-[18%] -translate-y-1/2 opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${GREEN}, transparent)`,
+          boxShadow: `0 0 10px ${GREEN}, 0 0 20px ${GREEN}60`,
+        }}
+      />
+    </div>
+  );
+}
+
 /* Signature graphic: 4 silhouettes rising over neon growth bars */
 function GrowthArtwork({ className = "" }: { className?: string }) {
   const bars = [
