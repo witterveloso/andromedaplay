@@ -91,32 +91,39 @@ function ProductsPage() {
           </div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-5">
           {data?.products.map((p: any) => (
             <Link
               key={p.id}
               to="/produtos/$slug"
               params={{ slug: p.slug }}
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/20 hover:bg-white/[0.05]"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] md:flex-row"
             >
               <div
-                className="aspect-video w-full bg-cover bg-center"
+                className="h-48 w-full shrink-0 bg-cover bg-center md:h-auto md:w-72 lg:w-96"
                 style={{
                   backgroundImage: `url(${p.sales_hero_url ?? p.cover_url ?? ""})`,
                   backgroundColor: "#10102a",
                 }}
               />
-              <div className="p-5">
-                <h3 className="font-display text-lg font-semibold leading-tight">{p.title}</h3>
-                {p.sales_subheadline && (
-                  <p className="mt-1 line-clamp-2 text-sm text-white/60">{p.sales_subheadline}</p>
-                )}
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-base font-semibold text-white">
+              <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-display text-xl font-semibold leading-tight md:text-2xl">
+                    {p.title}
+                  </h3>
+                  {p.sales_subheadline && (
+                    <p className="mt-2 line-clamp-2 text-sm text-white/60 md:text-base">
+                      {p.sales_subheadline}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:justify-center">
+                  <span className="text-lg font-semibold text-white md:text-xl">
                     {formatPrice(p.price_cents, p.currency ?? "BRL")}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-primary/90 transition group-hover:gap-2">
-                    Ver detalhes <ArrowRight className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
+                    {p.external_checkout_url || p.price_cents ? "Comprar" : "Saiba mais"}
+                    <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
                   </span>
                 </div>
               </div>
