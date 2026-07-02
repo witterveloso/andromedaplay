@@ -97,7 +97,7 @@ function HomePage() {
         to="/produtos"
         aria-label="Produtos"
         className="absolute z-40 md:hidden inline-flex items-center rounded-full border border-white/15 bg-black/30 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/85"
-        style={{ top: "1.8%", left: "50%", transform: "translateX(-50%)" }}
+        style={{ top: "2.2%", left: "62%", transform: "translateX(-50%)" }}
       >
         Produtos
       </Link>
