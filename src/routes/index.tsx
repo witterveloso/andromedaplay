@@ -80,13 +80,29 @@ function HomePage() {
         />
       </div>
 
-      <Link
-        to="/produtos"
-        aria-label="Produtos"
-        className="absolute left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-[11px] uppercase tracking-[0.32em] text-white/85 backdrop-blur-md transition hover:border-white/35 hover:bg-black/60 hover:text-white max-md:bottom-5 max-md:top-auto md:top-6 md:text-xs"
-      >
-        Produtos
-      </Link>
+      {/* Top navigation bar */}
+      <header className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-5">
+        <Link to="/" aria-label="Andromeda Play">
+          <AndromedaLogo size={32} />
+        </Link>
+
+        <nav className="flex items-center gap-4">
+          <Link
+            to="/produtos"
+            aria-label="Produtos"
+            className="text-xs uppercase tracking-[0.28em] text-white/70 transition hover:text-white"
+          >
+            Produtos
+          </Link>
+          <Link
+            to="/login"
+            aria-label="Entrar"
+            className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs uppercase tracking-[0.28em] text-white/90 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+          >
+            Entrar
+          </Link>
+        </nav>
+      </header>
 
       <h1 className="sr-only">
         Bem-vindo ao universo do conhecimento e da evolução
