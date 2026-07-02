@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listProducts } from "@/lib/products.functions";
 import { ArrowRight, Sparkles } from "lucide-react";
-import prosperusCoverAsset from "@/assets/prosperus-cover.png.asset.json";
+
 
 export const Route = createFileRoute("/produtos/")({
   head: () => ({
@@ -94,37 +94,30 @@ function ProductsPage() {
 
         <div className="flex flex-col gap-5">
           {data?.products.map((p: any) => {
-            const isProsperus = p.slug === "prosperus";
-            const cardBg = isProsperus ? "#04060F" : undefined;
-            const imgBg = isProsperus ? "#04060F" : "#ffffff";
-            const heroSrc = isProsperus
-              ? prosperusCoverAsset.url
-              : (p.sales_hero_url ?? p.cover_url ?? "");
+            const accent = p.accent_color || "#0a0a14";
+            const heroSrc = p.sales_hero_url ?? p.cover_url ?? "";
             return (
               <Link
                 key={p.id}
                 to="/produtos/$slug"
                 params={{ slug: p.slug }}
-                className={
-                  "group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 backdrop-blur transition hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row " +
-                  (isProsperus ? "" : "bg-white/[0.03] hover:bg-white/[0.05]")
-                }
-                style={cardBg ? { backgroundColor: cardBg } : undefined}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 backdrop-blur transition hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row"
+                style={{ backgroundColor: accent }}
               >
                 <div
-                  className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat md:h-auto md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
+                  className="h-48 w-full shrink-0 rounded-t-2xl bg-contain bg-center bg-no-repeat p-6 md:h-64 md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                   style={{
                     backgroundImage: `url(${heroSrc})`,
-                    backgroundColor: imgBg,
+                    backgroundColor: accent,
                   }}
                 />
-                <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
+                <div className="flex flex-1 flex-col justify-between gap-4 bg-black/20 p-6 md:flex-row md:items-center md:gap-8">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-display text-xl font-semibold leading-tight md:text-2xl">
+                    <h3 className="font-display text-xl font-semibold leading-tight text-white md:text-2xl">
                       {p.title}
                     </h3>
                     {p.sales_subheadline && (
-                      <p className="mt-2 line-clamp-2 text-sm text-white/60 md:text-base">
+                      <p className="mt-2 line-clamp-2 text-sm text-white/70 md:text-base">
                         {p.sales_subheadline}
                       </p>
                     )}
@@ -147,6 +140,7 @@ function ProductsPage() {
             );
           })}
         </div>
+
       </section>
     </main>
   );
