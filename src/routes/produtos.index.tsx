@@ -104,10 +104,12 @@ function ProductsPage() {
                 className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur transition hover:border-white/25 hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06060f] md:flex-row"
               >
                 <div
-                  className="h-48 w-full shrink-0 rounded-t-2xl bg-cover bg-center bg-no-repeat md:h-64 md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
+                  className="h-48 w-full shrink-0 rounded-t-2xl bg-no-repeat md:h-64 md:w-72 md:rounded-l-2xl md:rounded-tr-none lg:w-96"
                   style={{
                     backgroundImage: `url(${heroSrc})`,
                     backgroundColor: accent,
+                    backgroundSize: p.cover_fit === "contain" ? "contain" : "cover",
+                    backgroundPosition: p.cover_position || "center",
                   }}
                 />
                 <div className="flex flex-1 flex-col justify-between gap-4 p-6 md:flex-row md:items-center md:gap-8">
