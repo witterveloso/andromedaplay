@@ -19,7 +19,7 @@ export const listProducts = createServerFn({ method: "GET" }).handler(async () =
   const { data, error } = await supabase
     .from("courses")
     .select(
-      "id, slug, title, description, cover_url, logo_url, price_cents, currency, sales_headline, sales_subheadline, sales_hero_url",
+      "id, slug, title, description, cover_url, logo_url, price_cents, currency, sales_headline, sales_subheadline, sales_hero_url, external_checkout_url",
     )
     .eq("is_for_sale", true)
     .eq("status", "published")
