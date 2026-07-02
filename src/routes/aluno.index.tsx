@@ -88,11 +88,7 @@ function StudentHome() {
           <div className="absolute inset-0 z-0 overflow-hidden">
             <div
               className="absolute inset-0 animate-ken-burns"
-              style={
-                featured.cover_url
-                  ? { backgroundImage: `url(${featured.cover_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                  : { background: `linear-gradient(135deg, ${featured.primary_color ?? "#4f46e5"}, ${featured.accent_color ?? "#1e1e5a"})` }
-              }
+              style={coverStyle(featured)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/70 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a] via-[#0a0a1a]/40 to-transparent" />
