@@ -774,8 +774,12 @@ function ProsperusPage() {
       >
         <LightStreaks />
         <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <div className="mx-auto mb-10 h-40 w-full max-w-md sm:h-52">
-            <GrowthArtwork className="h-full w-full" />
+          <div className="mx-auto mb-10 flex h-48 w-full max-w-xs items-center justify-center sm:h-64">
+            <img
+              src={prosperusLogoAsset.url}
+              alt="Logo Prosperus"
+              className="h-full w-full object-contain drop-shadow-[0_0_40px_rgba(255,199,0,0.25)]"
+            />
           </div>
           <h2 className="font-display text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
             Entre para a <ProsperusWordmark className="text-3xl sm:text-4xl md:text-5xl" />
