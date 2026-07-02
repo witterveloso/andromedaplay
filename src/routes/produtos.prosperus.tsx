@@ -424,7 +424,7 @@ function ProsperusPage() {
               <span className="text-white">Crescimento profissional sustentável.</span>
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <GoldButton size="lg" href="#entrar">
+              <GoldButton size="lg" href={PROSPERUS_CHECKOUT_URL} external>
                 Entrar para a Prosperus
               </GoldButton>
               <a
@@ -783,7 +783,7 @@ function ProsperusPage() {
             sustentável.
           </p>
           <div className="mt-10 flex justify-center">
-            <GoldButton size="lg" href="#entrar">
+            <GoldButton size="lg" href={PROSPERUS_CHECKOUT_URL} external>
               Faça parte da Prosperus
             </GoldButton>
           </div>
