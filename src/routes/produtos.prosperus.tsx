@@ -437,7 +437,7 @@ function ProsperusPage() {
               <Sparkles className="h-3 w-3" /> Comunidade Andromeda Play
             </div>
             <h1 className="font-display leading-[0.95]">
-              <ProsperusWordmark className="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl" />
+              <ProsperusWordmark className="block text-3xl sm:text-5xl md:text-6xl lg:text-7xl" />
             </h1>
             <p className="mt-4 max-w-xl text-sm text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:mt-6 sm:text-lg md:text-xl">
               Temperamento entendido. Comportamento ajustado.{" "}
