@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { YouTubeLivePlayer } from "@/components/community/youtube-live-player";
 import { LiveChat } from "@/components/community/live-chat";
+import { Star, NotebookPen } from "lucide-react";
 import { toast } from "sonner";
+
 
 const REACTIONS = [
   { key: "heart", emoji: "❤️" },
