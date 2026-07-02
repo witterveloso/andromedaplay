@@ -211,25 +211,66 @@ export function StudentPostCard({ post }: { post: any }) {
       </div>
 
 
-      <div className="px-4 pb-3 flex items-center justify-end gap-2 flex-wrap border-t pt-3">
-        {REACTIONS.map((r) => {
-          const active = mine.has(r.key);
-          return (
-            <button
-              key={r.key}
-              type="button"
-              onClick={() => toggleReaction.mutate(r.key)}
-              disabled={toggleReaction.isPending}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors ${
-                active ? "bg-primary/15 border-primary/40" : "bg-muted/30 hover:bg-muted/60 border-transparent"
-              }`}
-            >
-              <span>{r.emoji}</span>
-              <span className="tabular-nums text-xs opacity-70">{counts[r.key] ?? 0}</span>
-            </button>
-          );
-        })}
+      <div className="px-4 pb-3 flex items-center justify-between gap-2 flex-wrap border-t pt-3">
+        <button
+          type="button"
+          onClick={() => toggleReaction.mutate("favorite")}
+          disabled={toggleReaction.isPending || !user}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors ${
+            mine.has("favorite")
+              ? "bg-amber-400/15 border-amber-400/50 text-amber-300"
+              : "bg-muted/30 hover:bg-muted/60 border-transparent"
+          }`}
+        >
+          <Star className={`h-4 w-4 ${mine.has("favorite") ? "fill-amber-400 text-amber-400" : ""}`} />
+          <span className="text-xs">{mine.has("favorite") ? "Favoritado" : "Favoritar"}</span>
+        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {REACTIONS.map((r) => {
+            const active = mine.has(r.key);
+            return (
+              <button
+                key={r.key}
+                type="button"
+                onClick={() => toggleReaction.mutate(r.key)}
+                disabled={toggleReaction.isPending}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors ${
+                  active ? "bg-primary/15 border-primary/40" : "bg-muted/30 hover:bg-muted/60 border-transparent"
+                }`}
+              >
+                <span>{r.emoji}</span>
+                <span className="tabular-nums text-xs opacity-70">{counts[r.key] ?? 0}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {user && (
+        <div className="border-t bg-white/[0.02] px-4 py-3 space-y-2">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] opacity-70">
+            <NotebookPen className="h-3.5 w-3.5" />
+            Minhas anotações
+          </div>
+          <Textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            placeholder="Escreva suas anotações sobre esta publicação..."
+            className="min-h-[90px] bg-background/40"
+          />
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => saveNote.mutate()}
+              disabled={saveNote.isPending}
+            >
+              {saveNote.isPending ? "Salvando..." : "Salvar anotação"}
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       {post.post_type === "live" && post.is_live_active && post.live_chat_enabled ? (
         <LiveChat postId={post.id} courseId={post.course_id} />
