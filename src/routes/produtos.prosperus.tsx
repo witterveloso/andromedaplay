@@ -137,9 +137,9 @@ function GrowthArtwork({ className = "" }: { className?: string }) {
 function ProsperusWordmark({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`font-display font-black whitespace-nowrap ${className}`}
+      className={`font-display font-black ${className}`}
       style={{
-        letterSpacing: "0.02em",
+        whiteSpace: "nowrap",
         backgroundImage:
           "linear-gradient(180deg, #ffffff 0%, #e8ecf3 40%, #a9b1c1 70%, #ffffff 100%)",
         WebkitBackgroundClip: "text",
