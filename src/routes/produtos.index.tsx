@@ -119,7 +119,11 @@ function ProductsPage() {
                 </div>
                 <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:justify-center">
                   <span className="text-lg font-semibold text-white md:text-xl">
-                    {formatPrice(p.price_cents, p.currency ?? "BRL")}
+                    {p.price_cents
+                      ? formatPrice(p.price_cents, p.currency ?? "BRL")
+                      : p.external_checkout_url
+                        ? "Saiba mais"
+                        : "Em breve"}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/90 transition group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-white">
                     {p.external_checkout_url || p.price_cents ? "Comprar" : "Saiba mais"}
