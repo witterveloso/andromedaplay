@@ -12,6 +12,133 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
+import prosperusLogoAsset from "@/assets/prosperus-logo.png.asset.json";
+import prosperusHeroAsset from "@/assets/prosperus-hero.png.asset.json";
+
+let _brandingCache: { logo: string; hero: string } | null = null;
+async function loadBrandingImages() {
+  if (_brandingCache) return _brandingCache;
+  const toDataUrl = async (url: string) => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  };
+  const [logo, hero] = await Promise.all([
+    toDataUrl(prosperusLogoAsset.url),
+    toDataUrl(prosperusHeroAsset.url),
+  ]);
+  _brandingCache = { logo, hero };
+  return _brandingCache;
+}
+
+async function generateNotePdf(note: any, post: any, course: any) {
+  const { logo, hero } = await loadBrandingImages();
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 48;
+
+  doc.setFillColor(11, 19, 38);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+  try {
+    doc.addImage(hero, "PNG", 0, 0, pageWidth, 180, undefined, "FAST");
+  } catch {}
+  try {
+    doc.setGState(new (doc as any).GState({ opacity: 0.55 }));
+    doc.setFillColor(11, 19, 38);
+    doc.rect(0, 0, pageWidth, 180, "F");
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  } catch {}
+
+  try {
+    doc.addImage(logo, "PNG", margin, 32, 150, 46, undefined, "FAST");
+  } catch {}
+
+  doc.setTextColor(230, 231, 234);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const dateStr = new Date(note.updated_at ?? note.created_at).toLocaleString("pt-BR");
+  doc.text(dateStr, pageWidth - margin, 48, { align: "right" });
+  doc.setTextColor(180, 180, 180);
+  doc.text(course?.title ?? "PROSPERUS", pageWidth - margin, 62, { align: "right" });
+
+  const barY = 180;
+  const seg = pageWidth / 4;
+  const colors: [number, number, number][] = [
+    [255, 59, 48], [255, 184, 0], [0, 178, 255], [34, 197, 94],
+  ];
+  colors.forEach((c, i) => {
+    doc.setFillColor(c[0], c[1], c[2]);
+    doc.rect(i * seg, barY, seg, 3, "F");
+  });
+
+  let y = 230;
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  const heading = post?.title || post?.body?.slice(0, 90) || "Anotação pessoal";
+  const titleLines = doc.splitTextToSize(heading, pageWidth - margin * 2);
+  doc.text(titleLines, margin, y);
+  y += titleLines.length * 22 + 6;
+
+  if (post) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(160, 170, 190);
+    doc.text("Referente à publicação da comunidade", margin, y);
+    y += 18;
+  }
+
+  doc.setDrawColor(90, 100, 130);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 22;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.setTextColor(235, 238, 245);
+  const bodyLines = doc.splitTextToSize(note.content || "(anotação vazia)", pageWidth - margin * 2);
+  for (const line of bodyLines) {
+    if (y > pageHeight - 90) {
+      doc.addPage();
+      doc.setFillColor(11, 19, 38);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+      y = margin + 10;
+      doc.setTextColor(235, 238, 245);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+    }
+    doc.text(line, margin, y);
+    y += 18;
+  }
+
+  const footerY = pageHeight - 42;
+  colors.forEach((c, i) => {
+    doc.setFillColor(c[0], c[1], c[2]);
+    doc.rect(i * seg, footerY - 6, seg, 2, "F");
+  });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(150, 160, 180);
+  doc.text("PROSPERUS  ·  Temperamento · Maturidade · Crescimento", margin, footerY + 8);
+  doc.text("andromedaplay.lovable.app", pageWidth - margin, footerY + 8, { align: "right" });
+
+  const slug = (post?.title || "anotacao")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 40) || "anotacao";
+  doc.save(`prosperus-${slug}-${(note.id ?? "").toString().slice(0, 6)}.pdf`);
+}
 
 type View =
   | { kind: "home" }
