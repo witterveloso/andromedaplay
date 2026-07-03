@@ -475,7 +475,7 @@ function ProsperusPage() {
           }}
         />
 
-        <div className="absolute inset-0 z-10 mx-auto flex max-w-6xl items-center px-5 py-10 sm:px-6 sm:py-14 md:py-20">
+        <div className="relative z-10 mx-auto flex max-w-6xl items-center px-5 pb-10 pt-6 sm:px-6 sm:pb-14 md:absolute md:inset-0 md:py-20">
           <div className="max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-white/70 backdrop-blur sm:text-[11px]">
               <Sparkles className="h-3 w-3" /> Comunidade Andromeda Play
