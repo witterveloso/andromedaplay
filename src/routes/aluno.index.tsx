@@ -210,7 +210,10 @@ function StudentHome() {
                     </p>
                     <h4 className="text-sm md:text-base font-bold leading-tight line-clamp-2">{c.title}</h4>
                     <div className="mt-3 w-full h-1 bg-[#1e1e5a] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#4f46e5] rounded-full shadow-[0_0_8px_#4f46e5]" style={{ width: "12%" }} />
+                      <div
+                        className="h-full bg-[#4f46e5] rounded-full shadow-[0_0_8px_#4f46e5] transition-all"
+                        style={{ width: `${progressByCourse?.[c.id] ?? 0}%` }}
+                      />
                     </div>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
