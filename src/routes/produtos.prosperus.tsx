@@ -36,10 +36,10 @@ export const Route = createFileRoute("/produtos/prosperus")({
         content:
           "Temperamento entendido. Comportamento ajustado. Crescimento profissional sustentável.",
       },
-      { property: "og:url", content: "https://andromedaplay.lovable.app/produtos/prosperus" },
+      { property: "og:url", content: "https://andromedaplay.com.br/produtos/prosperus" },
     ],
     links: [
-      { rel: "canonical", href: "https://andromedaplay.lovable.app/produtos/prosperus" },
+      { rel: "canonical", href: "https://andromedaplay.com.br/produtos/prosperus" },
     ],
   }),
   component: ProsperusPage,

@@ -129,7 +129,7 @@ async function generateNotePdf(note: any, post: any, course: any) {
   doc.setFontSize(8);
   doc.setTextColor(150, 160, 180);
   doc.text("PROSPERUS  ·  Temperamento · Maturidade · Crescimento", margin, footerY + 8);
-  doc.text("andromedaplay.lovable.app", pageWidth - margin, footerY + 8, { align: "right" });
+  doc.text("andromedaplay.com.br", pageWidth - margin, footerY + 8, { align: "right" });
 
   const slug = (post?.title || "anotacao")
     .toString()
