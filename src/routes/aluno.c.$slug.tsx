@@ -296,6 +296,8 @@ function StudentCourse() {
                         embed: activeLesson.video_embed,
                         legacyYoutubeUrl: activeLesson.youtube_url,
                       }}
+                      onProgress={handleProgress}
+                      onEnded={handleEnded}
                     />
                   ) : (
                     <div className="p-16 text-center bg-[#141432]">Aula sem vídeo configurado.</div>
