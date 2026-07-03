@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import homeDesktopAsset from "@/assets/andromeda-home-desktop.png.asset.json";
-import homeMobileAsset from "@/assets/andromeda-home-mobile.png.asset.json";
+import homeDesktopAsset from "@/assets/andromeda-home-desktop-v2.png.asset.json";
+import homeMobileAsset from "@/assets/andromeda-home-mobile-v2.png.asset.json";
 
 const homeDesktop = homeDesktopAsset.url;
 const homeMobile = homeMobileAsset.url;
