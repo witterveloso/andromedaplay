@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { FeaturedMoment } from "@/components/community/featured-moment";
 import { StudentPostCard } from "@/components/community/student-post-card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { aspectRatioStyle, cardWidthClass } from "@/lib/card-aspect";
 import {
   Home, Hash, Radio, FileText, Star, Clock, ChevronRight,
-  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X, NotebookPen, Download,
+  PlayCircle, MessageSquare, Paperclip, Sparkles, Menu, X, NotebookPen, Download, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
 import prosperusLogoAsset from "@/assets/prosperus-logo.png.asset.json";
 import prosperusHeroAsset from "@/assets/prosperus-hero.png.asset.json";
