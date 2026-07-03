@@ -46,6 +46,28 @@ function ResetPasswordPage() {
     setSubmitting(false);
     if (error) return toast.error(error.message);
     toast.success("Senha atualizada com sucesso");
+    // Find the most recent enrollment for this user and route straight to it.
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (uid) {
+        const { data: enr } = await supabase
+          .from("enrollments")
+          .select("created_at, course:courses(slug)")
+          .eq("student_id", uid)
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const slug = (enr as any)?.course?.slug as string | undefined;
+        if (slug) {
+          navigate({ to: "/aluno/c/$slug", params: { slug } });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("post-reset redirect failed", e);
+    }
     await supabase.auth.signOut();
     navigate({ to: "/login" });
   }
