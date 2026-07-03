@@ -192,7 +192,7 @@ function StudentHome() {
               <div className="h-px flex-1 bg-gradient-to-r from-[#1e1e5a] to-transparent" />
             </div>
             <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
-              {continueWatching.map((c) => (
+              {continueWatching.map((c: any) => (
                 <Link
                   key={c.id}
                   to="/aluno/c/$slug"
