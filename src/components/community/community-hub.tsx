@@ -745,6 +745,27 @@ function NotesView({
   onBack: () => void;
 }) {
   const postMap = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  const deleteNote = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("community_notes").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_data, id) => {
+      qc.setQueryData(["hub-my-notes", course.id, user?.id], (old: any[] | undefined) =>
+        (old ?? []).filter((n) => n.id !== id),
+      );
+      qc.invalidateQueries({ queryKey: ["hub-my-notes", course.id] });
+      const note = notes.find((n) => n.id === id);
+      if (note?.post_id) qc.invalidateQueries({ queryKey: ["my-note", note.post_id] });
+      toast.success("Anotação apagada");
+      setConfirmId(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-8">
@@ -790,6 +811,15 @@ function NotesView({
                     >
                       <Download className="h-3.5 w-3.5" /> Baixar PDF
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setConfirmId(n.id)}
+                      className="gap-2 h-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      aria-label="Apagar anotação"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Apagar
+                    </Button>
                   </div>
                 </div>
                 {p && (
@@ -805,6 +835,30 @@ function NotesView({
           })}
         </div>
       )}
+
+      <AlertDialog open={!!confirmId} onOpenChange={(o) => !o && setConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar anotação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja apagar esta anotação? Esta ação não pode ser desfeita. A publicação permanece intacta — apenas o conteúdo da sua anotação será removido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteNote.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmId) deleteNote.mutate(confirmId);
+              }}
+              disabled={deleteNote.isPending}
+              className="bg-red-600 hover:bg-red-500 text-white"
+            >
+              {deleteNote.isPending ? "Apagando..." : "Apagar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
