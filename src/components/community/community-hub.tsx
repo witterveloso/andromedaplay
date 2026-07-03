@@ -448,7 +448,7 @@ export function CommunityHub({
             </section>
 
 
-            <FeaturedMoment data={course as any} format={course.featured_format} />
+            <FeaturedMoment data={course as any} format={course.featured_format} courseId={course.id} />
 
             <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-10">
               {liveNow.length > 0 && (

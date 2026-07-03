@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Bell, ExternalLink, MessageSquare, PlayCircle, Sparkles, Video, X } from "lucide-react";
 import { toYouTubeEmbed, extractYouTubeId } from "@/lib/youtube";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 type FeaturedKind = "post" | "video" | "lesson" | "notice";
 
@@ -21,8 +23,58 @@ const KIND_META: Record<FeaturedKind, { label: string; Icon: typeof Sparkles }> 
   notice: { label: "Aviso", Icon: Bell },
 };
 
-export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | null | undefined; format?: string | null }) {
+function computeSignature(d: FeaturedMomentData): string {
+  return [
+    d.featured_kind ?? "",
+    d.featured_title ?? "",
+    d.featured_description ?? "",
+    d.featured_image_url ?? "",
+    d.featured_cta_label ?? "",
+    d.featured_cta_url ?? "",
+  ].join("||");
+}
+
+export function FeaturedMoment({
+  data,
+  format,
+  courseId,
+}: {
+  data: FeaturedMomentData | null | undefined;
+  format?: string | null;
+  courseId?: string | null;
+}) {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const [seenSignature, setSeenSignature] = useState<string | null>(null);
+  const currentSignature = useMemo(() => (data ? computeSignature(data) : ""), [data]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.id || !courseId) { setSeenSignature(null); return; }
+    (async () => {
+      const { data: row } = await supabase
+        .from("featured_moment_views")
+        .select("signature")
+        .eq("user_id", user.id)
+        .eq("course_id", courseId)
+        .maybeSingle();
+      if (!cancelled) setSeenSignature((row as any)?.signature ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, courseId, currentSignature]);
+
+  const alreadyViewed = seenSignature !== null && seenSignature === currentSignature;
+
+  const markViewed = async () => {
+    if (!user?.id || !courseId) return;
+    setSeenSignature(currentSignature);
+    await supabase
+      .from("featured_moment_views")
+      .upsert(
+        { user_id: user.id, course_id: courseId, signature: currentSignature, viewed_at: new Date().toISOString() },
+        { onConflict: "user_id,course_id" }
+      );
+  };
 
   if (!data?.featured_enabled) return null;
   if (!data.featured_title && !data.featured_image_url) return null;
@@ -40,6 +92,7 @@ export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | nu
   const isExternalLink = !useModal && /^https?:\/\//i.test(ctaUrl);
 
   const handleClick = (e: React.MouseEvent) => {
+    void markViewed();
     if (useModal) {
       e.preventDefault();
       setOpen(true);
@@ -48,10 +101,10 @@ export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | nu
 
   const fmt = (format ?? "banner").toLowerCase();
   const mediaAspectClass =
-    fmt === "card-16-9" ? "aspect-video max-w-3xl mx-auto" :
-    fmt === "card-9-16" ? "aspect-[9/16] max-w-sm mx-auto" :
-    fmt === "hero-full" ? "aspect-[21/9]" :
-    "aspect-[16/3] sm:aspect-[21/3] min-h-[75px]";
+    fmt === "card-16-9" ? "aspect-video max-w-2xl mx-auto" :
+    fmt === "card-9-16" ? "aspect-[9/16] max-w-xs mx-auto" :
+    fmt === "hero-full" ? "aspect-[21/4.5]" :
+    "aspect-[16/2] sm:aspect-[21/2] min-h-[75px]";
 
   return (
     <section className="relative w-full">
@@ -70,7 +123,7 @@ export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | nu
               <img
                 src={data.featured_image_url}
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.015]"
+                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-[1200ms] ease-out group-hover:scale-[1.015]"
               />
             ) : (
               <div
@@ -84,32 +137,34 @@ export function FeaturedMoment({ data, format }: { data: FeaturedMomentData | nu
             <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
             <div className="relative h-full flex items-center">
-              <div className="w-full sm:w-[62%] px-5 sm:px-8 lg:px-10 py-4 space-y-2 sm:space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-2.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-white/90">
-                  <Sparkles className="h-3 w-3 text-primary" />
-                  <span>Em destaque</span>
-                  <span className="opacity-50">·</span>
-                  <Icon className="h-3 w-3" />
-                  <span>{meta.label}</span>
-                </div>
+              <div className="w-full sm:w-[62%] px-5 sm:px-8 lg:px-10 py-3 space-y-1.5 sm:space-y-2">
+                {!alreadyViewed && (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-2.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-white/90">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    <span>Em destaque</span>
+                    <span className="opacity-50">·</span>
+                    <Icon className="h-3 w-3" />
+                    <span>{meta.label}</span>
+                  </div>
+                )}
 
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)] leading-[1.1] line-clamp-2">
+                <h2 className="text-base sm:text-xl lg:text-2xl font-bold tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)] leading-[1.1] line-clamp-2">
                   {data.featured_title}
                 </h2>
 
                 {data.featured_description && (
-                  <p className="hidden sm:block text-sm text-white/80 max-w-xl leading-snug line-clamp-2">
+                  <p className="hidden sm:block text-xs sm:text-sm text-white/80 max-w-xl leading-snug line-clamp-1">
                     {data.featured_description}
                   </p>
                 )}
 
-                <div className="pt-1">
+                <div className="pt-0.5">
                   <a
                     href={useModal ? "#" : (ctaUrl || "#")}
                     onClick={handleClick}
                     target={isExternalLink ? "_blank" : undefined}
                     rel={isExternalLink ? "noopener noreferrer" : undefined}
-                    className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-[0.99]"
+                    className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-[0.99]"
                   >
                     {ctaLabel}
                     <ArrowRight className="h-3.5 w-3.5" />
