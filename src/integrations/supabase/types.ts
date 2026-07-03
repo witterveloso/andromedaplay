@@ -387,6 +387,7 @@ export type Database = {
           sales_video_url: string | null
           slug: string
           status: Database["public"]["Enums"]["course_status"]
+          stripe_price_id: string | null
           text_color: string
           theme_mode: string
           title: string
@@ -432,6 +433,7 @@ export type Database = {
           sales_video_url?: string | null
           slug: string
           status?: Database["public"]["Enums"]["course_status"]
+          stripe_price_id?: string | null
           text_color?: string
           theme_mode?: string
           title: string
@@ -477,6 +479,7 @@ export type Database = {
           sales_video_url?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["course_status"]
+          stripe_price_id?: string | null
           text_color?: string
           theme_mode?: string
           title?: string
