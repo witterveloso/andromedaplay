@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { toYouTubeEmbed } from "@/lib/youtube";
 
 export type VideoProvider =
@@ -44,7 +45,6 @@ export function resolveVideoEmbedUrl(cfg: VideoConfig): string | null {
     case "bunny": {
       if (url) return url;
       if (id) {
-        // ID format "library/video" OR just video id (won't play without library)
         const parts = id.split("/");
         if (parts.length === 2) return `https://iframe.mediadelivery.net/embed/${parts[0]}/${parts[1]}`;
       }
@@ -88,14 +88,154 @@ function extractIframeSrc(html: string): string | null {
   return m ? m[1] : null;
 }
 
+function extractYouTubeIdFromEmbed(embedUrl: string | null): string | null {
+  if (!embedUrl) return null;
+  const m = embedUrl.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+// ---- YouTube IFrame API loader (singleton) ----
+let ytApiPromise: Promise<any> | null = null;
+function loadYouTubeIframeApi(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("SSR"));
+  const w = window as any;
+  if (w.YT?.Player) return Promise.resolve(w.YT);
+  if (ytApiPromise) return ytApiPromise;
+  ytApiPromise = new Promise((resolve) => {
+    const prev = w.onYouTubeIframeAPIReady;
+    w.onYouTubeIframeAPIReady = () => {
+      try { prev?.(); } catch {}
+      resolve(w.YT);
+    };
+    if (!document.querySelector('script[data-yt-iframe-api]')) {
+      const s = document.createElement("script");
+      s.src = "https://www.youtube.com/iframe_api";
+      s.async = true;
+      s.setAttribute("data-yt-iframe-api", "true");
+      document.head.appendChild(s);
+    }
+  });
+  return ytApiPromise;
+}
+
+export type VideoProgressData = { seconds: number; duration: number; percent: number };
+
+type YouTubePlayerProps = {
+  videoId: string;
+  title?: string;
+  className?: string;
+  onProgress?: (d: VideoProgressData) => void;
+  onEnded?: () => void;
+};
+
+function YouTubePlayer({ videoId, title, className, onProgress, onEnded }: YouTubePlayerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const endedFiredRef = useRef(false);
+  // Keep the latest callbacks accessible without re-instantiating the player.
+  const onProgressRef = useRef(onProgress);
+  const onEndedRef = useRef(onEnded);
+  useEffect(() => { onProgressRef.current = onProgress; }, [onProgress]);
+  useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
+
+  useEffect(() => {
+    let interval: number | null = null;
+    let disposed = false;
+    endedFiredRef.current = false;
+
+    const tick = () => {
+      try {
+        const p = playerRef.current;
+        if (!p?.getCurrentTime || !p?.getDuration) return;
+        const seconds = p.getCurrentTime();
+        const duration = p.getDuration();
+        if (!duration || !isFinite(duration)) return;
+        const percent = Math.max(0, Math.min(100, Math.round((seconds / duration) * 100)));
+        onProgressRef.current?.({ seconds, duration, percent });
+        if (percent >= 90 && !endedFiredRef.current) {
+          endedFiredRef.current = true;
+          onEndedRef.current?.();
+        }
+      } catch {}
+    };
+
+    loadYouTubeIframeApi().then((YT) => {
+      if (disposed || !containerRef.current || !YT?.Player) return;
+      playerRef.current = new YT.Player(containerRef.current, {
+        videoId,
+        playerVars: {
+          enablejsapi: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+        },
+        events: {
+          onStateChange: (e: any) => {
+            const state = e.data;
+            if (state === YT.PlayerState.PLAYING) {
+              tick();
+              if (interval) window.clearInterval(interval);
+              interval = window.setInterval(tick, 5000);
+            } else if (state === YT.PlayerState.ENDED) {
+              if (interval) { window.clearInterval(interval); interval = null; }
+              tick();
+              if (!endedFiredRef.current) {
+                endedFiredRef.current = true;
+                onEndedRef.current?.();
+              }
+            } else {
+              // PAUSED / BUFFERING / CUED
+              if (interval) { window.clearInterval(interval); interval = null; }
+            }
+          },
+        },
+      });
+    }).catch(() => {});
+
+    return () => {
+      disposed = true;
+      if (interval) window.clearInterval(interval);
+      try { playerRef.current?.destroy?.(); } catch {}
+      playerRef.current = null;
+    };
+  }, [videoId]);
+
+  return (
+    <div className={className ?? "aspect-video w-full rounded-lg overflow-hidden bg-black"}>
+      <div ref={containerRef} className="w-full h-full" title={title} />
+    </div>
+  );
+}
+
 type VideoPlayerProps = {
   config: VideoConfig;
   title?: string;
   className?: string;
+  onProgress?: (d: VideoProgressData) => void;
+  onEnded?: () => void;
 };
 
-export function VideoPlayer({ config, title, className }: VideoPlayerProps) {
+export function VideoPlayer({ config, title, className, onProgress, onEnded }: VideoPlayerProps) {
   const wrap = className ?? "aspect-video w-full rounded-lg overflow-hidden bg-black";
+  const provider = config.provider ?? "youtube";
+
+  // YouTube: use IFrame API so we can track real progress.
+  if (provider === "youtube") {
+    const embedUrl = resolveVideoEmbedUrl(config);
+    const videoId = extractYouTubeIdFromEmbed(embedUrl) || (config.externalId ?? "").trim() || null;
+    if (videoId) {
+      return (
+        <YouTubePlayer
+          videoId={videoId}
+          title={title}
+          className={wrap}
+          onProgress={onProgress}
+          onEnded={onEnded}
+        />
+      );
+    }
+    // fall through to generic iframe if we couldn't parse an id
+  }
 
   // 1) explicit embed snippet wins (custom or any provider)
   const embedRaw = (config.embed ?? "").trim();
@@ -114,7 +254,6 @@ export function VideoPlayer({ config, title, className }: VideoPlayerProps) {
         </div>
       );
     }
-    // Raw HTML fallback
     return (
       <div
         className={wrap}
@@ -124,8 +263,7 @@ export function VideoPlayer({ config, title, className }: VideoPlayerProps) {
     );
   }
 
-  // 2) Mux .m3u8 → use native <video> (HLS works on Safari; others need hls.js, future work)
-  const provider = config.provider ?? "youtube";
+  // 2) Mux .m3u8 → use native <video>
   if (provider === "mux") {
     const src = resolveVideoEmbedUrl(config);
     if (!src) return null;

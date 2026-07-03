@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, Clock, LayoutGrid, List, Play, PlayCircle } from "lucide-react";
 import { aspectRatioStyle } from "@/lib/card-aspect";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Lesson = {
   id: string;
@@ -33,8 +36,6 @@ type GroupMode = "module" | "all";
 
 const VIEW_KEY = "andromeda:lesson-view";
 const GROUP_KEY = "andromeda:lesson-group";
-const COMPLETED_KEY = (courseId: string) => `andromeda:lesson-completed:${courseId}`;
-const PROGRESS_KEY = (courseId: string) => `andromeda:lesson-progress:${courseId}`;
 
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -57,28 +58,29 @@ function formatDuration(l: Lesson): string | null {
   return null;
 }
 
+type ProgressRow = { lesson_id: string; percent: number; completed: boolean };
+
 export function LessonCatalog({
   course,
   modules,
   activeLessonId,
+  studentId,
   onSelect,
 }: {
   course: Course;
   modules: (Module & { lessons: Lesson[] })[];
   activeLessonId?: string | null;
+  studentId?: string | null;
   onSelect: (lessonId: string) => void;
 }) {
+  const qc = useQueryClient();
   const [view, setView] = useState<ViewMode>("grid");
   const [group, setGroup] = useState<GroupMode>("module");
-  const [completed, setCompleted] = useState<Record<string, boolean>>({});
-  const [progress, setProgress] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setView(readJson<ViewMode>(VIEW_KEY, "grid"));
     setGroup(readJson<GroupMode>(GROUP_KEY, "module"));
-    setCompleted(readJson<Record<string, boolean>>(COMPLETED_KEY(course.id), {}));
-    setProgress(readJson<Record<string, number>>(PROGRESS_KEY(course.id), {}));
-  }, [course.id]);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") window.localStorage.setItem(VIEW_KEY, JSON.stringify(view));
@@ -87,50 +89,73 @@ export function LessonCatalog({
     if (typeof window !== "undefined") window.localStorage.setItem(GROUP_KEY, JSON.stringify(group));
   }, [group]);
 
+  const progressQueryKey = ["lesson-progress", course.id, studentId] as const;
+
+  const { data: progressRows } = useQuery({
+    enabled: !!studentId && !!course.id,
+    queryKey: progressQueryKey,
+    queryFn: async (): Promise<ProgressRow[]> => {
+      const { data, error } = await supabase
+        .from("lesson_progress")
+        .select("lesson_id, percent, completed")
+        .eq("student_id", studentId!)
+        .eq("course_id", course.id);
+      if (error) throw error;
+      return (data ?? []) as ProgressRow[];
+    },
+  });
+
+  const progressMap = useMemo(() => {
+    const map = new Map<string, { percent: number; completed: boolean }>();
+    for (const r of progressRows ?? []) map.set(r.lesson_id, { percent: r.percent, completed: r.completed });
+    return map;
+  }, [progressRows]);
+
   const allLessons = useMemo(
     () => modules.flatMap((m) => m.lessons.map((l) => ({ ...l, moduleTitle: m.title, moduleId: m.id }))),
     [modules],
   );
 
+  const toggleMutation = useMutation({
+    mutationFn: async (vars: { lessonId: string; nextCompleted: boolean }) => {
+      if (!studentId) throw new Error("Você precisa estar autenticado.");
+      const nowIso = new Date().toISOString();
+      const { error } = await supabase.from("lesson_progress").upsert(
+        {
+          student_id: studentId,
+          lesson_id: vars.lessonId,
+          course_id: course.id,
+          percent: vars.nextCompleted ? 100 : 0,
+          completed: vars.nextCompleted,
+          completed_at: vars.nextCompleted ? nowIso : null,
+          updated_at: nowIso,
+        },
+        { onConflict: "student_id,lesson_id" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: progressQueryKey });
+      qc.invalidateQueries({ queryKey: ["course-progress-summary", studentId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const toggleCompleted = (id: string) => {
-    setCompleted((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      try {
-        window.localStorage.setItem(COMPLETED_KEY(course.id), JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-    setProgress((prev) => {
-      const next = { ...prev, [id]: !completed[id] ? 100 : 0 };
-      try {
-        window.localStorage.setItem(PROGRESS_KEY(course.id), JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
+    const current = progressMap.get(id);
+    toggleMutation.mutate({ lessonId: id, nextCompleted: !current?.completed });
   };
 
   const select = (id: string) => {
     onSelect(id);
-    // mark started
-    setProgress((prev) => {
-      if (prev[id] && prev[id] > 0) return prev;
-      const next = { ...prev, [id]: completed[id] ? 100 : 10 };
-      try {
-        window.localStorage.setItem(PROGRESS_KEY(course.id), JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
   };
 
+
+
   const renderCard = (l: Lesson & { moduleTitle?: string }, idx: number) => {
-    const done = !!completed[l.id];
-    const pct = done ? 100 : progress[l.id] ?? 0;
+    const p = progressMap.get(l.id);
+    const done = !!p?.completed;
+    const pct = done ? 100 : (p?.percent ?? 0);
     const active = activeLessonId === l.id;
     return (
       <div
@@ -201,8 +226,9 @@ export function LessonCatalog({
   };
 
   const renderListItem = (l: Lesson & { moduleTitle?: string }) => {
-    const done = !!completed[l.id];
-    const pct = done ? 100 : progress[l.id] ?? 0;
+    const p = progressMap.get(l.id);
+    const done = !!p?.completed;
+    const pct = done ? 100 : (p?.percent ?? 0);
     const active = activeLessonId === l.id;
     return (
       <div

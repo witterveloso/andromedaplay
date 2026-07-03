@@ -41,8 +41,47 @@ function StudentHome() {
     },
   });
 
+  // Aggregate real course progress for the "Continue assistindo" row.
+  const { data: progressByCourse } = useQuery({
+    enabled: !!user && !!courses?.length,
+    queryKey: ["course-progress-summary", user?.id],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const courseIds = (courses ?? []).map((c: any) => c.id);
+      if (courseIds.length === 0) return {} as Record<string, number>;
+
+      const [lessonsRes, progressRes] = await Promise.all([
+        supabase.from("lessons").select("id, module_id, modules!inner(course_id)").in("modules.course_id", courseIds),
+        supabase
+          .from("lesson_progress")
+          .select("course_id, percent")
+          .eq("student_id", user!.id)
+          .in("course_id", courseIds),
+      ]);
+
+      const totalByCourse = new Map<string, number>();
+      for (const l of (lessonsRes.data ?? []) as any[]) {
+        const cid = l.modules?.course_id;
+        if (!cid) continue;
+        totalByCourse.set(cid, (totalByCourse.get(cid) ?? 0) + 1);
+      }
+      const sumByCourse = new Map<string, number>();
+      for (const p of (progressRes.data ?? []) as any[]) {
+        sumByCourse.set(p.course_id, (sumByCourse.get(p.course_id) ?? 0) + (p.percent ?? 0));
+      }
+      const out: Record<string, number> = {};
+      for (const cid of courseIds) {
+        const total = totalByCourse.get(cid) ?? 0;
+        const sum = sumByCourse.get(cid) ?? 0;
+        out[cid] = total > 0 ? Math.max(0, Math.min(100, Math.round(sum / total))) : 0;
+      }
+      return out;
+    },
+  });
+
   const featured = useMemo(() => courses?.[0], [courses]);
   const continueWatching = useMemo(() => (courses ?? []).slice(0, 3), [courses]);
+
 
   const coverStyle = (c: any) => {
     if (!c?.cover_url) {
@@ -153,7 +192,7 @@ function StudentHome() {
               <div className="h-px flex-1 bg-gradient-to-r from-[#1e1e5a] to-transparent" />
             </div>
             <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
-              {continueWatching.map((c) => (
+              {continueWatching.map((c: any) => (
                 <Link
                   key={c.id}
                   to="/aluno/c/$slug"
@@ -171,7 +210,10 @@ function StudentHome() {
                     </p>
                     <h4 className="text-sm md:text-base font-bold leading-tight line-clamp-2">{c.title}</h4>
                     <div className="mt-3 w-full h-1 bg-[#1e1e5a] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#4f46e5] rounded-full shadow-[0_0_8px_#4f46e5]" style={{ width: "12%" }} />
+                      <div
+                        className="h-full bg-[#4f46e5] rounded-full shadow-[0_0_8px_#4f46e5] transition-all"
+                        style={{ width: `${progressByCourse?.[c.id] ?? 0}%` }}
+                      />
                     </div>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
