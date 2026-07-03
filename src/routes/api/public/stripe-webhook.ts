@@ -128,14 +128,66 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             case "checkout.session.completed":
             case "checkout.session.async_payment_succeeded": {
               const s = event.data.object as any;
-              const orderId = s.client_reference_id || s.metadata?.order_id;
-              if (orderId && s.payment_status === "paid") {
-                await grantAccess(
-                  orderId,
-                  (s.payment_intent as string) ?? null,
-                  new Date((event.created ?? Date.now() / 1000) * 1000).toISOString(),
-                );
+              if (s.payment_status !== "paid") break;
+              const paidAtIso = new Date((event.created ?? Date.now() / 1000) * 1000).toISOString();
+              const paymentId = (s.payment_intent as string) ?? null;
+              let orderId: string | null = s.client_reference_id || s.metadata?.order_id || null;
+
+              if (!orderId) {
+                // External Payment Link: resolve course by stripe_price_id from line items.
+                const email = s.customer_details?.email as string | undefined;
+                if (!email) {
+                  console.warn("Stripe external payment: no customer email", s.id);
+                  break;
+                }
+                let priceId: string | null = null;
+                try {
+                  const items = await stripe.checkout.sessions.listLineItems(s.id, {
+                    expand: ["data.price"],
+                    limit: 10,
+                  });
+                  priceId = items.data[0]?.price?.id ?? null;
+                } catch (e) {
+                  console.error("listLineItems failed", e);
+                  break;
+                }
+                if (!priceId) {
+                  console.warn("Stripe external payment: no price id on session", s.id);
+                  break;
+                }
+                const { data: course } = await supabaseAdmin
+                  .from("courses")
+                  .select("id")
+                  .eq("stripe_price_id" as any, priceId)
+                  .maybeSingle();
+                if (!course) {
+                  console.warn("Stripe external payment: no course matches price", priceId);
+                  break;
+                }
+                const buyerName = (s.customer_details?.name as string | undefined) ?? null;
+                const currency = (s.currency as string | undefined)?.toUpperCase() ?? "BRL";
+                const amountCents = (s.amount_total as number | undefined) ?? 0;
+                const { data: inserted, error: insErr } = await supabaseAdmin
+                  .from("orders")
+                  .insert({
+                    course_id: course.id,
+                    buyer_email: email,
+                    buyer_name: buyerName,
+                    amount_cents: amountCents,
+                    currency,
+                    status: "pending" as any,
+                    mp_payment_id: paymentId,
+                  })
+                  .select("id")
+                  .single();
+                if (insErr || !inserted) {
+                  console.error("failed to create external order", insErr);
+                  break;
+                }
+                orderId = inserted.id;
               }
+
+              await grantAccess(orderId!, paymentId, paidAtIso);
               break;
             }
             case "checkout.session.async_payment_failed":
