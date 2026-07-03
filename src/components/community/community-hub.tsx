@@ -56,9 +56,6 @@ async function generateNotePdf(note: any, post: any, course: any) {
     doc.setGState(new (doc as any).GState({ opacity: 1 }));
   } catch {}
 
-  try {
-    doc.addImage(logo, "PNG", margin, 32, 150, 46, undefined, "FAST");
-  } catch {}
 
   doc.setTextColor(230, 231, 234);
   doc.setFont("helvetica", "normal");
