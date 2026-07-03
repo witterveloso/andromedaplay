@@ -744,72 +744,13 @@ function NotesView({
 }) {
   const postMap = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
 
-  const downloadPdf = () => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 48;
-    let y = margin;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(`Anotações — ${course.title ?? ""}`, margin, y);
-    y += 24;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(new Date().toLocaleString("pt-BR"), margin, y);
-    y += 24;
-    doc.setTextColor(0);
-
-    for (const n of notes) {
-      const p = n.post_id ? postMap.get(n.post_id) : null;
-      const heading = p?.title || p?.body?.slice(0, 80) || "Anotação geral";
-      const when = new Date(n.updated_at ?? n.created_at).toLocaleString("pt-BR");
-
-      if (y > pageHeight - margin - 60) { doc.addPage(); y = margin; }
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      const titleLines = doc.splitTextToSize(heading, pageWidth - margin * 2);
-      doc.text(titleLines, margin, y);
-      y += titleLines.length * 14 + 2;
-
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(9);
-      doc.setTextColor(120);
-      doc.text(when, margin, y);
-      y += 14;
-      doc.setTextColor(0);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-      const bodyLines = doc.splitTextToSize(n.content || "(vazio)", pageWidth - margin * 2);
-      for (const line of bodyLines) {
-        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
-        doc.text(line, margin, y);
-        y += 14;
-      }
-      y += 14;
-    }
-
-    doc.save(`anotacoes-${(course.slug ?? course.id ?? "curso")}.pdf`);
-  };
-
   return (
     <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-8">
       <header className="space-y-2">
         <button onClick={onBack} className="text-xs uppercase tracking-[0.22em] text-white/50 hover:text-white">← Voltar ao hub</button>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">Anotações</h1>
-            <p className="text-white/60 mt-1">Seu caderno pessoal desta comunidade</p>
-          </div>
-          {notes.length > 0 && (
-            <Button onClick={downloadPdf} className="gap-2" style={{ background: primary }}>
-              <Download className="h-4 w-4" /> Baixar em PDF
-            </Button>
-          )}
+        <div>
+          <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">Anotações</h1>
+          <p className="text-white/60 mt-1">Seu caderno pessoal desta comunidade — baixe cada anotação em PDF individualmente</p>
         </div>
       </header>
 
@@ -826,14 +767,28 @@ function NotesView({
               <div key={n.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
                 <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
                   <div className="text-xs uppercase tracking-[0.2em] text-white/50">{when}</div>
-                  {p && (
-                    <button
-                      onClick={() => onOpen(p)}
-                      className="text-xs text-white/80 hover:text-white underline underline-offset-4"
+                  <div className="flex items-center gap-3">
+                    {p && (
+                      <button
+                        onClick={() => onOpen(p)}
+                        className="text-xs text-white/80 hover:text-white underline underline-offset-4"
+                      >
+                        Ir para publicação →
+                      </button>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        generateNotePdf(n, p, course).catch((e) => {
+                          console.error("PDF error", e);
+                        })
+                      }
+                      className="gap-2 h-8"
+                      style={{ background: primary }}
                     >
-                      Ir para publicação →
-                    </button>
-                  )}
+                      <Download className="h-3.5 w-3.5" /> Baixar PDF
+                    </Button>
+                  </div>
                 </div>
                 {p && (
                   <div className="font-semibold mb-2 line-clamp-1">
