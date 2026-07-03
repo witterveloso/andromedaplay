@@ -12,6 +12,133 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
+import prosperusLogoAsset from "@/assets/prosperus-logo.png.asset.json";
+import prosperusHeroAsset from "@/assets/prosperus-hero.png.asset.json";
+
+let _brandingCache: { logo: string; hero: string } | null = null;
+async function loadBrandingImages() {
+  if (_brandingCache) return _brandingCache;
+  const toDataUrl = async (url: string) => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  };
+  const [logo, hero] = await Promise.all([
+    toDataUrl(prosperusLogoAsset.url),
+    toDataUrl(prosperusHeroAsset.url),
+  ]);
+  _brandingCache = { logo, hero };
+  return _brandingCache;
+}
+
+async function generateNotePdf(note: any, post: any, course: any) {
+  const { logo, hero } = await loadBrandingImages();
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 48;
+
+  doc.setFillColor(11, 19, 38);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+  try {
+    doc.addImage(hero, "PNG", 0, 0, pageWidth, 180, undefined, "FAST");
+  } catch {}
+  try {
+    doc.setGState(new (doc as any).GState({ opacity: 0.55 }));
+    doc.setFillColor(11, 19, 38);
+    doc.rect(0, 0, pageWidth, 180, "F");
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  } catch {}
+
+  try {
+    doc.addImage(logo, "PNG", margin, 32, 150, 46, undefined, "FAST");
+  } catch {}
+
+  doc.setTextColor(230, 231, 234);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const dateStr = new Date(note.updated_at ?? note.created_at).toLocaleString("pt-BR");
+  doc.text(dateStr, pageWidth - margin, 48, { align: "right" });
+  doc.setTextColor(180, 180, 180);
+  doc.text(course?.title ?? "PROSPERUS", pageWidth - margin, 62, { align: "right" });
+
+  const barY = 180;
+  const seg = pageWidth / 4;
+  const colors: [number, number, number][] = [
+    [255, 59, 48], [255, 184, 0], [0, 178, 255], [34, 197, 94],
+  ];
+  colors.forEach((c, i) => {
+    doc.setFillColor(c[0], c[1], c[2]);
+    doc.rect(i * seg, barY, seg, 3, "F");
+  });
+
+  let y = 230;
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  const heading = post?.title || post?.body?.slice(0, 90) || "Anotação pessoal";
+  const titleLines = doc.splitTextToSize(heading, pageWidth - margin * 2);
+  doc.text(titleLines, margin, y);
+  y += titleLines.length * 22 + 6;
+
+  if (post) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(160, 170, 190);
+    doc.text("Referente à publicação da comunidade", margin, y);
+    y += 18;
+  }
+
+  doc.setDrawColor(90, 100, 130);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 22;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.setTextColor(235, 238, 245);
+  const bodyLines = doc.splitTextToSize(note.content || "(anotação vazia)", pageWidth - margin * 2);
+  for (const line of bodyLines) {
+    if (y > pageHeight - 90) {
+      doc.addPage();
+      doc.setFillColor(11, 19, 38);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+      y = margin + 10;
+      doc.setTextColor(235, 238, 245);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+    }
+    doc.text(line, margin, y);
+    y += 18;
+  }
+
+  const footerY = pageHeight - 42;
+  colors.forEach((c, i) => {
+    doc.setFillColor(c[0], c[1], c[2]);
+    doc.rect(i * seg, footerY - 6, seg, 2, "F");
+  });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(150, 160, 180);
+  doc.text("PROSPERUS  ·  Temperamento · Maturidade · Crescimento", margin, footerY + 8);
+  doc.text("andromedaplay.lovable.app", pageWidth - margin, footerY + 8, { align: "right" });
+
+  const slug = (post?.title || "anotacao")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 40) || "anotacao";
+  doc.save(`prosperus-${slug}-${(note.id ?? "").toString().slice(0, 6)}.pdf`);
+}
 
 type View =
   | { kind: "home" }
@@ -617,72 +744,13 @@ function NotesView({
 }) {
   const postMap = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
 
-  const downloadPdf = () => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 48;
-    let y = margin;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(`Anotações — ${course.title ?? ""}`, margin, y);
-    y += 24;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(new Date().toLocaleString("pt-BR"), margin, y);
-    y += 24;
-    doc.setTextColor(0);
-
-    for (const n of notes) {
-      const p = n.post_id ? postMap.get(n.post_id) : null;
-      const heading = p?.title || p?.body?.slice(0, 80) || "Anotação geral";
-      const when = new Date(n.updated_at ?? n.created_at).toLocaleString("pt-BR");
-
-      if (y > pageHeight - margin - 60) { doc.addPage(); y = margin; }
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      const titleLines = doc.splitTextToSize(heading, pageWidth - margin * 2);
-      doc.text(titleLines, margin, y);
-      y += titleLines.length * 14 + 2;
-
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(9);
-      doc.setTextColor(120);
-      doc.text(when, margin, y);
-      y += 14;
-      doc.setTextColor(0);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-      const bodyLines = doc.splitTextToSize(n.content || "(vazio)", pageWidth - margin * 2);
-      for (const line of bodyLines) {
-        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
-        doc.text(line, margin, y);
-        y += 14;
-      }
-      y += 14;
-    }
-
-    doc.save(`anotacoes-${(course.slug ?? course.id ?? "curso")}.pdf`);
-  };
-
   return (
     <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-20 space-y-8">
       <header className="space-y-2">
         <button onClick={onBack} className="text-xs uppercase tracking-[0.22em] text-white/50 hover:text-white">← Voltar ao hub</button>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">Anotações</h1>
-            <p className="text-white/60 mt-1">Seu caderno pessoal desta comunidade</p>
-          </div>
-          {notes.length > 0 && (
-            <Button onClick={downloadPdf} className="gap-2" style={{ background: primary }}>
-              <Download className="h-4 w-4" /> Baixar em PDF
-            </Button>
-          )}
+        <div>
+          <h1 className="font-cinema-display text-3xl md:text-5xl font-extrabold tracking-tighter">Anotações</h1>
+          <p className="text-white/60 mt-1">Seu caderno pessoal desta comunidade — baixe cada anotação em PDF individualmente</p>
         </div>
       </header>
 
@@ -699,14 +767,28 @@ function NotesView({
               <div key={n.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
                 <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
                   <div className="text-xs uppercase tracking-[0.2em] text-white/50">{when}</div>
-                  {p && (
-                    <button
-                      onClick={() => onOpen(p)}
-                      className="text-xs text-white/80 hover:text-white underline underline-offset-4"
+                  <div className="flex items-center gap-3">
+                    {p && (
+                      <button
+                        onClick={() => onOpen(p)}
+                        className="text-xs text-white/80 hover:text-white underline underline-offset-4"
+                      >
+                        Ir para publicação →
+                      </button>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        generateNotePdf(n, p, course).catch((e) => {
+                          console.error("PDF error", e);
+                        })
+                      }
+                      className="gap-2 h-8"
+                      style={{ background: primary }}
                     >
-                      Ir para publicação →
-                    </button>
-                  )}
+                      <Download className="h-3.5 w-3.5" /> Baixar PDF
+                    </Button>
+                  </div>
                 </div>
                 {p && (
                   <div className="font-semibold mb-2 line-clamp-1">
