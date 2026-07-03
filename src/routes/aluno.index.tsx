@@ -79,6 +79,10 @@ function StudentHome() {
     },
   });
 
+  const featured = useMemo(() => courses?.[0], [courses]);
+  const continueWatching = useMemo(() => (courses ?? []).slice(0, 3), [courses]);
+
+
   const coverStyle = (c: any) => {
     if (!c?.cover_url) {
       return { background: `linear-gradient(135deg, ${c?.primary_color ?? "#4f46e5"}, ${c?.accent_color ?? "#1e1e5a"})` };
