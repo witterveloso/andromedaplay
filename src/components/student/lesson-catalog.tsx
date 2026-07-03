@@ -226,8 +226,9 @@ export function LessonCatalog({
   };
 
   const renderListItem = (l: Lesson & { moduleTitle?: string }) => {
-    const done = !!completed[l.id];
-    const pct = done ? 100 : progress[l.id] ?? 0;
+    const p = progressMap.get(l.id);
+    const done = !!p?.completed;
+    const pct = done ? 100 : (p?.percent ?? 0);
     const active = activeLessonId === l.id;
     return (
       <div
