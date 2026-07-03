@@ -95,6 +95,91 @@ function StudentCourse() {
     }
   }, [course?.course_type, channels, activeChannelId, activeLessonId]);
 
+  // --- Lesson progress persistence -------------------------------------
+  const qc = useQueryClient();
+  const lastPersistRef = useRef<{ lessonId: string; ts: number } | null>(null);
+
+  const upsertProgress = useCallback(
+    async (args: {
+      lessonId: string;
+      courseId: string;
+      percent?: number;
+      seconds?: number;
+      duration?: number | null;
+      completed?: boolean;
+    }) => {
+      if (!user?.id) return;
+      const nowIso = new Date().toISOString();
+      const payload: Record<string, any> = {
+        student_id: user.id,
+        lesson_id: args.lessonId,
+        course_id: args.courseId,
+        updated_at: nowIso,
+      };
+      if (typeof args.percent === "number") payload.percent = Math.max(0, Math.min(100, Math.round(args.percent)));
+      if (typeof args.seconds === "number") payload.seconds_watched = args.seconds;
+      if (args.duration && isFinite(args.duration)) payload.duration_seconds = args.duration;
+      if (args.completed) {
+        payload.completed = true;
+        payload.completed_at = nowIso;
+        payload.percent = 100;
+      }
+      const { error } = await supabase
+        .from("lesson_progress")
+        .upsert(payload, { onConflict: "student_id,lesson_id" });
+      if (error) console.warn("lesson_progress upsert failed", error.message);
+    },
+    [user?.id],
+  );
+
+  // Mark a lesson as "started" when the user opens it (does not clobber existing percent).
+  useEffect(() => {
+    if (!user?.id || !course?.id || !activeLessonId) return;
+    void supabase
+      .from("lesson_progress")
+      .upsert(
+        {
+          student_id: user.id,
+          lesson_id: activeLessonId,
+          course_id: course.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "student_id,lesson_id", ignoreDuplicates: true },
+      )
+      .then(({ error }) => {
+        if (error && !/duplicate/i.test(error.message)) {
+          console.warn("started upsert failed", error.message);
+        }
+      });
+  }, [user?.id, course?.id, activeLessonId]);
+
+  const handleProgress = useCallback(
+    (d: VideoProgressData) => {
+      if (!activeLessonId || !course?.id) return;
+      // Throttle to at most one upsert per lesson per 5s.
+      const now = Date.now();
+      const last = lastPersistRef.current;
+      if (last && last.lessonId === activeLessonId && now - last.ts < 5000) return;
+      lastPersistRef.current = { lessonId: activeLessonId, ts: now };
+      void upsertProgress({
+        lessonId: activeLessonId,
+        courseId: course.id,
+        percent: d.percent,
+        seconds: d.seconds,
+        duration: d.duration,
+      });
+    },
+    [activeLessonId, course?.id, upsertProgress],
+  );
+
+  const handleEnded = useCallback(() => {
+    if (!activeLessonId || !course?.id) return;
+    void upsertProgress({ lessonId: activeLessonId, courseId: course.id, completed: true }).then(() => {
+      qc.invalidateQueries({ queryKey: ["lesson-progress", course.id, user?.id] });
+      qc.invalidateQueries({ queryKey: ["course-progress-summary", user?.id] });
+    });
+  }, [activeLessonId, course?.id, qc, upsertProgress, user?.id]);
+
   if (!course) {
     return <div className="p-8 text-muted-foreground">Curso não disponível.</div>;
   }
