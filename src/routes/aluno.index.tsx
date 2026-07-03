@@ -41,8 +41,43 @@ function StudentHome() {
     },
   });
 
-  const featured = useMemo(() => courses?.[0], [courses]);
-  const continueWatching = useMemo(() => (courses ?? []).slice(0, 3), [courses]);
+  // Aggregate real course progress for the "Continue assistindo" row.
+  const { data: progressByCourse } = useQuery({
+    enabled: !!user && !!courses?.length,
+    queryKey: ["course-progress-summary", user?.id],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const courseIds = (courses ?? []).map((c: any) => c.id);
+      if (courseIds.length === 0) return {} as Record<string, number>;
+
+      const [lessonsRes, progressRes] = await Promise.all([
+        supabase.from("lessons").select("id, module_id, modules!inner(course_id)").in("modules.course_id", courseIds),
+        supabase
+          .from("lesson_progress")
+          .select("course_id, percent")
+          .eq("student_id", user!.id)
+          .in("course_id", courseIds),
+      ]);
+
+      const totalByCourse = new Map<string, number>();
+      for (const l of (lessonsRes.data ?? []) as any[]) {
+        const cid = l.modules?.course_id;
+        if (!cid) continue;
+        totalByCourse.set(cid, (totalByCourse.get(cid) ?? 0) + 1);
+      }
+      const sumByCourse = new Map<string, number>();
+      for (const p of (progressRes.data ?? []) as any[]) {
+        sumByCourse.set(p.course_id, (sumByCourse.get(p.course_id) ?? 0) + (p.percent ?? 0));
+      }
+      const out: Record<string, number> = {};
+      for (const cid of courseIds) {
+        const total = totalByCourse.get(cid) ?? 0;
+        const sum = sumByCourse.get(cid) ?? 0;
+        out[cid] = total > 0 ? Math.max(0, Math.min(100, Math.round(sum / total))) : 0;
+      }
+      return out;
+    },
+  });
 
   const coverStyle = (c: any) => {
     if (!c?.cover_url) {
