@@ -648,6 +648,56 @@ export type Database = {
           },
         ]
       }
+      lesson_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          course_id: string
+          duration_seconds: number | null
+          id: string
+          lesson_id: string
+          percent: number
+          seconds_watched: number
+          started_at: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          course_id: string
+          duration_seconds?: number | null
+          id?: string
+          lesson_id: string
+          percent?: number
+          seconds_watched?: number
+          started_at?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          course_id?: string
+          duration_seconds?: number | null
+          id?: string
+          lesson_id?: string
+          percent?: number
+          seconds_watched?: number
+          started_at?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           course_id: string
