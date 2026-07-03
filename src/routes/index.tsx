@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import homeDesktopAsset from "@/assets/andromeda-home-desktop.png.asset.json";
-import homeMobileAsset from "@/assets/andromeda-home-mobile.png.asset.json";
+import homeDesktopAsset from "@/assets/andromeda-home-desktop-v2.png.asset.json";
+import homeMobileAsset from "@/assets/andromeda-home-mobile-v2.png.asset.json";
 
 const homeDesktop = homeDesktopAsset.url;
 const homeMobile = homeMobileAsset.url;
@@ -48,26 +48,26 @@ function HomePage() {
       <Link
         to="/login"
         aria-label="Entrar na Andromeda Play"
-        className="hidden md:block absolute left-[7.7%] top-[69%] w-[13.5%] h-[6.8%] z-20"
+        className="hidden md:block absolute left-[8.5%] top-[66%] w-[14.5%] h-[8%] z-20"
       />
       {/* Hotspot Produtos - Desktop */}
       <Link
         to="/produtos"
         aria-label="Ver produtos da Andromeda Play"
-        className="hidden md:block absolute left-[23.1%] top-[69%] w-[13.5%] h-[6.8%] z-20"
+        className="hidden md:block absolute left-[24.5%] top-[66%] w-[14.5%] h-[8%] z-20"
       />
 
       {/* Hotspot Entrar - Mobile */}
       <Link
         to="/login"
         aria-label="Entrar na Andromeda Play"
-        className="block md:hidden absolute left-[14%] top-[39%] w-[33%] h-[5.5%] z-20"
+        className="block md:hidden absolute left-[6%] top-[38%] w-[38%] h-[5%] z-20"
       />
       {/* Hotspot Produtos - Mobile */}
       <Link
         to="/produtos"
         aria-label="Ver produtos da Andromeda Play"
-        className="block md:hidden absolute left-[52%] top-[39%] w-[34%] h-[5.5%] z-20"
+        className="block md:hidden absolute left-[46%] top-[38%] w-[48%] h-[5%] z-20"
       />
     </section>
   );
