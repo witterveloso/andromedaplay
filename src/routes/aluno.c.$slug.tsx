@@ -333,6 +333,7 @@ function StudentCourse() {
               course={course as any}
               modules={(modules ?? []) as any}
               activeLessonId={activeLesson?.id ?? null}
+              studentId={user?.id ?? null}
               onSelect={(id) => {
                 setActiveChannelId(null);
                 setActiveLessonId(id);
