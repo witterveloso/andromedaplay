@@ -74,7 +74,7 @@ function AdminLayout() {
       <aside className="relative z-10 flex w-64 flex-col border-r border-white/[0.06] bg-[#0b0b16]/80 backdrop-blur-xl">
         {/* Brand */}
         <div className="px-5 py-5 border-b border-white/[0.06]">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <AndromedaLogo showWordmark={false} className="scale-90 origin-left" />
             <div className="leading-tight">
               <div className="font-display text-sm font-bold tracking-[0.22em] text-foreground">
@@ -84,7 +84,7 @@ function AdminLayout() {
                 Admin geral
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto">
