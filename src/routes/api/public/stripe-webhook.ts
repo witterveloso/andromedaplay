@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
 
         let event: any;
         try {
-          event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+          event = await stripe.webhooks.constructEventAsync(rawBody, sig, webhookSecret);
         } catch (err: any) {
           console.error("Stripe signature verification failed", err?.message);
           return new Response("invalid_signature", { status: 401 });
