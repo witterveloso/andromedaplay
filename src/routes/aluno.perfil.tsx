@@ -169,7 +169,7 @@ function ProfilePage() {
       {/* Header */}
       <header className="relative border-b border-white/[0.06] backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/aluno" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <AndromedaLogo className="scale-[0.85]" />
           </Link>
           <AvatarMenu />
