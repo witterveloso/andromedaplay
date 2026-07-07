@@ -38,6 +38,58 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { buildPurchaseConfirmationEmail } = await import(
+          "@/lib/emails/purchase-confirmation"
+        );
+
+        async function sendAccessEmail(params: {
+          email: string;
+          productName: string;
+          redirectTo: string;
+        }) {
+          try {
+            const resendKey = process.env.RESEND_API_KEY;
+            if (!resendKey) {
+              console.warn("RESEND_API_KEY not configured; skipping access email");
+              return;
+            }
+            const { data: linkData, error: linkError } =
+              await supabaseAdmin.auth.admin.generateLink({
+                type: "recovery",
+                email: params.email,
+                options: { redirectTo: params.redirectTo },
+              });
+            if (linkError || !linkData?.properties?.action_link) {
+              console.error("generateLink failed", linkError);
+              return;
+            }
+            const actionUrl = linkData.properties.action_link;
+            const html = buildPurchaseConfirmationEmail({
+              productName: params.productName,
+              customerEmail: params.email,
+              actionUrl,
+            });
+            const res = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${resendKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Andromeda Play <acesso@andromedaplay.com.br>",
+                to: [params.email],
+                subject: "Sua compra foi confirmada — acesse a Andromeda Play",
+                html,
+              }),
+            });
+            if (!res.ok) {
+              const body = await res.text();
+              console.error("Resend send failed", res.status, body);
+            }
+          } catch (e) {
+            console.error("sendAccessEmail failed", e);
+          }
+        }
 
         async function grantAccess(orderId: string, paymentId: string | null, paidAtIso: string) {
           const { data: order } = await supabaseAdmin
@@ -61,6 +113,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
 
           // Ensure user exists
           let buyerId = order.buyer_id as string | null;
+          let isNewUser = false;
           if (!buyerId) {
             const email = order.buyer_email.toLowerCase();
             let found: any = null;
@@ -88,11 +141,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                 return;
               }
               found = created.user;
-              try {
-                await supabaseAdmin.auth.resetPasswordForEmail(order.buyer_email);
-              } catch (e) {
-                console.warn("password reset email failed", e);
-              }
+              isNewUser = true;
             }
             buyerId = found.id;
             await supabaseAdmin.from("orders").update({ buyer_id: buyerId }).eq("id", order.id);
@@ -104,7 +153,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
 
           const { data: course } = await supabaseAdmin
             .from("courses")
-            .select("access_duration_days")
+            .select("title, access_duration_days")
             .eq("id", order.course_id)
             .maybeSingle();
           const expires_at = course?.access_duration_days
@@ -121,6 +170,14 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             },
             { onConflict: "course_id,student_id" },
           );
+
+          if (isNewUser) {
+            await sendAccessEmail({
+              email: order.buyer_email,
+              productName: course?.title ?? "sua compra",
+              redirectTo: "https://andromedaplay.com.br/reset-password",
+            });
+          }
         }
 
         try {
