@@ -47,7 +47,3 @@ jobs:
           accountId: 555b4a54dec3d097c90bc3826983a20a
           workingDirectory: .output/server
           wranglerVersion: '3'
-          secrets: |
-            SUPABASE_SERVICE_ROLE_KEY
-        env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
