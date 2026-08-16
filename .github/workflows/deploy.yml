@@ -21,13 +21,21 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://vjxvasojqqadyxvuqpez.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_IV84xTtm7FKuFIGRM0wWcA_ypXbeljR
 
-      - name: Set worker name to andromedaplay
+      - name: Set worker name and vars
         run: |
           node -e "
           const fs = require('fs');
           const config = JSON.parse(fs.readFileSync('.output/server/wrangler.json', 'utf8'));
           config.name = 'andromedaplay';
+          config.vars = {
+            ...(config.vars || {}),
+            SUPABASE_URL: 'https://vjxvasojqqadyxvuqpez.supabase.co',
+            SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_IV84xTtm7FKuFIGRM0wWcA_ypXbeljR',
+          };
           fs.writeFileSync('.output/server/wrangler.json', JSON.stringify(config, null, 2));
           console.log('wrangler.json updated:', JSON.stringify(config, null, 2));
           "
@@ -39,5 +47,7 @@ jobs:
           accountId: 555b4a54dec3d097c90bc3826983a20a
           workingDirectory: .output/server
           wranglerVersion: '3'
+          secrets: |
+            SUPABASE_SERVICE_ROLE_KEY
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
