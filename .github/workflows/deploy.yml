@@ -40,6 +40,9 @@ jobs:
           console.log('wrangler.json updated:', JSON.stringify(config, null, 2));
           "
 
+      - name: Remove conflicting wrangler config
+              run: rm -rf .wrangler/
+              
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
