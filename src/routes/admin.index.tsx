@@ -130,7 +130,7 @@ function Dashboard() {
               <Link to="/admin/access" className="text-xs rounded-md border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] px-3 py-1.5">
                 Gerenciar acessos
               </Link>
-              <Link to="/admin/settings" className="text-xs rounded-md border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] px-3 py-1.5">
+              <Link to="/admin/maintenance" className="text-xs rounded-md border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] px-3 py-1.5">
                 Configurações
               </Link>
             </div>
