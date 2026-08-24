@@ -15,7 +15,8 @@ import { LessonCatalog } from "@/components/student/lesson-catalog";
 
 export const Route = createFileRoute("/aluno/c/$slug")({
   component: StudentCourse,
-  validateSearch: (s: Record<string, unknown>) => ({ preview: s.preview === "1" || s.preview === 1 || s.preview === true ? 1 : undefined }),
+  validateSearch: (s: Record<string, unknown>): { preview?: 1 } =>
+    s.preview === "1" || s.preview === 1 || s.preview === true ? { preview: 1 } : {},
 });
 
 function StudentCourse() {
