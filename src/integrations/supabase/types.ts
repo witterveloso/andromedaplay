@@ -604,6 +604,57 @@ export type Database = {
           },
         ]
       }
+      lesson_access_sessions: {
+        Row: {
+          course_id: string
+          id: string
+          last_seen_at: string
+          lesson_id: string
+          page_seconds: number
+          seen_by_owner: boolean
+          started_at: string
+          student_id: string
+          video_seconds: number
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          last_seen_at?: string
+          lesson_id: string
+          page_seconds?: number
+          seen_by_owner?: boolean
+          started_at?: string
+          student_id: string
+          video_seconds?: number
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          last_seen_at?: string
+          lesson_id?: string
+          page_seconds?: number
+          seen_by_owner?: boolean
+          started_at?: string
+          student_id?: string
+          video_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_access_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_access_sessions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_materials: {
         Row: {
           created_at: string
@@ -1017,9 +1068,28 @@ export type Database = {
         Args: { _email: string; _user_id: string }
         Returns: number
       }
+      count_unseen_lesson_accesses: { Args: never; Returns: number }
       email_has_pending_invitation: {
         Args: { _email: string }
         Returns: boolean
+      }
+      get_lesson_access_report: {
+        Args: { _course_id?: string; _from?: string; _to?: string }
+        Returns: {
+          course_id: string
+          course_title: string
+          id: string
+          last_seen_at: string
+          lesson_id: string
+          lesson_title: string
+          page_seconds: number
+          seen_by_owner: boolean
+          started_at: string
+          student_email: string
+          student_id: string
+          student_name: string
+          video_seconds: number
+        }[]
       }
       has_role: {
         Args: {
@@ -1027,6 +1097,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      heartbeat_lesson_session: {
+        Args: { _page_add: number; _session_id: string; _video_add: number }
+        Returns: undefined
       }
       is_course_owner_or_admin: {
         Args: { _course_id: string; _user_id: string }
@@ -1037,6 +1111,8 @@ export type Database = {
         Returns: boolean
       }
       is_expert_active: { Args: { _expert_id: string }; Returns: boolean }
+      mark_lesson_accesses_seen: { Args: never; Returns: undefined }
+      start_lesson_session: { Args: { _lesson_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "student" | "expert"
