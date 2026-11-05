@@ -9,59 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ExpertRouteImport } from './routes/expert'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
-import { Route as ExpertIndexRouteImport } from './routes/expert.index'
-import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ExpertRouteImport } from './routes/expert'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as ProdutosProsperusRouteImport } from './routes/produtos.prosperus'
-import { Route as ProdutosComunicaPascomRouteImport } from './routes/produtos.comunica-pascom'
-import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
-import { Route as ExpertRelatorioRouteImport } from './routes/expert.relatorio'
-import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
-import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
-import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
-import { Route as CheckoutPendenteRouteImport } from './routes/checkout.pendente'
-import { Route as CheckoutFalhouRouteImport } from './routes/checkout.falhou'
-import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
-import { Route as AdminSupportRouteImport } from './routes/admin.support'
-import { Route as AdminStudentsRouteImport } from './routes/admin.students'
-import { Route as AdminRelatorioRouteImport } from './routes/admin.relatorio'
-import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
-import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
-import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
-import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
-import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
-import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.index'
+import { Route as AdminCommunitiesRouteImport } from './routes/admin.communities'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
+import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
+import { Route as AdminRelatorioRouteImport } from './routes/admin.relatorio'
+import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
+import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
+import { Route as CheckoutFalhouRouteImport } from './routes/checkout.falhou'
+import { Route as CheckoutPendenteRouteImport } from './routes/checkout.pendente'
+import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
+import { Route as ExpertIndexRouteImport } from './routes/expert.index'
+import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
+import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
+import { Route as ExpertRelatorioRouteImport } from './routes/expert.relatorio'
+import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
+import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
+import { Route as ProdutosComunicaPascomRouteImport } from './routes/produtos.comunica-pascom'
+import { Route as ProdutosProsperusRouteImport } from './routes/produtos.prosperus'
 import { Route as AdminExpertsIndexRouteImport } from './routes/admin.experts.index'
-import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
-import { Route as ExpertCoursesIdRouteImport } from './routes/expert.courses.$id'
-import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
-import { Route as AlunoCSlugRouteImport } from './routes/aluno.c.$slug'
-import { Route as AdminExpertsNewRouteImport } from './routes/admin.experts.new'
 import { Route as AdminExpertsIdRouteImport } from './routes/admin.experts.$id'
+import { Route as AdminExpertsNewRouteImport } from './routes/admin.experts.new'
+import { Route as AlunoCSlugRouteImport } from './routes/aluno.c.$slug'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ExpertCoursesIndexRouteImport } from './routes/expert.courses.index'
+import { Route as ExpertCoursesIdRouteImport } from './routes/expert.courses.$id'
+import { Route as ExpertCoursesNewRouteImport } from './routes/expert.courses.new'
 import { Route as ExpertCoursesIdStudentsRouteImport } from './routes/expert.courses.$id.students'
 import { Route as ExpertCoursesIdLivePostIdRouteImport } from './routes/expert.courses.$id.live.$postId'
 
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExpertRoute = ExpertRouteImport.update({
-  id: '/expert',
-  path: '/expert',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -69,24 +59,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ExpertRoute = ExpertRouteImport.update({
+  id: '/expert',
+  path: '/expert',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProdutosIndexRoute = ProdutosIndexRouteImport.update({
-  id: '/produtos/',
-  path: '/produtos/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExpertIndexRoute = ExpertIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ExpertRoute,
-} as any)
-const AlunoIndexRoute = AlunoIndexRouteImport.update({
-  id: '/aluno/',
-  path: '/aluno/',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -94,94 +79,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const ProdutosProsperusRoute = ProdutosProsperusRouteImport.update({
-  id: '/produtos/prosperus',
-  path: '/produtos/prosperus',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutosComunicaPascomRoute = ProdutosComunicaPascomRouteImport.update({
-  id: '/produtos/comunica-pascom',
-  path: '/produtos/comunica-pascom',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
-  id: '/produtos/$slug',
-  path: '/produtos/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExpertRelatorioRoute = ExpertRelatorioRouteImport.update({
-  id: '/relatorio',
-  path: '/relatorio',
-  getParentRoute: () => ExpertRoute,
-} as any)
-const ExpertProfileRoute = ExpertProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => ExpertRoute,
-} as any)
-const ExpertPreviewRoute = ExpertPreviewRouteImport.update({
-  id: '/preview',
-  path: '/preview',
-  getParentRoute: () => ExpertRoute,
-} as any)
-const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
-  id: '/checkout/sucesso',
-  path: '/checkout/sucesso',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutPendenteRoute = CheckoutPendenteRouteImport.update({
-  id: '/checkout/pendente',
-  path: '/checkout/pendente',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutFalhouRoute = CheckoutFalhouRouteImport.update({
-  id: '/checkout/falhou',
-  path: '/checkout/falhou',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
-  id: '/aluno/perfil',
-  path: '/aluno/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSupportRoute = AdminSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminStudentsRoute = AdminStudentsRouteImport.update({
-  id: '/students',
-  path: '/students',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRelatorioRoute = AdminRelatorioRouteImport.update({
-  id: '/relatorio',
-  path: '/relatorio',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProdutosRoute = AdminProdutosRouteImport.update({
-  id: '/produtos',
-  path: '/produtos',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMaintenanceRoute = AdminMaintenanceRouteImport.update({
-  id: '/maintenance',
-  path: '/maintenance',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
-  id: '/invitations',
-  path: '/invitations',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCoursesRoute = AdminCoursesRouteImport.update({
-  id: '/courses',
-  path: '/courses',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/content',
-  path: '/content',
+const AdminAccessRoute = AdminAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCommunitiesRoute = AdminCommunitiesRouteImport.update({
@@ -189,24 +89,139 @@ const AdminCommunitiesRoute = AdminCommunitiesRouteImport.update({
   path: '/communities',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAccessRoute = AdminAccessRouteImport.update({
-  id: '/access',
-  path: '/access',
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
   getParentRoute: () => AdminRoute,
 } as any)
-const ExpertCoursesIndexRoute = ExpertCoursesIndexRouteImport.update({
-  id: '/courses/',
-  path: '/courses/',
+const AdminCoursesRoute = AdminCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMaintenanceRoute = AdminMaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProdutosRoute = AdminProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRelatorioRoute = AdminRelatorioRouteImport.update({
+  id: '/relatorio',
+  path: '/relatorio',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AlunoIndexRoute = AlunoIndexRouteImport.update({
+  id: '/aluno/',
+  path: '/aluno/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
+  id: '/aluno/perfil',
+  path: '/aluno/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutFalhouRoute = CheckoutFalhouRouteImport.update({
+  id: '/checkout/falhou',
+  path: '/checkout/falhou',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutPendenteRoute = CheckoutPendenteRouteImport.update({
+  id: '/checkout/pendente',
+  path: '/checkout/pendente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
+  id: '/checkout/sucesso',
+  path: '/checkout/sucesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpertIndexRoute = ExpertIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertPreviewRoute = ExpertPreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertProfileRoute = ExpertProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertRelatorioRoute = ExpertRelatorioRouteImport.update({
+  id: '/relatorio',
+  path: '/relatorio',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ProdutosIndexRoute = ProdutosIndexRouteImport.update({
+  id: '/produtos/',
+  path: '/produtos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
+  id: '/produtos/$slug',
+  path: '/produtos/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosComunicaPascomRoute = ProdutosComunicaPascomRouteImport.update({
+  id: '/produtos/comunica-pascom',
+  path: '/produtos/comunica-pascom',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosProsperusRoute = ProdutosProsperusRouteImport.update({
+  id: '/produtos/prosperus',
+  path: '/produtos/prosperus',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminExpertsIndexRoute = AdminExpertsIndexRouteImport.update({
   id: '/experts/',
   path: '/experts/',
   getParentRoute: () => AdminRoute,
 } as any)
-const ExpertCoursesNewRoute = ExpertCoursesNewRouteImport.update({
-  id: '/courses/new',
-  path: '/courses/new',
+const AdminExpertsIdRoute = AdminExpertsIdRouteImport.update({
+  id: '/experts/$id',
+  path: '/experts/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExpertsNewRoute = AdminExpertsNewRouteImport.update({
+  id: '/experts/new',
+  path: '/experts/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AlunoCSlugRoute = AlunoCSlugRouteImport.update({
+  id: '/aluno/c/$slug',
+  path: '/aluno/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpertCoursesIndexRoute = ExpertCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
   getParentRoute: () => ExpertRoute,
 } as any)
 const ExpertCoursesIdRoute = ExpertCoursesIdRouteImport.update({
@@ -214,25 +229,10 @@ const ExpertCoursesIdRoute = ExpertCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => ExpertRoute,
 } as any)
-const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
-  id: '/api/public/stripe-webhook',
-  path: '/api/public/stripe-webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlunoCSlugRoute = AlunoCSlugRouteImport.update({
-  id: '/aluno/c/$slug',
-  path: '/aluno/c/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminExpertsNewRoute = AdminExpertsNewRouteImport.update({
-  id: '/experts/new',
-  path: '/experts/new',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminExpertsIdRoute = AdminExpertsIdRouteImport.update({
-  id: '/experts/$id',
-  path: '/experts/$id',
-  getParentRoute: () => AdminRoute,
+const ExpertCoursesNewRoute = ExpertCoursesNewRouteImport.update({
+  id: '/courses/new',
+  path: '/courses/new',
+  getParentRoute: () => ExpertRoute,
 } as any)
 const ExpertCoursesIdStudentsRoute = ExpertCoursesIdStudentsRouteImport.update({
   id: '/students',
@@ -513,25 +513,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/expert': {
-      id: '/expert'
-      path: '/expert'
-      fullPath: '/expert'
-      preLoaderRoute: typeof ExpertRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -541,32 +527,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/expert': {
+      id: '/expert'
+      path: '/expert'
+      fullPath: '/expert'
+      preLoaderRoute: typeof ExpertRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/produtos/': {
-      id: '/produtos/'
-      path: '/produtos'
-      fullPath: '/produtos/'
-      preLoaderRoute: typeof ProdutosIndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/expert/': {
-      id: '/expert/'
-      path: '/'
-      fullPath: '/expert/'
-      preLoaderRoute: typeof ExpertIndexRouteImport
-      parentRoute: typeof ExpertRoute
-    }
-    '/aluno/': {
-      id: '/aluno/'
-      path: '/aluno'
-      fullPath: '/aluno/'
-      preLoaderRoute: typeof AlunoIndexRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -576,130 +555,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/produtos/prosperus': {
-      id: '/produtos/prosperus'
-      path: '/produtos/prosperus'
-      fullPath: '/produtos/prosperus'
-      preLoaderRoute: typeof ProdutosProsperusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produtos/comunica-pascom': {
-      id: '/produtos/comunica-pascom'
-      path: '/produtos/comunica-pascom'
-      fullPath: '/produtos/comunica-pascom'
-      preLoaderRoute: typeof ProdutosComunicaPascomRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produtos/$slug': {
-      id: '/produtos/$slug'
-      path: '/produtos/$slug'
-      fullPath: '/produtos/$slug'
-      preLoaderRoute: typeof ProdutosSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/expert/relatorio': {
-      id: '/expert/relatorio'
-      path: '/relatorio'
-      fullPath: '/expert/relatorio'
-      preLoaderRoute: typeof ExpertRelatorioRouteImport
-      parentRoute: typeof ExpertRoute
-    }
-    '/expert/profile': {
-      id: '/expert/profile'
-      path: '/profile'
-      fullPath: '/expert/profile'
-      preLoaderRoute: typeof ExpertProfileRouteImport
-      parentRoute: typeof ExpertRoute
-    }
-    '/expert/preview': {
-      id: '/expert/preview'
-      path: '/preview'
-      fullPath: '/expert/preview'
-      preLoaderRoute: typeof ExpertPreviewRouteImport
-      parentRoute: typeof ExpertRoute
-    }
-    '/checkout/sucesso': {
-      id: '/checkout/sucesso'
-      path: '/checkout/sucesso'
-      fullPath: '/checkout/sucesso'
-      preLoaderRoute: typeof CheckoutSucessoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout/pendente': {
-      id: '/checkout/pendente'
-      path: '/checkout/pendente'
-      fullPath: '/checkout/pendente'
-      preLoaderRoute: typeof CheckoutPendenteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout/falhou': {
-      id: '/checkout/falhou'
-      path: '/checkout/falhou'
-      fullPath: '/checkout/falhou'
-      preLoaderRoute: typeof CheckoutFalhouRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/aluno/perfil': {
-      id: '/aluno/perfil'
-      path: '/aluno/perfil'
-      fullPath: '/aluno/perfil'
-      preLoaderRoute: typeof AlunoPerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/support': {
-      id: '/admin/support'
-      path: '/support'
-      fullPath: '/admin/support'
-      preLoaderRoute: typeof AdminSupportRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/students': {
-      id: '/admin/students'
-      path: '/students'
-      fullPath: '/admin/students'
-      preLoaderRoute: typeof AdminStudentsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/relatorio': {
-      id: '/admin/relatorio'
-      path: '/relatorio'
-      fullPath: '/admin/relatorio'
-      preLoaderRoute: typeof AdminRelatorioRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/produtos': {
-      id: '/admin/produtos'
-      path: '/produtos'
-      fullPath: '/admin/produtos'
-      preLoaderRoute: typeof AdminProdutosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/maintenance': {
-      id: '/admin/maintenance'
-      path: '/maintenance'
-      fullPath: '/admin/maintenance'
-      preLoaderRoute: typeof AdminMaintenanceRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/invitations': {
-      id: '/admin/invitations'
-      path: '/invitations'
-      fullPath: '/admin/invitations'
-      preLoaderRoute: typeof AdminInvitationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/courses': {
-      id: '/admin/courses'
-      path: '/courses'
-      fullPath: '/admin/courses'
-      preLoaderRoute: typeof AdminCoursesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/content': {
-      id: '/admin/content'
-      path: '/content'
-      fullPath: '/admin/content'
-      preLoaderRoute: typeof AdminContentRouteImport
+    '/admin/access': {
+      id: '/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AdminAccessRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/communities': {
@@ -709,19 +569,152 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCommunitiesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/access': {
-      id: '/admin/access'
-      path: '/access'
-      fullPath: '/admin/access'
-      preLoaderRoute: typeof AdminAccessRouteImport
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/expert/courses/': {
-      id: '/expert/courses/'
+    '/admin/courses': {
+      id: '/admin/courses'
       path: '/courses'
-      fullPath: '/expert/courses/'
-      preLoaderRoute: typeof ExpertCoursesIndexRouteImport
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AdminCoursesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/invitations': {
+      id: '/admin/invitations'
+      path: '/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/maintenance': {
+      id: '/admin/maintenance'
+      path: '/maintenance'
+      fullPath: '/admin/maintenance'
+      preLoaderRoute: typeof AdminMaintenanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/produtos': {
+      id: '/admin/produtos'
+      path: '/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminProdutosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/relatorio': {
+      id: '/admin/relatorio'
+      path: '/relatorio'
+      fullPath: '/admin/relatorio'
+      preLoaderRoute: typeof AdminRelatorioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/aluno/': {
+      id: '/aluno/'
+      path: '/aluno'
+      fullPath: '/aluno/'
+      preLoaderRoute: typeof AlunoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aluno/perfil': {
+      id: '/aluno/perfil'
+      path: '/aluno/perfil'
+      fullPath: '/aluno/perfil'
+      preLoaderRoute: typeof AlunoPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/falhou': {
+      id: '/checkout/falhou'
+      path: '/checkout/falhou'
+      fullPath: '/checkout/falhou'
+      preLoaderRoute: typeof CheckoutFalhouRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/pendente': {
+      id: '/checkout/pendente'
+      path: '/checkout/pendente'
+      fullPath: '/checkout/pendente'
+      preLoaderRoute: typeof CheckoutPendenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/sucesso': {
+      id: '/checkout/sucesso'
+      path: '/checkout/sucesso'
+      fullPath: '/checkout/sucesso'
+      preLoaderRoute: typeof CheckoutSucessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expert/': {
+      id: '/expert/'
+      path: '/'
+      fullPath: '/expert/'
+      preLoaderRoute: typeof ExpertIndexRouteImport
       parentRoute: typeof ExpertRoute
+    }
+    '/expert/preview': {
+      id: '/expert/preview'
+      path: '/preview'
+      fullPath: '/expert/preview'
+      preLoaderRoute: typeof ExpertPreviewRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/profile': {
+      id: '/expert/profile'
+      path: '/profile'
+      fullPath: '/expert/profile'
+      preLoaderRoute: typeof ExpertProfileRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/relatorio': {
+      id: '/expert/relatorio'
+      path: '/relatorio'
+      fullPath: '/expert/relatorio'
+      preLoaderRoute: typeof ExpertRelatorioRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/produtos/': {
+      id: '/produtos/'
+      path: '/produtos'
+      fullPath: '/produtos/'
+      preLoaderRoute: typeof ProdutosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos/$slug': {
+      id: '/produtos/$slug'
+      path: '/produtos/$slug'
+      fullPath: '/produtos/$slug'
+      preLoaderRoute: typeof ProdutosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos/comunica-pascom': {
+      id: '/produtos/comunica-pascom'
+      path: '/produtos/comunica-pascom'
+      fullPath: '/produtos/comunica-pascom'
+      preLoaderRoute: typeof ProdutosComunicaPascomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos/prosperus': {
+      id: '/produtos/prosperus'
+      path: '/produtos/prosperus'
+      fullPath: '/produtos/prosperus'
+      preLoaderRoute: typeof ProdutosProsperusRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/experts/': {
       id: '/admin/experts/'
@@ -730,11 +723,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExpertsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/expert/courses/new': {
-      id: '/expert/courses/new'
-      path: '/courses/new'
-      fullPath: '/expert/courses/new'
-      preLoaderRoute: typeof ExpertCoursesNewRouteImport
+    '/admin/experts/$id': {
+      id: '/admin/experts/$id'
+      path: '/experts/$id'
+      fullPath: '/admin/experts/$id'
+      preLoaderRoute: typeof AdminExpertsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/experts/new': {
+      id: '/admin/experts/new'
+      path: '/experts/new'
+      fullPath: '/admin/experts/new'
+      preLoaderRoute: typeof AdminExpertsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/aluno/c/$slug': {
+      id: '/aluno/c/$slug'
+      path: '/aluno/c/$slug'
+      fullPath: '/aluno/c/$slug'
+      preLoaderRoute: typeof AlunoCSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expert/courses/': {
+      id: '/expert/courses/'
+      path: '/courses'
+      fullPath: '/expert/courses/'
+      preLoaderRoute: typeof ExpertCoursesIndexRouteImport
       parentRoute: typeof ExpertRoute
     }
     '/expert/courses/$id': {
@@ -744,33 +765,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpertCoursesIdRouteImport
       parentRoute: typeof ExpertRoute
     }
-    '/api/public/stripe-webhook': {
-      id: '/api/public/stripe-webhook'
-      path: '/api/public/stripe-webhook'
-      fullPath: '/api/public/stripe-webhook'
-      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/aluno/c/$slug': {
-      id: '/aluno/c/$slug'
-      path: '/aluno/c/$slug'
-      fullPath: '/aluno/c/$slug'
-      preLoaderRoute: typeof AlunoCSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/experts/new': {
-      id: '/admin/experts/new'
-      path: '/experts/new'
-      fullPath: '/admin/experts/new'
-      preLoaderRoute: typeof AdminExpertsNewRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/experts/$id': {
-      id: '/admin/experts/$id'
-      path: '/experts/$id'
-      fullPath: '/admin/experts/$id'
-      preLoaderRoute: typeof AdminExpertsIdRouteImport
-      parentRoute: typeof AdminRoute
+    '/expert/courses/new': {
+      id: '/expert/courses/new'
+      path: '/courses/new'
+      fullPath: '/expert/courses/new'
+      preLoaderRoute: typeof ExpertCoursesNewRouteImport
+      parentRoute: typeof ExpertRoute
     }
     '/expert/courses/$id/students': {
       id: '/expert/courses/$id/students'
