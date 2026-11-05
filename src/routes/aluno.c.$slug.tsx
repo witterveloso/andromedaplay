@@ -10,6 +10,7 @@ import { VideoPlayer, type VideoProgressData } from "@/lib/video-player";
 import { CommunityHub } from "@/components/community/community-hub";
 import { LessonMaterials } from "@/components/student/lesson-materials";
 import { LessonCatalog } from "@/components/student/lesson-catalog";
+import { useLessonSession } from "@/hooks/use-lesson-session";
 
 
 
@@ -154,8 +155,11 @@ function StudentCourse() {
       });
   }, [user?.id, course?.id, activeLessonId]);
 
+  const { reportVideoPosition } = useLessonSession(activeLessonId, !!user?.id && !isPreview);
+
   const handleProgress = useCallback(
     (d: VideoProgressData) => {
+      if (typeof d.seconds === "number") reportVideoPosition(d.seconds);
       if (!activeLessonId || !course?.id) return;
       // Throttle to at most one upsert per lesson per 5s.
       const now = Date.now();
@@ -170,7 +174,7 @@ function StudentCourse() {
         duration: d.duration,
       });
     },
-    [activeLessonId, course?.id, upsertProgress],
+    [activeLessonId, course?.id, upsertProgress, reportVideoPosition],
   );
 
   const handleEnded = useCallback(() => {
