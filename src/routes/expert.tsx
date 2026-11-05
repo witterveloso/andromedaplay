@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LogOut, AlertTriangle, Eye, UserCircle } from "lucide-react";
+import { BookOpen, LogOut, AlertTriangle, Eye, UserCircle, Activity } from "lucide-react";
+import { useUnseenAccessCount } from "@/components/reports/lesson-access-report";
 import { cn } from "@/lib/utils";
 import andromedaLogo from "@/assets/andromeda-logo.png.asset.json";
 
@@ -16,6 +17,7 @@ function ExpertLayout() {
   const { loading, session, isExpert, isAdmin, user, signOut } = useAuth();
   const navigate = useNavigate();
   const { location } = useRouterState();
+  const { data: unseen } = useUnseenAccessCount(!!session && (isExpert || isAdmin));
 
   useEffect(() => {
     if (loading) return;
@@ -40,6 +42,7 @@ function ExpertLayout() {
 
   const nav = [
     { to: "/expert/courses", label: "Meus cursos", icon: BookOpen },
+    { to: "/expert/relatorio", label: "Relatório de acessos", icon: Activity },
     { to: "/expert/profile", label: "Meu perfil", icon: UserCircle },
     { to: "/expert/preview", label: "Ver como aluno", icon: Eye },
   ];
@@ -65,6 +68,9 @@ function ExpertLayout() {
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               )}>
                 <item.icon className="h-4 w-4" /> {item.label}
+                {item.to === "/expert/relatorio" && !!unseen && (
+                  <span className="ml-auto rounded-full bg-primary px-2 text-[10px] font-semibold text-primary-foreground">{unseen}</span>
+                )}
               </Link>
             );
           })}

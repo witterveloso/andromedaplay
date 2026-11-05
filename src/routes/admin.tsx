@@ -16,7 +16,9 @@ import {
   Settings,
   LogOut,
   Wrench,
+  Activity,
 } from "lucide-react";
+import { useUnseenAccessCount } from "@/components/reports/lesson-access-report";
 import { cn } from "@/lib/utils";
 import { AndromedaLogo } from "@/components/brand/AndromedaLogo";
 
@@ -35,6 +37,7 @@ const nav: NavItem[] = [
   { to: "/admin/communities", label: "Comunidades", icon: MessagesSquare },
   { to: "/admin/content", label: "Conteúdos", icon: FileStack },
   { to: "/admin/access", label: "Acessos", icon: KeyRound },
+  { to: "/admin/relatorio", label: "Relatório de aulas", icon: Activity },
   { to: "/admin/invitations", label: "Convites", icon: MailCheck },
   { to: "/admin/maintenance", label: "Manutenção", icon: Wrench },
   { to: "/admin/support", label: "Suporte", icon: LifeBuoy },
@@ -45,6 +48,7 @@ function AdminLayout() {
   const { loading, session, isAdmin, user, signOut } = useAuth();
   const navigate = useNavigate();
   const { location } = useRouterState();
+  const { data: unseen } = useUnseenAccessCount(!!session && isAdmin);
 
   useEffect(() => {
     if (loading) return;
@@ -108,6 +112,9 @@ function AdminLayout() {
                 )}
                 <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "opacity-70")} />
                 <span className="truncate">{item.label}</span>
+                {item.to === "/admin/relatorio" && !!unseen && (
+                  <span className="ml-auto rounded-full bg-primary px-2 text-[10px] font-semibold text-primary-foreground">{unseen}</span>
+                )}
               </Link>
             );
           })}
