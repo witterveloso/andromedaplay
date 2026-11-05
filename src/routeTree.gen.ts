@@ -21,6 +21,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutosProsperusRouteImport } from './routes/produtos.prosperus'
 import { Route as ProdutosComunicaPascomRouteImport } from './routes/produtos.comunica-pascom'
 import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
+import { Route as ExpertRelatorioRouteImport } from './routes/expert.relatorio'
 import { Route as ExpertProfileRouteImport } from './routes/expert.profile'
 import { Route as ExpertPreviewRouteImport } from './routes/expert.preview'
 import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
@@ -29,6 +30,7 @@ import { Route as CheckoutFalhouRouteImport } from './routes/checkout.falhou'
 import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
+import { Route as AdminRelatorioRouteImport } from './routes/admin.relatorio'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminMaintenanceRouteImport } from './routes/admin.maintenance'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -107,6 +109,11 @@ const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
   path: '/produtos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExpertRelatorioRoute = ExpertRelatorioRouteImport.update({
+  id: '/relatorio',
+  path: '/relatorio',
+  getParentRoute: () => ExpertRoute,
+} as any)
 const ExpertProfileRoute = ExpertProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -145,6 +152,11 @@ const AdminSupportRoute = AdminSupportRouteImport.update({
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRelatorioRoute = AdminRelatorioRouteImport.update({
+  id: '/relatorio',
+  path: '/relatorio',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
@@ -247,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/relatorio': typeof AdminRelatorioRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -255,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/expert/relatorio': typeof ExpertRelatorioRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/produtos/prosperus': typeof ProdutosProsperusRoute
@@ -284,6 +298,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/relatorio': typeof AdminRelatorioRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -292,6 +307,7 @@ export interface FileRoutesByTo {
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/expert/relatorio': typeof ExpertRelatorioRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/produtos/prosperus': typeof ProdutosProsperusRoute
@@ -324,6 +340,7 @@ export interface FileRoutesById {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/maintenance': typeof AdminMaintenanceRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/relatorio': typeof AdminRelatorioRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -332,6 +349,7 @@ export interface FileRoutesById {
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/expert/preview': typeof ExpertPreviewRoute
   '/expert/profile': typeof ExpertProfileRoute
+  '/expert/relatorio': typeof ExpertRelatorioRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/produtos/comunica-pascom': typeof ProdutosComunicaPascomRoute
   '/produtos/prosperus': typeof ProdutosProsperusRoute
@@ -365,6 +383,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/produtos'
+    | '/admin/relatorio'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -373,6 +392,7 @@ export interface FileRouteTypes {
     | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/expert/relatorio'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
     | '/produtos/prosperus'
@@ -402,6 +422,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/produtos'
+    | '/admin/relatorio'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -410,6 +431,7 @@ export interface FileRouteTypes {
     | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/expert/relatorio'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
     | '/produtos/prosperus'
@@ -441,6 +463,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/maintenance'
     | '/admin/produtos'
+    | '/admin/relatorio'
     | '/admin/students'
     | '/admin/support'
     | '/aluno/perfil'
@@ -449,6 +472,7 @@ export interface FileRouteTypes {
     | '/checkout/sucesso'
     | '/expert/preview'
     | '/expert/profile'
+    | '/expert/relatorio'
     | '/produtos/$slug'
     | '/produtos/comunica-pascom'
     | '/produtos/prosperus'
@@ -573,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/expert/relatorio': {
+      id: '/expert/relatorio'
+      path: '/relatorio'
+      fullPath: '/expert/relatorio'
+      preLoaderRoute: typeof ExpertRelatorioRouteImport
+      parentRoute: typeof ExpertRoute
+    }
     '/expert/profile': {
       id: '/expert/profile'
       path: '/profile'
@@ -627,6 +658,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/admin/students'
       preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/relatorio': {
+      id: '/admin/relatorio'
+      path: '/relatorio'
+      fullPath: '/admin/relatorio'
+      preLoaderRoute: typeof AdminRelatorioRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/produtos': {
@@ -759,6 +797,7 @@ interface AdminRouteChildren {
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMaintenanceRoute: typeof AdminMaintenanceRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
+  AdminRelatorioRoute: typeof AdminRelatorioRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -775,6 +814,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMaintenanceRoute: AdminMaintenanceRoute,
   AdminProdutosRoute: AdminProdutosRoute,
+  AdminRelatorioRoute: AdminRelatorioRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -802,6 +842,7 @@ const ExpertCoursesIdRouteWithChildren = ExpertCoursesIdRoute._addFileChildren(
 interface ExpertRouteChildren {
   ExpertPreviewRoute: typeof ExpertPreviewRoute
   ExpertProfileRoute: typeof ExpertProfileRoute
+  ExpertRelatorioRoute: typeof ExpertRelatorioRoute
   ExpertIndexRoute: typeof ExpertIndexRoute
   ExpertCoursesIdRoute: typeof ExpertCoursesIdRouteWithChildren
   ExpertCoursesNewRoute: typeof ExpertCoursesNewRoute
@@ -811,6 +852,7 @@ interface ExpertRouteChildren {
 const ExpertRouteChildren: ExpertRouteChildren = {
   ExpertPreviewRoute: ExpertPreviewRoute,
   ExpertProfileRoute: ExpertProfileRoute,
+  ExpertRelatorioRoute: ExpertRelatorioRoute,
   ExpertIndexRoute: ExpertIndexRoute,
   ExpertCoursesIdRoute: ExpertCoursesIdRouteWithChildren,
   ExpertCoursesNewRoute: ExpertCoursesNewRoute,
