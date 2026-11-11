@@ -4,3 +4,7 @@ node_modules/
 cloud/turnserver.conf
 *.log
 .DS_Store
+
+logs/
+licenca.txt
+licenca-privada.pem
