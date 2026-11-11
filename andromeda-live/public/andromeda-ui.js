@@ -19,6 +19,7 @@
     const bar = make('div', 'page-toolbar');
     bar.append(...loose); page.prepend(bar);
   }
+  const brand = $('.logo-name'); if (brand) brand.textContent = 'Andrômeda';
   const rename = (selector, text) => { const el = $(selector); if (el) el.textContent = text; };
   rename('#settingsButton', 'Configurações gerais');
   rename('#mediaButton', 'Fontes de câmera');
