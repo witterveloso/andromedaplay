@@ -49,7 +49,7 @@
   pages.diagnostics = page;
   const tab = make('button', '', 'Diagnóstico'); tab.dataset.page = 'diagnostics'; tab.onclick = () => { openWorkspace('diagnostics'); unseen = 0; badge(); };
   nav.insertBefore(tab, [...nav.children].find(b => !b.dataset.page) || null);
-  const badge = () => { tab.dataset.alerts = unseen ? String(Math.min(99, unseen)) : ''; };
+  const badge = () => { tab.dataset.alerts = unseen ? String(Math.min(99, unseen)) : ''; tab.setAttribute('aria-label', unseen ? 'Diagnóstico, ' + unseen + ' aviso(s) novo(s)' : 'Diagnóstico'); };
 
   const LEVEL = { info: 'Info', warn: 'Aviso', error: 'Erro' };
   function paint() {
