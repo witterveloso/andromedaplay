@@ -201,7 +201,8 @@
 
   /* ---------- sincronização visual ---------- */
 
-  const info = make('div', 'mon-info'); $('#monPreview')?.append(info);
+  const info = make('div', 'preview-strip'), infoText = make('span'), infoState = make('b'); info.append(infoText, infoState);
+  $('#monPreview')?.closest('.dock-panel')?.append(info);
   const baseSync = sync;
   sync = function () {
     baseSync();
@@ -229,11 +230,12 @@
   };
   function paintInfo() {
     const i = state.prv;
-    if (i === MOSAIC) info.textContent = 'MOSAICO · ' + stage.members.length + ' câmera(s)';
-    else if (i === 10) info.textContent = 'PRETO';
-    else if (!live(i)) info.textContent = 'SEM SINAL';
-    else { const [w, h] = dims(media[i].element); info.textContent = kind(i) + ' · ' + w + '×' + h + (h > w ? ' · VERTICAL' : ''); }
-    info.dataset.ok = String(i === MOSAIC || i === 10 || live(i));
+    const ok = i === MOSAIC || i === 10 || live(i);
+    if (i === MOSAIC) infoText.textContent = 'MOSAICO · ' + stage.members.length + ' câmera(s)';
+    else if (i === 10) infoText.textContent = 'PRETO';
+    else if (!live(i)) infoText.textContent = 'Aguardando fonte neste canal';
+    else { const [w, h] = dims(media[i].element); infoText.textContent = kind(i) + ' · ' + w + '×' + h + (h > w ? ' · VERTICAL' : ''); }
+    infoState.textContent = ok ? 'VÍDEO OK' : 'SEM SINAL'; info.dataset.ok = String(ok);
   }
 
   /* ---------- fontes de câmera: sem demonstração por padrão ---------- */

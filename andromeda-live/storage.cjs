@@ -34,6 +34,7 @@ async function unixVolumes() {
     const mount = parts.slice(5).join(' '), external = /^\/(media|mnt|Volumes|run\/media)\//.test(mount);
     if (mount !== '/' && !external) continue;
     if (/^(tmpfs|devtmpfs|overlay|map)/.test(parts[0]) && mount !== '/') continue;
+    try { fs.accessSync(mount, fs.constants.W_OK); } catch { continue; } // só unidades em que dá para gravar
     volumes.push({ path: mount, label: mount === '/' ? 'Disco do sistema' : path.basename(mount), kind: external ? 'removable' : 'system', free: Number(parts[3]) * 1024, total: Number(parts[1]) * 1024 });
   }
   return volumes;

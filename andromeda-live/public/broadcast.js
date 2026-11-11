@@ -19,7 +19,7 @@
   const STORE = 'andromeda.broadcast.v1';
   const make = (tag, className, text) => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = text; return el; };
   const uid = () => Math.random().toString(36).slice(2, 9);
-  const gb = bytes => bytes == null ? '—' : bytes >= 1e12 ? (bytes / 1e12).toFixed(2) + ' TB' : (bytes / 1e9).toFixed(1) + ' GB';
+  const gb = bytes => bytes == null ? '—' : bytes >= 1e12 ? (bytes / 1e12).toFixed(2) + ' TB' : bytes >= 1e9 ? (bytes / 1e9).toFixed(1) + ' GB' : Math.max(1, Math.round(bytes / 1e6)) + ' MB';
 
   const model = { destinations: [{ id: uid(), platform: 'youtube', name: 'YouTube', server: PRESETS.youtube.server, key: '', enabled: true }], resolution: '1080p', bitrate: 6, encoder: 'libx264', record: false, dir: '', remember: false };
   try {

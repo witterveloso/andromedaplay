@@ -55,7 +55,9 @@ function validateRecording(input) {
   const dir = String(input.dir || '').trim();
   if (!dir || !path.isAbsolute(dir)) fail('Escolha a pasta de gravação.');
   if (/[|\r\n]/.test(dir)) fail('A pasta de gravação contém caracteres não aceitos.');
-  const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
+  // Nome com a data e a hora locais do computador, que é como o operador procura o arquivo.
+  const now = new Date(), two = n => String(n).padStart(2, '0');
+  const stamp = now.getFullYear() + '-' + two(now.getMonth() + 1) + '-' + two(now.getDate()) + '-' + two(now.getHours()) + '-' + two(now.getMinutes()) + '-' + two(now.getSeconds());
   return { dir, file: path.join(dir, 'Andromeda_' + stamp + '.mkv') };
 }
 

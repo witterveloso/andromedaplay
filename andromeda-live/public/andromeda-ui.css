@@ -112,6 +112,7 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--d-inset); border:
 .topbar-right:empty { display: none; }
 /* Latência não é medida nesta versão; o indicador só ocupava espaço. */
 .topbar-center > :nth-child(n+8) { display: none; }
+@media (max-width: 1640px) { .topbar-center > :nth-child(3), .topbar-center > :nth-child(4) { display: none; } .workspace-tabs button { padding: 0 11px; } }
 
 /* ---------- área de trabalho ---------- */
 
@@ -174,7 +175,17 @@ code { padding: 2px 6px; border-radius: 5px; background: var(--d-inset); border:
 
 /* Monitores em 16:9 exato, limitados pela altura da janela para a operação caber na tela. */
 .dock-panel .monitor { border: 0; border-radius: 0; box-shadow: none; }
-.dock-panel[data-tool="program"] #monProgram, .dock-panel[data-tool="preview"] #monPreview { width: min(100%, 44vh * 16 / 9); margin-inline: auto; }
+.dock-panel[data-tool="program"] #monProgram, .dock-panel[data-tool="preview"] #monPreview { width: min(100%, 40vh * 16 / 9); margin-inline: auto; }
+/* Preview e PGM com a mesma altura: a faixa de estado do Preview espelha a de áudio do PGM. */
+.dock-bottom > .dock-panel[data-tool="preview"], .dock-bottom > .dock-panel[data-tool="program"] { align-self: stretch; display: flex; flex-direction: column; }
+.dock-panel[data-tool="program"] > .program-card { flex: 1; display: flex; flex-direction: column; }
+.program-card > #monProgram { order: 0; }
+.program-card > .pgm-audio-monitor { order: 1; }
+.dock-panel[data-tool="program"] .pgm-audio-monitor { flex: 1; align-content: center; }
+.preview-strip { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 8px 12px; border-top: 1px solid var(--d-line); color: var(--d-muted); font: 600 11px var(--d-mono); letter-spacing: .04em; }
+.preview-strip b { padding: 3px 8px; border-radius: 999px; background: var(--d-raise); font-weight: 700; letter-spacing: .08em; }
+.preview-strip[data-ok="true"] b { color: var(--d-pvw-text); }
+.preview-strip[data-ok="false"] b { color: var(--d-amber); }
 .mon-label { padding: 8px; gap: 8px; background: linear-gradient(rgba(0, 0, 0, .6), transparent); }
 .mon-title { padding: 3px 7px; border-radius: 4px; font: 700 10px var(--d-mono); letter-spacing: .08em; }
 .monitor.program .mon-title { background: var(--d-pgm); }
@@ -448,13 +459,6 @@ dialog::backdrop { background: rgba(4, 5, 8, .78); }
 .src-btn.mos-key { margin-left: 8px; border-color: rgba(0, 163, 255, .55); color: #8fd6ff; }
 .src-btn.mos-key.prv-on, .src-btn.mos-key.pgm-on { color: #fff; }
 
-.mon-info {
-  position: absolute; left: 8px; bottom: 8px; z-index: 3; padding: 4px 8px; border-radius: 5px;
-  background: rgba(5, 6, 15, .72); color: var(--d-muted); font: 600 10px var(--d-mono); letter-spacing: .04em; pointer-events: none;
-}
-.mon-info[data-ok="true"] { color: var(--d-pvw-text); }
-.mon-info[data-ok="false"] { color: var(--d-amber); }
-
 /* ---------- transmissão: destinos ---------- */
 
 .page-toolbar #transmitYouTube { min-height: 44px; padding: 0 22px; font: 800 13px var(--d-display); letter-spacing: .1em; }
@@ -464,8 +468,8 @@ dialog::backdrop { background: rgba(4, 5, 8, .78); }
 #recArm[data-live="true"] { background: var(--d-pgm); border-color: var(--d-pgm); color: #fff; }
 
 .stream-row.broadcast { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.dest-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 10px; }
-.dest { display: grid; gap: 10px; min-width: 0; padding: 12px; background: var(--d-inset); border: 1px solid var(--d-line); border-radius: 10px; }
+.dest-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 10px; }
+.dest { display: grid; gap: 10px; min-width: 0; max-width: 820px; padding: 12px; background: var(--d-inset); border: 1px solid var(--d-line); border-radius: 10px; }
 .dest > header { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .dest-badge { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--d-raise); color: #fff; font: 800 11px var(--d-display); }
 .dest[data-platform="youtube"] .dest-badge { background: #ff0033; }
@@ -505,6 +509,8 @@ dialog::backdrop { background: rgba(4, 5, 8, .78); }
 
 .record-panel { display: grid; gap: 12px; padding: 14px; background: var(--d-inset); border: 1px solid var(--d-line); border-radius: 10px; }
 .record-panel > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.record-panel > header label { display: inline-flex; }
+#showProgramOutput { justify-self: start; }
 .record-panel > header strong { font: 700 13px var(--d-display); letter-spacing: .04em; }
 .rec-body { display: grid; gap: 10px; }
 .volumes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
