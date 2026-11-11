@@ -1,6 +1,6 @@
-# Andromeda Live
+# Andrômeda Live
 
-Mesa de corte ao vivo que roda no notebook, com câmeras de celular por link de convite (WebRTC, Wi-Fi ou 4G/5G), entradas Blackmagic por RTMP e saída do PROGRAM para o YouTube.
+Mesa de corte ao vivo que roda no notebook, com câmeras de celular por link de convite (WebRTC, Wi-Fi ou 4G/5G), entradas Blackmagic por RTMP, mosaico, gravação e saída do PROGRAM para vários destinos ao mesmo tempo (YouTube, Facebook, Instagram, Twitch, Kick, TikTok, LinkedIn ou RTMP próprio).
 
 | Parte | Onde fica | Como abre |
 | --- | --- | --- |
@@ -10,9 +10,13 @@ Mesa de corte ao vivo que roda no notebook, com câmeras de celular por link de 
 
 Requer Node.js 22 ou superior. Testes: `npm test`.
 
-# Atualização atual: 0.11
+# Atualização atual: 0.12
 
-Leia [ATUALIZACAO_011.md](ATUALIZACAO_011.md): correção dos monitores congelados da 0.10, nova interface da mesa e da câmera, convite com QR code e o que foi validado.
+Leia [ATUALIZACAO_012.md](ATUALIZACAO_012.md): transmissão para vários destinos, gravação em disco e HD externo, mosaico, identidade Andrômeda Live, diagnóstico com auditoria e a base do licenciamento. As avaliações de produto (formato do aplicativo, referências, nuvem, câmera nativa) estão em [AVALIACAO_PRODUTO.md](AVALIACAO_PRODUTO.md).
+
+# Atualização 0.11
+
+Leia [ATUALIZACAO_011.md](ATUALIZACAO_011.md): correção dos monitores congelados da 0.10, nova interface da mesa e da câmera e convite com QR code.
 
 # Atualização 0.10
 

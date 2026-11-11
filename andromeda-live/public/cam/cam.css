@@ -5,19 +5,19 @@
  */
 
 :root {
-  --ink: #07080c;
+  --ink: #060817;
   --glass: rgba(13, 15, 21, .74);
-  --panel: #10121a;
+  --panel: #0b0f2a;
   --line: rgba(255, 255, 255, .14);
   --line-strong: rgba(255, 255, 255, .28);
   --text: #f5f6fa;
   --muted: rgba(245, 246, 250, .74);
   --faint: rgba(245, 246, 250, .52);
-  --pgm: #e5202e;
+  --pgm: #ff0033;
   --pgm-glow: rgba(255, 59, 71, .42);
   --pvw: #22c36a;
-  --amber: #f5a623;
-  --talk: #7c4dff;
+  --amber: #00a3ff;
+  --talk: #8b00ff;
   --ok: #34d399;
   --warn: #fbbf24;
   --bad: #ff7b7b;
@@ -41,7 +41,7 @@ body {
   overflow: hidden;
   display: grid;
   grid-template: "top" auto "mid" minmax(0, 1fr) "bottom" auto / minmax(0, 1fr);
-  background: radial-gradient(110% 70% at 50% -10%, #1b1626 0%, var(--ink) 62%) var(--ink);
+  background: radial-gradient(110% 70% at 50% -10%, #1a0c44 0%, var(--ink) 62%) var(--ink);
   color: var(--text);
   font: 500 14px/1.4 var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -101,7 +101,7 @@ body[data-tally="preview"] .frame { box-shadow: inset 0 0 0 4px var(--pvw); }
   -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
 }
 .icon svg, .pad svg, .rotate-hint svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.icon[aria-pressed="true"] { background: var(--amber); border-color: transparent; color: #17120a; }
+.icon[aria-pressed="true"] { background: var(--amber); border-color: transparent; color: #00121f; }
 
 .tally {
   grid-area: tally; justify-self: center;
@@ -135,7 +135,7 @@ body[data-run="idle"] .hero, body[data-run="starting"] .hero { display: grid; }
 .hero p { margin: 0; max-width: 34ch; color: var(--muted); font-size: 15px; line-height: 1.5; text-wrap: pretty; }
 .steps { list-style: none; width: 100%; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
 .steps li { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 14px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); font-size: 14px; text-align: left; }
-.steps b { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(245, 166, 35, .16); color: var(--amber); font-size: 12px; }
+.steps b { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(0, 163, 255, .16); color: var(--amber); font-size: 12px; }
 .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
 
 .btn { min-height: 48px; padding: 0 22px; border: 0; border-radius: 14px; background: var(--text); color: #0b0c10; font-size: 14px; font-weight: 800; }
@@ -186,7 +186,7 @@ body[data-run="live"] .status[data-quiet="on"], body[data-run="test"] .status[da
 .telemetry [data-level="fair"] { color: var(--warn); }
 .telemetry [data-level="poor"] { color: var(--bad); border-color: rgba(255, 123, 123, .5); }
 
-.chip-btn { min-height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(245, 166, 35, .12); border: 1px solid rgba(245, 166, 35, .55); color: #ffd591; font-size: 12.5px; font-weight: 700; }
+.chip-btn { min-height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(0, 163, 255, .12); border: 1px solid rgba(0, 163, 255, .55); color: #9bdcff; font-size: 12.5px; font-weight: 700; }
 #notice { margin: 0; max-width: 54ch; color: var(--faint); font-size: 12.5px; line-height: 1.45; }
 body[data-run="idle"] .telemetry, body[data-run="starting"] .telemetry,
 body[data-run="idle"] .chip-btn, body[data-run="starting"] .chip-btn,

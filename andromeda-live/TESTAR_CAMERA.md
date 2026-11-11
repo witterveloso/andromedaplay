@@ -6,6 +6,6 @@ Toque em ATIVAR TESTE e permita câmera e microfone. Você vê a imagem real, o 
 
 É o cliente real em captura local, sem WebSocket nem envio de mídia. O tally permanece TESTE LOCAL · FORA DO AR; intercom, bitrate de envio e convite ficam desabilitados. Isso não comprova transmissão pela rede, retorno do DTV ou recebimento na mesa. Sem `teste=1`, o fluxo normal continua exigindo gateway e convite.
 
-Para atualizar a página publicada, envie `index.html`, `cam.css`, `cam.js`, `manifest.json` e `icon.svg` da pasta `docs/` deste pacote para a pasta `docs/` do repositório da câmera e aguarde o workflow "Publish Andromeda Cam".
+Para atualizar a página publicada, envie `index.html`, `cam.css`, `cam.js`, `manifest.json` e `icon.png` da pasta `docs/` deste pacote para a pasta `docs/` do repositório da câmera e aguarde o workflow "Publish Andromeda Cam".
 
 Validação: os testes automatizados do cliente com captura simulada passam (sem chamadas de rede no modo de teste e com liberação das tracks ao parar). Ainda precisa ser validado em aparelhos reais.
