@@ -153,6 +153,19 @@ Free-to-play, **só cosméticos**: skins de máscara/roupa, cascas de bolinha, t
 - Se começa como **protótipo web jogável** (compartilhável por link) antes do app nativo.
 - Estilo de arte: realista suave, cartoon (estilo Fortnite) ou low-poly.
 
+## 11.1 Estado atual do protótipo (v0.3)
+
+**Implementado (navegador, PC e celular):** 5 campos jogáveis (Arena Speedball, Galpão Abandonado, Morro Vivo, Ferro-Velho, Cidade Abandonada), 1ª e 3ª pessoa, partida 5x5 contra bots (eliminação, melhor de 5), tinta na máscara, camuflagem por equipe, cores de tinta personalizáveis, menu com seleção de campo, configurações e acessibilidade, placar e tela de fim de partida.
+
+**Princípios de UX adotados**
+1. *Jogar em 1 toque:* o botão principal é o maior elemento da tela; tudo o mais (campo, tinta, câmera, bots) tem um padrão sensato.
+2. *Mostrar, não explicar:* o campo 3D roda ao fundo do menu; cartões de campo com imagem; dicas curtas no carregamento e no primeiro jogo.
+3. *Feedback imediato e legível:* marcador de acerto, feed, indicador de direção do tiro, tinta na máscara, vibração no celular.
+4. *Acessível por padrão:* paleta laranja×azul segura para daltonismo, opção "reduzir efeitos", mira configurável, HUD redimensionável, navegação por teclado, modo canhoto.
+5. *Mobile de verdade:* paisagem, zonas de toque grandes e seguras para o notch, joystick flutuante, botões redimensionáveis.
+
+**Ainda não feito:** multiplayer online, modos Centerflag/Battle Royale, outros marcadores, arte 3D e animação própria (o soldado atual é provisório), teste em aparelhos reais, balanceamento com jogadores humanos.
+
 ## 12. Fontes da pesquisa
 
 - [Paintball marker (Wikipedia)](https://www.wikipedia.org/wiki/Paintball_gun)

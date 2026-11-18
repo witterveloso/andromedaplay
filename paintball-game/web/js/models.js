@@ -241,6 +241,43 @@ export function buildCharacter(team, world) {
     legUR: B('RightUpLeg'), legR: B('RightLeg'), footR: B('RightFoot'),
   };
 
+  // ---- equipamento de paintball (máscara, pods, cilindro de ar) ----
+  model.updateMatrixWorld(true);
+  const gearFrame = (bone) => {
+    const o = new THREE.Object3D();
+    o.scale.setScalar(1 / (bone.getWorldScale(new THREE.Vector3()).y || 1));
+    o.quaternion.copy(SOLDIER.rest[bone.name]).invert();
+    bone.add(o);
+    return o;
+  };
+  const dark = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.55, metalness: 0.2 });
+  const lensMat = new THREE.MeshStandardMaterial({ color: 0x0d151d, roughness: 0.06, metalness: 0.75, envMapIntensity: 1.6 });
+  const accent = new THREE.MeshStandardMaterial({ color: paint, emissive: paint, emissiveIntensity: 0.25, roughness: 0.5 });
+  const put = (parent, mesh, x, y, z, rx = 0, ry = 0, rz = 0) => { mesh.position.set(x, y, z); mesh.rotation.set(rx, ry, rz); mesh.castShadow = true; parent.add(mesh); return mesh; };
+  const hf = gearFrame(bones.head);
+  {
+    const lens = new THREE.Mesh(new THREE.CapsuleGeometry(0.047, 0.15, 6, 14), lensMat); lens.scale.set(1, 1, 0.78);
+    put(hf, lens, 0, 0.1, -0.112, 0, 0, Math.PI / 2);
+    const frame = new THREE.Mesh(new THREE.CapsuleGeometry(0.056, 0.15, 6, 14), dark); frame.scale.set(1, 1, 0.7);
+    put(hf, frame, 0, 0.1, -0.1, 0, 0, Math.PI / 2);
+    put(hf, new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.07), dark), 0, 0.035, -0.11);              // protetor de boca
+    [-1, 1].forEach((sx) => put(hf, new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 14), dark), sx * 0.112, 0.095, -0.02, 0, 0, Math.PI / 2)); // orelhas
+    put(hf, new THREE.Mesh(new THREE.TorusGeometry(0.113, 0.011, 8, 28), accent), 0, 0.125, -0.012, Math.PI / 2, 0, 0); // tira do time
+  }
+  const cf = gearFrame(bones.spine2);
+  {
+    for (let i = 0; i < 4; i++) {
+      const x = -0.115 + i * 0.077;
+      put(cf, new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.13, 12), dark), x, -0.19, -0.185);
+      put(cf, new THREE.Mesh(new THREE.CylinderGeometry(0.031, 0.031, 0.025, 12), accent), x, -0.115, -0.185);
+    }
+    put(cf, new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.03, 0.05), dark), 0, -0.1, -0.17);                    // faixa dos pods
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3, 14), new THREE.MeshStandardMaterial({ color: 0x1b1d21, roughness: 0.35, metalness: 0.5 }));
+    put(cf, tank, 0.06, -0.08, 0.2, 0.12, 0, 0.1);
+    put(cf, new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.045, 14), accent), 0.06, -0.08, 0.2, 0.12, 0, 0.1).translateY(0.07);
+    put(cf, new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.06, 0.06), dark), 0.07, 0.09, 0.2);
+  }
+
   // braçadeira da cor do time em cada braço
   [bones.armL, bones.armR].forEach((arm) => {
     const ws = arm.getWorldScale(new THREE.Vector3()).y || 1;

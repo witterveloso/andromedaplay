@@ -224,6 +224,7 @@ function drawGraffiti(g, r, { word } = {}) {
   g.save(); g.translate(256, 256); g.rotate((r() - 0.5) * 0.18);
   const text = word || words[Math.floor(r() * words.length)];
   g.font = '900 190px Impact, "Arial Black", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const tw = g.measureText(text).width; if (tw > 400) g.font = `900 ${Math.floor((190 * 400) / tw)}px Impact, "Arial Black", sans-serif`;
   g.lineJoin = 'round';
   g.lineWidth = 34; g.strokeStyle = '#111'; g.strokeText(text, 0, 0);
   const grad = g.createLinearGradient(-200, -80, 200, 80); grad.addColorStop(0, pal[0]); grad.addColorStop(0.55, pal[1]); grad.addColorStop(1, pal[2]);
