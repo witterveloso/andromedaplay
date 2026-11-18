@@ -1,5 +1,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import { TEAM_PAINT } from './world.js';
+import { camoTexture } from './camo.js';
+import * as SkeletonUtils from './vendor/utils/SkeletonUtils.js';
 
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...o });
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -34,7 +36,7 @@ export function buildMarker(paint) {
 }
 
 let camoTex = null;
-function camoTexture() {
+function procCamoTexture() {
   if (camoTex) return camoTex;
   const c = document.createElement('canvas');
   c.width = c.height = 128;
@@ -53,10 +55,10 @@ function camoTexture() {
   return camoTex;
 }
 
-export function buildCharacter(team, world) {
+export function buildProceduralCharacter(team, world) {
   const paint = TEAM_PAINT[team];
   const jersey = std(paint, { roughness: 0.7 });
-  const camo = std(0xffffff, { roughness: 0.95, map: camoTexture() });
+  const camo = std(0xffffff, { roughness: 0.95, map: procCamoTexture() });
   const black = std(0x15171a, { roughness: 0.5 });
   const skin = std(0xc89a78, { roughness: 0.8 });
   const root = new THREE.Group();
@@ -181,3 +183,190 @@ export function buildCharacter(team, world) {
 }
 
 function clamp01(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+
+// ---------------------------------------------------------------------------
+// Soldado realista (glTF com esqueleto) + camuflagem por equipe
+// ---------------------------------------------------------------------------
+let SOLDIER = null;
+export async function loadCharacterAssets() {
+  try {
+    const { GLTFLoader } = await import('./vendor/loaders/GLTFLoader.js');
+    const gltf = await new GLTFLoader().loadAsync('assets/soldier.glb');
+    gltf.scene.updateMatrixWorld(true);
+    const rest = {}, q = new THREE.Quaternion();
+    gltf.scene.traverse((o) => { if (o.isBone) { o.getWorldQuaternion(q); rest[o.name] = q.clone(); } });
+    const top = gltf.scene.getObjectByName('mixamorigHeadTop_End');
+    const h = top.getWorldPosition(new THREE.Vector3()).y;
+    SOLDIER = { gltf, rest, scale: 1.8 / h, clips: Object.fromEntries(gltf.animations.map((a) => [a.name, a])) };
+  } catch (e) {
+    console.warn('Modelo realista indisponível, usando personagem simples.', e);
+  }
+}
+
+const rotX = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), a);
+const rotY = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), a);
+const rotZ = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), a);
+const _Mq = new THREE.Quaternion(), _P = new THREE.Quaternion(), _T = new THREE.Quaternion();
+
+export function buildCharacter(team, world) {
+  if (!SOLDIER) return buildProceduralCharacter(team, world);
+  const paint = TEAM_PAINT[team];
+  const root = new THREE.Group();
+  const holder = new THREE.Group();
+  const model = SkeletonUtils.clone(SOLDIER.gltf.scene);
+  model.scale.setScalar(SOLDIER.scale);
+  holder.add(model);
+  root.add(holder);
+
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = true; o.frustumCulled = false;
+    o.material = o.material.clone();
+    if (o.material.name === 'VanguardBodyMat') {
+      o.material.map = camoTexture(team);
+      o.material.roughness = 0.85; o.material.metalness = 0.05;
+    } else {
+      o.material.color = new THREE.Color(paint).multiplyScalar(0.1);
+      o.material.emissive = new THREE.Color(paint).multiplyScalar(0.07);
+    }
+  });
+
+  const B = (n) => model.getObjectByName('mixamorig' + n);
+  const bones = {
+    hips: B('Hips'), spine1: B('Spine1'), spine2: B('Spine2'), head: B('Head'),
+    armR: B('RightArm'), foreR: B('RightForeArm'), handR: B('RightHand'),
+    armL: B('LeftArm'), foreL: B('LeftForeArm'), handL: B('LeftHand'),
+    legUL: B('LeftUpLeg'), legL: B('LeftLeg'), footL: B('LeftFoot'),
+    legUR: B('RightUpLeg'), legR: B('RightLeg'), footR: B('RightFoot'),
+  };
+
+  // braçadeira da cor do time em cada braço
+  [bones.armL, bones.armR].forEach((arm) => {
+    const ws = arm.getWorldScale(new THREE.Vector3()).y || 1;
+    const len = arm.children.find((c) => c.isBone)?.position.length() || 0.3;
+    const ring = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.068 / ws, 0.068 / ws, 0.07 / ws, 16, 1, true),
+      new THREE.MeshStandardMaterial({ color: paint, emissive: paint, emissiveIntensity: 0.25, roughness: 0.6, side: THREE.DoubleSide })
+    );
+    ring.position.y = len * 0.45;
+    arm.add(ring);
+  });
+
+  const mixer = new THREE.AnimationMixer(model);
+  const act = {};
+  ['Idle', 'Walk', 'Run'].forEach((n) => { act[n] = mixer.clipAction(SOLDIER.clips[n]); act[n].play(); act[n].setEffectiveWeight(n === 'Idle' ? 1 : 0); });
+
+  // marcador (acompanha a mira) + máscara de tinta
+  const pivot = new THREE.Group();
+  pivot.position.y = 1.36;
+  const marker = buildMarker(paint);
+  marker.position.set(0.0, -0.1, -0.42);
+  pivot.add(marker);
+  root.add(pivot);
+  const paintOverlay = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.34), world.splatMaterial(team, 3));
+  paintOverlay.rotation.y = Math.PI;
+  paintOverlay.visible = false;
+  root.add(paintOverlay);
+
+  const bodySplats = [];
+  const pose = { crouch: 0, hands: 0, phase: 0 };
+  const tmp = new THREE.Vector3(), tv = new THREE.Vector3();
+
+  const relParent = (bone, out) => {
+    bone.parent.getWorldQuaternion(out);
+    return out.premultiply(_Mq.clone().invert());
+  };
+  // aplica rotação R (espaço do modelo) ao osso, mantendo a pose atual
+  const twist = (bone, R) => {
+    relParent(bone, _P);
+    _T.copy(_P).invert().multiply(R).multiply(_P);
+    bone.quaternion.premultiply(_T);
+    bone.updateMatrixWorld(true);
+  };
+  // define a orientação absoluta do osso: R * pose de repouso
+  const setAbs = (bone, R) => {
+    relParent(bone, _P);
+    bone.quaternion.copy(_P).invert().multiply(R).multiply(SOLDIER.rest[bone.name]);
+    bone.updateMatrixWorld(true);
+  };
+  const qa = new THREE.Quaternion(), qb = new THREE.Quaternion();
+  const armQ = (side, pitch, yawOff, h, out) => {
+    // side: +1 = braço direito do personagem (aponta -X no repouso), -1 = esquerdo
+    const aim = rotX(pitch).multiply(rotY(side * (Math.PI / 2 + yawOff)));
+    const up = rotZ(side * (Math.PI / 2 - 0.35));
+    return out.copy(aim).slerp(up, h);
+  };
+
+  const ch = {
+    root, marker, paintOverlay, pose,
+    setHeadPaint(on) { paintOverlay.visible = on; },
+    addSplat(worldPoint, team2) {
+      root.updateMatrixWorld(true);
+      tmp.copy(worldPoint);
+      root.worldToLocal(tmp);
+      const n = new THREE.Vector3(tmp.x, 0, tmp.z);
+      if (n.lengthSq() < 1e-4) n.set(0, 0, -1);
+      n.normalize();
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), world.splatMaterial(team2, Math.floor(Math.random() * 3)));
+      m.scale.setScalar(0.3 + Math.random() * 0.15);
+      m.position.set(n.x * 0.24, clamp01(tmp.y, 0.3, 1.6), n.z * 0.24);
+      m.lookAt(m.position.clone().add(n));
+      m.rotateZ(Math.random() * 6);
+      root.add(m);
+      bodySplats.push(m);
+      if (bodySplats.length > 7) root.remove(bodySplats.shift());
+    },
+    clearSplats() { bodySplats.splice(0).forEach((m) => root.remove(m)); paintOverlay.visible = false; },
+    animate(dt, st) {
+      pose.crouch = lerp(pose.crouch, st.crouch ? 1 : 0, Math.min(1, dt * 10));
+      pose.hands = lerp(pose.hands, st.handsUp ? 1 : 0, Math.min(1, dt * 7));
+      const c = pose.crouch, h = pose.hands, sp = st.speed;
+      // locomoção: idle -> andar -> correr
+      const wWalk = Math.min(1, sp / 1.6) * (sp > 2.8 ? Math.max(0, 1 - (sp - 2.8) / 1.6) : 1);
+      const wRun = Math.max(0, Math.min(1, (sp - 2.8) / 1.6));
+      act.Walk.setEffectiveWeight(wWalk); act.Run.setEffectiveWeight(wRun);
+      act.Idle.setEffectiveWeight(Math.max(0, 1 - wWalk - wRun));
+      act.Walk.timeScale = Math.max(0.4, sp / 1.5); act.Run.timeScale = Math.max(0.5, sp / 4.2);
+      mixer.update(dt);
+      model.updateMatrixWorld(true);
+      model.getWorldQuaternion(_Mq);
+
+      // agachar: dobra as pernas e abaixa o quadril até os pés tocarem o chão
+      let drop = 0;
+      if (c > 0.02) {
+        [[bones.legUL, bones.legL, bones.footL], [bones.legUR, bones.legR, bones.footR]].forEach(([u, l, f]) => {
+          twist(u, rotX(1.0 * c)); twist(l, rotX(-1.7 * c)); twist(f, rotX(0.65 * c));
+        });
+        twist(bones.spine1, rotX(-0.12 * c));
+        bones.footL.getWorldPosition(tv); const yl = root.worldToLocal(tv).y;
+        bones.footR.getWorldPosition(tv); const yr = root.worldToLocal(tv).y;
+        drop = Math.max(0, Math.min(yl, yr) - 0.132 * SOLDIER.scale);
+        const ws = bones.hips.parent.getWorldScale(tv).y || 1;
+        bones.hips.position.y -= drop / ws;
+        bones.hips.updateMatrixWorld(true);
+      }
+      // tronco acompanha a mira
+      const pitch = st.pitch * (1 - h);
+      twist(bones.spine1, rotX(pitch * 0.3));
+      twist(bones.spine2, rotX(pitch * 0.3));
+      // braços: pose de mira (segurando o marcador) ou mãos pra cima
+      [[1, bones.armR, bones.foreR, bones.handR], [-1, bones.armL, bones.foreL, bones.handL]].forEach(([side, a, f, hd]) => {
+        setAbs(a, armQ(side, pitch, 0.22, h, qa));
+        setAbs(f, armQ(side, pitch, 0.95, h, qb));
+        setAbs(hd, qb);
+      });
+      // posição do marcador / máscara
+      bones.armL.getWorldPosition(tv); const sl = root.worldToLocal(tv).clone();
+      bones.armR.getWorldPosition(tv); const sr = root.worldToLocal(tv);
+      pivot.position.set(0, (sl.y + sr.y) / 2 - 0.05, (sl.z + sr.z) / 2);
+      pivot.rotation.x = lerp(pitch, 0, h);
+      marker.position.set(lerp(0.0, 0.26, h), lerp(-0.1, 0.78, h), lerp(-0.42, 0, h));
+      marker.rotation.x = lerp(0, Math.PI / 2, h);
+      bones.head.getWorldPosition(tv);
+      root.worldToLocal(tv);
+      paintOverlay.position.set(tv.x, tv.y + 0.1, tv.z - 0.13);
+    },
+  };
+  return ch;
+}

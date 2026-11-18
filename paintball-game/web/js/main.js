@@ -1,11 +1,12 @@
 import * as THREE from './vendor/three.module.min.js';
 import { buildWorld, ARENA, TEAM_PAINT, segSphere, segCyl } from './world.js';
-import { buildMarker } from './models.js';
+import { buildMarker, loadCharacterAssets } from './models.js';
 import { Combatant, Bot, DIFFICULTY } from './combatants.js';
 import { Particles } from './effects.js';
 import { Sfx } from './audio.js';
 import { HUD, MaskOverlay, TEAM_CSS, TEAM_NAME } from './ui.js';
 import { Input, IS_TOUCH } from './input.js';
+import { camoTexture } from './camo.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -43,11 +44,28 @@ function resize() {
 addEventListener('resize', resize);
 resize();
 
-// marcador em primeira pessoa (viewmodel)
+// marcador + braços em primeira pessoa (viewmodel)
 const viewmodel = buildMarker(TEAM_PAINT[0]);
-viewmodel.scale.setScalar(0.7);
-viewmodel.traverse((m) => { if (m.isMesh) { m.castShadow = false; m.frustumCulled = false; } });
-camera.add(viewmodel);
+viewmodel.scale.setScalar(0.5);
+const fp = new THREE.Group();
+fp.add(viewmodel);
+{
+  const sleeve = new THREE.MeshStandardMaterial({ map: camoTexture(0), roughness: 0.9 });
+  const glove = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.6 });
+  const limb = (a, b, r) => {
+    const d = b.clone().sub(a);
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.85, r, d.length(), 12), sleeve);
+    mesh.position.copy(a).add(b).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    return mesh;
+  };
+  const hand = (p, r) => { const h = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), glove); h.position.copy(p); h.scale.set(1, 0.9, 1.25); return h; };
+  const gripR = new THREE.Vector3(0.0, -0.06, 0.03), gripL = new THREE.Vector3(0.0, -0.025, -0.15);
+  fp.add(limb(new THREE.Vector3(0.3, -0.42, 0.42), gripR, 0.05), hand(gripR, 0.042));
+  fp.add(limb(new THREE.Vector3(-0.2, -0.4, 0.34), gripL, 0.046), hand(gripL, 0.04));
+}
+fp.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; } });
+camera.add(fp);
 
 // ---------- bolinhas ----------
 const ballMats = TEAM_PAINT.map((c) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.6, roughness: 0.3 }));
@@ -292,7 +310,7 @@ const game = {
     const a = this.menuOrbit, r = 36;
     camera.position.set(Math.sin(a) * r, 9, Math.cos(a) * r * 1.3);
     camera.lookAt(0, 1.4, 0);
-    viewmodel.visible = false;
+    fp.visible = false;
     this.player.model.root.visible = true;
   },
 
@@ -300,7 +318,7 @@ const game = {
     const p = this.player;
     if (this.cine) { // câmera cinematográfica (usada para gravar vídeos)
       this.cine(camera, dt);
-      viewmodel.visible = false; p.model.root.visible = true;
+      fp.visible = false; p.model.root.visible = true;
       camera.updateMatrixWorld(true);
       return;
     }
@@ -316,7 +334,7 @@ const game = {
     const dir = camera.getWorldDirection(tmpB);
     if (fpp) {
       camera.position.copy(eye);
-      viewmodel.visible = true;
+      fp.visible = true;
       p.model.root.visible = false;
     } else {
       const right = tmpC.crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
@@ -325,7 +343,7 @@ const game = {
       const t = hit ? Math.max(0.05, hit.t - 0.1) : 1;
       camera.position.copy(eye).addScaledVector(V().subVectors(desired, eye), t);
       camera.position.y = Math.max(0.25, camera.position.y);
-      viewmodel.visible = false;
+      fp.visible = false;
       p.model.root.visible = true;
     }
     this.animateViewmodel(dt);
@@ -340,12 +358,12 @@ const game = {
     this.recoil = Math.max(0, (this.recoil || 0) - dt * 9);
     const rl = p.reloadT > 0 ? 1 : 0;
     this.vmRl = (this.vmRl || 0) + (rl - (this.vmRl || 0)) * Math.min(1, dt * 8);
-    viewmodel.position.set(
-      0.19 + Math.sin(this.vmT) * 0.008 * bob,
+    fp.position.set(
+      0.2 + Math.sin(this.vmT) * 0.008 * bob,
       -0.2 + Math.abs(Math.cos(this.vmT)) * 0.012 * bob - this.vmRl * 0.12,
-      -0.42 + this.recoil * 0.05
+      -0.5 + this.recoil * 0.04
     );
-    viewmodel.rotation.set(this.recoil * 0.07 + this.vmRl * 0.6, 0.04, -this.vmRl * 0.5);
+    fp.rotation.set(this.recoil * 0.06 + this.vmRl * 0.6, 0.03, -this.vmRl * 0.5);
   },
 
   playerShoot() {
@@ -400,6 +418,7 @@ const game = {
 };
 
 // ---------- ligações de UI ----------
+await loadCharacterAssets();
 game.setup();
 game.layout();
 hud.camLabel(game.camPref);
