@@ -3,17 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d10">
+  <meta name="theme-color" content="#0a0d12">
+  <meta name="description" content="Splat Arena — paintball tático online no navegador, para celular e PC.">
   <title>Splat Arena — Paintball Online</title>
   <link rel="stylesheet" href="style.css">
   <script type="importmap">{"imports":{"three":"./js/vendor/three.module.min.js"}}</script>
 </head>
 <body>
-  <canvas id="game"></canvas>
-  <canvas id="mask"></canvas>
+  <canvas id="game" aria-label="Campo de jogo"></canvas>
+  <canvas id="mask" aria-hidden="true"></canvas>
 
-  <div id="hud">
-    <div id="top">
+  <!-- HUD em jogo -->
+  <div id="hud" aria-live="polite">
+    <div id="top" role="button" tabindex="-1" aria-label="Placar">
       <div class="team o"><span id="score-o">0</span><div id="alive-o" class="alive"></div></div>
       <div id="center"><div id="timer">2:00</div><div id="round">RODADA 1</div></div>
       <div class="team b"><span id="score-b">0</span><div id="alive-b" class="alive"></div></div>
@@ -23,39 +25,110 @@
     <div id="hitmarker"></div>
     <div id="banner"><div id="banner-t"></div><div id="banner-s"></div></div>
     <div id="reload-bar"><div id="reload-fill"></div></div>
-    <div id="bottom-left"><div id="ammo">200</div><div id="pods">PODS 4</div></div>
-    <div id="bottom-right"><div id="cam-label">1ª PESSOA</div><small class="pc-only">V: trocar câmera · R: recarregar · C: agachar · Shift: correr</small></div>
+    <div id="reload-hint">RECARREGAR <kbd>R</kbd></div>
+    <div id="weapon">
+      <div class="w-name">MARCADOR TÁTICO <span id="cam-label">1ª PESSOA</span></div>
+      <div class="w-row"><div id="ammo">200</div><div class="w-side"><div class="w-bar"><i id="ammo-fill"></i></div><div id="pods">PODS 4</div></div></div>
+    </div>
+    <div id="map-label"></div>
+    <small id="keys" class="pc-only">V câmera · R recarregar · C agachar · Shift correr · Tab placar · Esc pausa</small>
   </div>
 
+  <!-- coach: dicas no primeiro jogo -->
+  <div id="coach" role="dialog" aria-label="Como jogar">
+    <div class="coach-card">
+      <h3>Como jogar</h3>
+      <ul class="pc-only"><li><kbd>W A S D</kbd> mover</li><li><b>Mouse</b> mirar · <b>clique</b> atirar</li><li><kbd>V</kbd> troca 1ª/3ª pessoa</li><li><kbd>C</kbd> agacha atrás do bunker</li></ul>
+      <ul class="touch-only"><li><b>Joystick</b> à esquerda para mover</li><li><b>Arraste</b> à direita para mirar</li><li>Botão <b>FOGO</b> para atirar</li><li>Botão <b>CAM</b> troca a câmera</li></ul>
+      <p>Um tiro e você está <b>marcado</b>. Use a cobertura!</p>
+      <button id="coach-ok" class="btn">Entendi</button>
+    </div>
+  </div>
+
+  <!-- controles de toque -->
   <div id="touch">
     <div id="joy-zone"></div>
     <div id="look-zone"></div>
     <div id="joy-base"><div id="joy-stick"></div></div>
     <button id="btn-pause" aria-label="Pausar">II</button>
-    <button id="btn-cam">CAM</button>
-    <button id="btn-reload">⟳</button>
-    <button id="btn-crouch">▼</button>
+    <button id="btn-cam" aria-label="Trocar câmera">CAM</button>
+    <button id="btn-reload" aria-label="Recarregar">⟳</button>
+    <button id="btn-crouch" aria-label="Agachar">▼</button>
     <button id="btn-fire" aria-label="Atirar">FOGO</button>
   </div>
 
-  <div id="menu">
-    <div class="card">
+  <!-- carregando -->
+  <div id="loader" class="screen on">
+    <div class="ld-logo">SPLAT<span>ARENA</span></div>
+    <div class="ld-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i id="ld-fill"></i></div>
+    <p id="ld-tip"></p>
+  </div>
+
+  <!-- menu inicial -->
+  <main id="home" class="screen">
+    <header class="home-top">
       <div class="logo">SPLAT<span>ARENA</span></div>
-      <p id="menu-sub"></p>
-      <label>Câmera
-        <select id="sel-cam"><option value="fpp">1ª pessoa (estilo CoD)</option><option value="tpp">3ª pessoa (estilo Free Fire)</option></select>
-      </label>
-      <label>Dificuldade dos bots
-        <select id="sel-diff"><option value="facil">Fácil</option><option value="normal">Normal</option><option value="dificil">Difícil</option></select>
-      </label>
-      <label>Sensibilidade <input id="sens" type="range" min="0.3" max="2.5" step="0.05"></label>
-      <button id="btn-play" class="primary">JOGAR</button>
-      <button id="btn-restart">NOVA PARTIDA</button>
-      <p class="help pc-only">WASD mover · Mouse mirar · Clique atirar · R recarregar · V câmera · C agachar · Shift correr · Esc pausa</p>
-      <p class="help touch-only">Joystick à esquerda · arraste à direita para mirar · botão FOGO para atirar</p>
+      <button id="btn-settings" class="icon-btn" aria-label="Configurações"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </header>
+    <section class="home-left">
+      <p class="eyebrow">PAINTBALL TÁTICO ONLINE</p>
+      <h1>Cobertura, tinta<br>e sangue-frio.</h1>
+      <p class="lede">5 contra 5 em campos reais: galpão, favela, ferro-velho e cidade abandonada. Um tiro e você está marcado.</p>
+      <button id="btn-play" class="cta"><span>JOGAR AGORA</span><small>Eliminação · melhor de 5</small></button>
+      <div class="modes" aria-label="Modos de jogo">
+        <span class="chip on">Eliminação</span><span class="chip dis" title="Em breve">Centerflag <i>em breve</i></span><span class="chip dis" title="Em breve">Battle Royale <i>em breve</i></span>
+      </div>
+      <div class="loadout">
+        <div class="field"><span class="lab" id="lab-paint">Cor da tinta</span><div id="palette" class="swatches" role="radiogroup" aria-labelledby="lab-paint"></div></div>
+        <div class="field"><span class="lab" id="lab-cam">Câmera</span><div id="seg-cam" class="seg" role="radiogroup" aria-labelledby="lab-cam"></div></div>
+        <div class="field"><span class="lab" id="lab-diff">Bots</span><div id="seg-diff" class="seg" role="radiogroup" aria-labelledby="lab-diff"></div></div>
+      </div>
+    </section>
+    <section class="home-right">
+      <div class="sec-head"><h2>Escolha o campo</h2><span id="map-desc"></span></div>
+      <div id="maps" class="map-grid" role="radiogroup" aria-label="Campos"></div>
+    </section>
+  </main>
+
+  <!-- pausa -->
+  <div id="pause" class="screen">
+    <div class="sheet small">
+      <h2>Pausado</h2>
+      <button id="p-resume" class="btn primary">Continuar</button>
+      <button id="p-settings" class="btn">Configurações</button>
+      <button id="p-restart" class="btn">Reiniciar partida</button>
+      <button id="p-home" class="btn ghost">Voltar ao menu</button>
     </div>
   </div>
-  <div id="rotate">Gire o celular para o modo paisagem</div>
+
+  <!-- fim de partida -->
+  <div id="end" class="screen">
+    <div class="sheet">
+      <p id="end-eyebrow" class="eyebrow">FIM DE PARTIDA</p>
+      <h2 id="end-title">VITÓRIA</h2>
+      <div id="end-score" class="end-score"></div>
+      <div id="end-stats" class="end-stats"></div>
+      <div id="end-table" class="table"></div>
+      <div class="row">
+        <button id="e-again" class="btn primary">Jogar de novo</button>
+        <button id="e-home" class="btn">Trocar campo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- placar (Tab) -->
+  <div id="board" class="board" aria-hidden="true"><div class="sheet"><div id="board-table" class="table"></div></div></div>
+
+  <!-- configurações -->
+  <div id="settings" class="screen" role="dialog" aria-modal="true" aria-label="Configurações">
+    <div class="sheet">
+      <div class="sheet-head"><h2>Configurações</h2><button id="s-close" class="icon-btn" aria-label="Fechar">✕</button></div>
+      <div class="tabs" role="tablist" id="s-tabs"></div>
+      <div id="s-body"></div>
+    </div>
+  </div>
+
+  <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

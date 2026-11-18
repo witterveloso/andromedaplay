@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
-import { buildWorld, ARENA, TEAM_PAINT, segSphere, segCyl } from './world.js';
+import { createWorld, ARENA, TEAM_PAINT, segSphere, segCyl } from './world.js';
+import { MAPS, MAP_LIST } from './maps.js';
 import { buildMarker, loadCharacterAssets } from './models.js';
 import { Combatant, Bot, DIFFICULTY } from './combatants.js';
 import { Particles } from './effects.js';
@@ -7,16 +8,28 @@ import { Sfx } from './audio.js';
 import { HUD, MaskOverlay, TEAM_CSS, TEAM_NAME } from './ui.js';
 import { Input, IS_TOUCH } from './input.js';
 import { camoTexture } from './camo.js';
+import { settings, PALETTES } from './settings.js';
+import { createScreens } from './screens.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const LOW = params.get('quality') === 'low' || (IS_TOUCH && params.get('quality') !== 'high');
+const Q = params.get('quality') || settings.get('quality');
+const LOW = Q === 'low' || (Q === 'auto' && IS_TOUCH);
 const ROUND_TIME = 120, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
 const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo'];
-const store = {
-  get(k, d) { try { return localStorage.getItem('splat_' + k) ?? d; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('splat_' + k, v); } catch (e) { /* ignora */ } },
-};
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+const loaderProgress = (p, tip) => { $('ld-fill').style.width = `${Math.round(p * 100)}%`; if (tip) $('ld-tip').textContent = tip; };
+loaderProgress(0.05, 'Preparando o campo…');
+await nextFrame();
+
+// paleta de tinta (altera as cores globais antes de construir qualquer coisa)
+function paletteApply(i) {
+  const p = PALETTES[i] || PALETTES[0];
+  TEAM_PAINT[0] = parseInt(p.a.slice(1), 16); TEAM_PAINT[1] = parseInt(p.b.slice(1), 16);
+  TEAM_CSS[0] = p.a; TEAM_CSS[1] = p.b;
+  document.documentElement.style.setProperty('--o', p.a); document.documentElement.style.setProperty('--b', p.b);
+}
+paletteApply(settings.get('palette'));
 
 // ---------- cena ----------
 const canvas = $('game');
@@ -29,7 +42,14 @@ renderer.toneMappingExposure = 1.05;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 520);
 scene.add(camera);
-const world = buildWorld(scene, LOW ? 'low' : 'high');
+const world = createWorld(scene, renderer, LOW ? 'low' : 'high');
+loaderProgress(0.2, 'Montando o campo…');
+await nextFrame();
+const startMap = MAPS[params.get('map')] ? params.get('map') : MAPS[settings.get('map')] ? settings.get('map') : 'arena';
+settings.set('map', startMap);
+world.loadMap(startMap);
+loaderProgress(0.55, 'Carregando os jogadores…');
+await nextFrame();
 const particles = new Particles(scene, LOW ? 120 : 240);
 const sfx = new Sfx();
 const hud = new HUD();
@@ -45,7 +65,7 @@ addEventListener('resize', resize);
 resize();
 
 // marcador + braços em primeira pessoa (viewmodel)
-const viewmodel = buildMarker(TEAM_PAINT[0]);
+let viewmodel = buildMarker(TEAM_PAINT[0]);
 viewmodel.scale.setScalar(0.5);
 const fp = new THREE.Group();
 fp.add(viewmodel);
@@ -83,10 +103,11 @@ const tmpA = V(), tmpB = V(), tmpC = V(), tmpD = V();
 
 const game = {
   world, scene, camera, sfx, input, hud, overlay,
-  state: 'menu', paused: false, difficulty: store.get('diff', 'normal'),
+  state: 'menu', paused: false, settings,
   score: [0, 0], roundNo: 0, roundTime: 0, cd: 0, endT: 0, combatants: [], player: null,
-  camPref: params.get('cam') === 'tpp' ? 'tpp' : store.get('cam', 'fpp'), camMode: 'fpp', shake: 0, switchT: 0, menuOrbit: 0,
-  sens: parseFloat(store.get('sens', '1')),
+  camMode: 'fpp', shake: 0, switchT: 0, menuOrbit: 0,
+  get difficulty() { return settings.get('diff'); },
+  get camPref() { return params.get('cam') === 'tpp' ? 'tpp' : settings.get('cam'); },
 
   distToListener(p) { return camera.position.distanceTo(p); },
 
@@ -154,17 +175,18 @@ const game = {
   onMarked(victim, shooter, head, point) {
     const you = (c) => (c.isPlayer ? 'Você' : c.name);
     hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> marcou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b>${head ? ' 🎯' : ''}`, shooter.team);
-    if (shooter.isPlayer) { hud.hitmarker(); sfx.hitmarker(); }
+    if (shooter.isPlayer) { hud.hitmarker(); sfx.hitmarker(); this.buzz(25); }
     if (victim.isPlayer) {
-      sfx.marked();
+      sfx.marked(); this.buzz([60, 40, 90]);
       const col = TEAM_CSS[shooter.team];
-      if (head) overlay.hitFace(col, this.camMode === 'fpp' ? 1 : 0.6);
+      const fx = settings.get('reduceFx') ? 0.45 : 1;
+      if (head) overlay.hitFace(col, (this.camMode === 'fpp' ? 1 : 0.6) * fx);
       else {
         const ang = Math.atan2(-(shooter.pos.x - victim.pos.x), -(shooter.pos.z - victim.pos.z)) - victim.yaw;
         overlay.hitBody(col, -ang);
-        if (this.camMode === 'fpp') overlay.hitFace(col, 0.5);
+        if (this.camMode === 'fpp') overlay.hitFace(col, 0.5 * fx);
       }
-      this.shake = 0.5;
+      this.shake = settings.get('reduceFx') ? 0 : 0.5;
       this.switchT = 1.2;
       hud.banner('VOCÊ FOI MARCADO!', 'Mãos para cima — aguarde a rodada', 0, TEAM_CSS[shooter.team]);
     }
@@ -194,8 +216,17 @@ const game = {
     });
   },
 
+  buzz(p) { if (settings.get('haptics') && IS_TOUCH && navigator.vibrate) { try { navigator.vibrate(p); } catch (e) { /* ignora */ } } },
+
+  rebuild() { // recria os personagens (troca de paleta)
+    this.combatants.forEach((c) => { scene.remove(c.model.root); c.model.root.traverse((o) => { if (o.geometry) o.geometry.dispose(); }); });
+    this.combatants = [];
+    this.setup();
+  },
+
   startMatch() {
     this.score = [0, 0]; this.roundNo = 0;
+    this.combatants.forEach((c) => { c.kills = 0; });
     hud.score(0, 0);
     this.nextRound();
   },
@@ -258,7 +289,7 @@ const game = {
     } else if (this.state === 'roundover') {
       this.endT -= dt;
       if (this.endT <= 0) {
-        if (this.matchOver) { this.matchOver = false; this.state = 'menu'; this.openMenu('end'); } else { hud.hideBanner(); this.nextRound(); }
+        if (this.matchOver) { this.matchOver = false; this.state = 'menu'; hud.hideBanner(); overlay.clear(false); ui.showEnd(); } else { hud.hideBanner(); this.nextRound(); }
       }
     }
 
@@ -287,9 +318,9 @@ const game = {
   updatePlayer(dt) {
     const p = this.player;
     const look = input.consumeLook();
-    const s = 0.0022 * this.sens;
+    const s = 0.0022 * settings.get('sens');
     p.yaw -= look.x * s;
-    p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch - look.y * s));
+    p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch - look.y * s * (settings.get('invertY') ? -1 : 1)));
     const active = this.state === 'playing' || this.state === 'countdown';
     if (!p.alive || !active) { p.vel.multiplyScalar(0.8); return; }
     if (this.state === 'countdown') return;
@@ -307,9 +338,11 @@ const game = {
   },
 
   menuCamera() {
-    const a = this.menuOrbit, r = 36;
-    camera.position.set(Math.sin(a) * r, 9, Math.cos(a) * r * 1.3);
-    camera.lookAt(0, 1.4, 0);
+    const cfg = (this.world.map && this.world.map.menu) || { r: 36, h: 9, rz: 1.3, look: [0, 1.4, 0] };
+    const a = this.menuOrbit;
+    camera.fov = 62; camera.updateProjectionMatrix();
+    camera.position.set(Math.sin(a) * cfg.r, cfg.h, Math.cos(a) * cfg.r * cfg.rz);
+    camera.lookAt(...cfg.look);
     fp.visible = false;
     this.player.model.root.visible = true;
   },
@@ -322,11 +355,13 @@ const game = {
       camera.updateMatrixWorld(true);
       return;
     }
+    const fov = settings.get('fov');
+    if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
     const fpp = this.camMode === 'fpp' && p.alive;
     const eye = tmpA.set(p.pos.x, p.eyeY, p.pos.z);
     camera.rotation.order = 'YXZ';
     this.shake = Math.max(0, this.shake - dt * 2.5);
-    const sh = this.shake * 0.02;
+    const sh = settings.get('reduceFx') ? 0 : this.shake * 0.02;
     camera.rotation.y = p.yaw + (Math.random() - 0.5) * sh;
     camera.rotation.x = p.pitch + (Math.random() - 0.5) * sh;
     camera.rotation.z = 0;
@@ -390,63 +425,89 @@ const game = {
   updateHud(dt) {
     const p = this.player;
     hud.ammo(p.hopper, p.pods, p.reloadT);
+    $('reload-hint').classList.toggle('on', p.alive && this.state === 'playing' && (p.hopper < 30 || p.reloadT > 0) && p.reloadT <= 0 && p.pods > 0);
     hud.crosshair(p.spread, p.alive);
   },
 
   toggleCam() {
     if (!this.player.alive) return;
-    this.camPref = this.camPref === 'fpp' ? 'tpp' : 'fpp';
-    this.camMode = this.camPref;
-    store.set('cam', this.camPref);
+    this.camMode = this.camMode === 'fpp' ? 'tpp' : 'fpp';
+    settings.set('cam', this.camMode);
     hud.camLabel(this.camMode);
   },
 
-  // ---------- menu ----------
-  openMenu(mode) {
-    this.menuMode = mode;
-    $('menu').classList.add('on');
-    const play = $('btn-play'), again = $('btn-restart');
-    again.style.display = mode === 'pause' ? 'block' : 'none';
-    play.textContent = mode === 'start' ? 'JOGAR' : mode === 'pause' ? 'CONTINUAR' : 'JOGAR NOVAMENTE';
-    $('menu-sub').textContent = mode === 'end'
-      ? `Placar final: ${this.score[0]} x ${this.score[1]} — ${this.score[0] > this.score[1] ? 'sua equipe venceu!' : 'a equipe azul levou essa.'}`
-      : mode === 'pause' ? 'Jogo pausado.' : 'Paintball tático online — 5x5 com bots. Multiplayer em breve.';
-    if (mode === 'pause') this.paused = true;
+  // ---------- navegação ----------
+  setMap(id) {
+    settings.set('map', id);
+    world.loadMap(id);
+    this.layout();
+    $('map-label').textContent = `${MAPS[id].name} · Eliminação`;
+  },
+  setPalette(i) {
+    paletteApply(i);
+    world.recolor();
+    ballMats.forEach((mt, t) => { mt.color.set(TEAM_PAINT[t]); mt.emissive.set(TEAM_PAINT[t]); });
+    fp.remove(viewmodel); viewmodel = buildMarker(TEAM_PAINT[0]); viewmodel.scale.setScalar(0.5);
+    viewmodel.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; } });
+    fp.add(viewmodel);
+    this.rebuild();
+    this.updateAlive();
+  },
+  begin(restart) {
+    sfx.init();
+    sfx.setVolume(settings.get('volume'));
+    if (IS_TOUCH) {
+      try { document.documentElement.requestFullscreen?.(); screen.orientation?.lock?.('landscape').catch(() => {}); } catch (e) { /* ignora */ }
+    }
+    this.paused = false;
+    ui.hideHome(); ui.hidePause();
+    this.startMatch();
+    input.requestLock();
+    ui.maybeCoach();
+  },
+  openPause() {
+    if (this.state === 'menu' || this.paused) return;
+    this.paused = true; ui.showPause();
     if (document.pointerLockElement) document.exitPointerLock();
   },
-  closeMenu() { $('menu').classList.remove('on'); this.paused = false; },
+  resume() { this.paused = false; ui.hidePause(); input.requestLock(); },
+  goHome() {
+    this.paused = false; this.state = 'menu'; this.matchOver = false;
+    hud.hideBanner(); overlay.clear(false); this.cine = null;
+    balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
+    this.layout(); ui.showHome();
+    if (document.pointerLockElement) document.exitPointerLock();
+  },
 };
 
 // ---------- ligações de UI ----------
+loaderProgress(0.75, 'Vestindo os soldados…');
+await nextFrame();
 await loadCharacterAssets();
 game.setup();
-game.layout();
+const ui = createScreens(game);
+game.ui = ui;
 hud.camLabel(game.camPref);
-$('sel-cam').value = game.camPref;
-$('sel-diff').value = game.difficulty;
-$('sens').value = game.sens;
-if (IS_TOUCH) document.body.classList.add('touch');
-$('sel-cam').onchange = (e) => { game.camPref = e.target.value; store.set('cam', game.camPref); if (game.state !== 'menu') game.camMode = game.camPref; hud.camLabel(game.camPref); };
-$('sel-diff').onchange = (e) => { game.difficulty = e.target.value; store.set('diff', game.difficulty); };
-$('sens').oninput = (e) => { game.sens = parseFloat(e.target.value); store.set('sens', game.sens); };
-
-function begin() {
-  sfx.init();
-  if (IS_TOUCH) {
-    try { document.documentElement.requestFullscreen?.(); screen.orientation?.lock?.('landscape').catch(() => {}); } catch (e) { /* ignora */ }
-  }
-  if (game.menuMode === 'pause') { game.closeMenu(); } else { game.closeMenu(); game.startMatch(); }
-  input.requestLock();
-}
-$('btn-play').onclick = begin;
-$('btn-restart').onclick = () => { game.closeMenu(); game.startMatch(); input.requestLock(); };
+$('map-label').textContent = `${MAPS[startMap].name} · Eliminação`;
+sfx.setVolume(settings.get('volume'));
+settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); });
 input.on.reload = () => { if (game.state === 'playing' && !game.paused) game.player.startReload(); };
 input.on.cam = () => { if (!game.paused && game.state !== 'menu') game.toggleCam(); };
-input.on.pause = () => { if (game.state !== 'menu' && !game.paused) game.openMenu('pause'); };
-input.on.lockChange = (locked) => { if (!locked && game.state !== 'menu' && !game.paused && !IS_TOUCH) game.openMenu('pause'); };
+input.on.pause = () => {
+  if (ui.settingsOpen()) ui.closeSettings();
+  else if (game.paused) game.resume();
+  else game.openPause();
+};
+input.on.lockChange = (locked) => { if (!locked && game.state !== 'menu' && !game.paused && !IS_TOUCH && !ui.settingsOpen()) game.openPause(); };
 canvas.addEventListener('mousedown', () => { if (!IS_TOUCH && !input.locked && game.state !== 'menu' && !game.paused) input.requestLock(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && game.state !== 'menu' && !game.paused) game.openMenu('pause'); });
-game.openMenu('start');
+document.addEventListener('visibilitychange', () => { if (document.hidden) game.openPause(); });
+addEventListener('keydown', (e) => { if (e.code === 'Tab') { e.preventDefault(); if (game.state !== 'menu') ui.toggleBoard(true); } });
+addEventListener('keyup', (e) => { if (e.code === 'Tab') ui.toggleBoard(false); });
+if (IS_TOUCH) { let bt = 0; $('top').addEventListener('pointerdown', () => { ui.toggleBoard(true); clearTimeout(bt); bt = setTimeout(() => ui.toggleBoard(false), 3000); }); }
+loaderProgress(1, 'Pronto!');
+await nextFrame();
+ui.hideLoader();
+ui.showHome();
 
 // ---------- loop ----------
 window.__game = game;

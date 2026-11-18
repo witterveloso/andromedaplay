@@ -25,12 +25,13 @@ export class HUD {
   }
   ammo(h, pods, reloading) {
     this.el.ammo.textContent = h;
+    const fill = document.getElementById('ammo-fill'); if (fill) fill.style.transform = `scaleX(${Math.max(0, h) / 200})`;
     this.el.ammo.classList.toggle('low', h < 30);
     this.el.pods.textContent = `PODS ${pods}`;
     this.el.reload.classList.toggle('on', reloading > 0);
     this.el.reloadFill.style.transform = `scaleX(${reloading > 0 ? 1 - reloading / 2.0 : 0})`;
   }
-  camLabel(mode) { this.el.cam.textContent = mode === 'fpp' ? '1ª PESSOA' : '3ª PESSOA'; }
+  camLabel(mode) { this.el.cam.textContent = mode === 'tpp' ? '3ª PESSOA' : '1ª PESSOA'; }
   feed(text, team) {
     const d = document.createElement('div');
     d.innerHTML = text;

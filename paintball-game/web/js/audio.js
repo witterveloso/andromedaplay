@@ -8,13 +8,15 @@ export class Sfx {
     if (!AC) return;
     this.ctx = new AC();
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.6;
+    this.master.gain.value = this.vol ?? 0.6;
     this.master.connect(this.ctx.destination);
     const len = this.ctx.sampleRate;
     this.noise = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const d = this.noise.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
   }
+
+  setVolume(v) { this.vol = v; if (this.master) this.master.gain.value = v; }
 
   _burst(type, freq, q, dur, vol) {
     if (!this.ctx || this.muted) return;
