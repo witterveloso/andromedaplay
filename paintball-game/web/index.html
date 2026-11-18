@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <title>Splat Arena — Paintball Online</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <canvas id="mask"></canvas>
+
+  <div id="hud">
+    <div id="top">
+      <div class="team o"><span id="score-o">0</span><div id="alive-o" class="alive"></div></div>
+      <div id="center"><div id="timer">2:00</div><div id="round">RODADA 1</div></div>
+      <div class="team b"><span id="score-b">0</span><div id="alive-b" class="alive"></div></div>
+    </div>
+    <div id="feed"></div>
+    <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+    <div id="hitmarker"></div>
+    <div id="banner"><div id="banner-t"></div><div id="banner-s"></div></div>
+    <div id="reload-bar"><div id="reload-fill"></div></div>
+    <div id="bottom-left"><div id="ammo">200</div><div id="pods">PODS 4</div></div>
+    <div id="bottom-right"><div id="cam-label">1ª PESSOA</div><small class="pc-only">V: trocar câmera · R: recarregar · C: agachar · Shift: correr</small></div>
+  </div>
+
+  <div id="touch">
+    <div id="joy-zone"></div>
+    <div id="look-zone"></div>
+    <div id="joy-base"><div id="joy-stick"></div></div>
+    <button id="btn-pause" aria-label="Pausar">II</button>
+    <button id="btn-cam">CAM</button>
+    <button id="btn-reload">⟳</button>
+    <button id="btn-crouch">▼</button>
+    <button id="btn-fire" aria-label="Atirar">FOGO</button>
+  </div>
+
+  <div id="menu">
+    <div class="card">
+      <div class="logo">SPLAT<span>ARENA</span></div>
+      <p id="menu-sub"></p>
+      <label>Câmera
+        <select id="sel-cam"><option value="fpp">1ª pessoa (estilo CoD)</option><option value="tpp">3ª pessoa (estilo Free Fire)</option></select>
+      </label>
+      <label>Dificuldade dos bots
+        <select id="sel-diff"><option value="facil">Fácil</option><option value="normal">Normal</option><option value="dificil">Difícil</option></select>
+      </label>
+      <label>Sensibilidade <input id="sens" type="range" min="0.3" max="2.5" step="0.05"></label>
+      <button id="btn-play" class="primary">JOGAR</button>
+      <button id="btn-restart">NOVA PARTIDA</button>
+      <p class="help pc-only">WASD mover · Mouse mirar · Clique atirar · R recarregar · V câmera · C agachar · Shift correr · Esc pausa</p>
+      <p class="help touch-only">Joystick à esquerda · arraste à direita para mirar · botão FOGO para atirar</p>
+    </div>
+  </div>
+  <div id="rotate">Gire o celular para o modo paisagem</div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
