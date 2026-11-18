@@ -25,6 +25,28 @@ Jogo de tiro online, multiplataforma e free-to-play, no estilo Free Fire / Call 
 | Máscara obrigatória **[C]** | Máscara é parte do personagem; tiro na máscara é headshot "limpo". Máscara embaçada com chuva/suor = mecânica visual leve. |
 | Barreiras/bunkers para se esconder **[F]** | Cobertura é o núcleo do mapa. Tinta atinge parede e deixa marca; "paint wall" cobre a visão. |
 
+## 2.1 Câmeras: primeira e terceira pessoa **[D]**
+
+O jogador alterna a qualquer momento (botão **V** no PC, ícone no celular, **R3** no controle). A escolha é salva no perfil.
+
+| | **1ª pessoa (FPP)** | **3ª pessoa (TPP)** |
+|---|---|---|
+| Ponto de vista | Olhos do jogador, por dentro da máscara | Câmera sobre o ombro, estilo Free Fire |
+| Visível | Marcador, mãos, borda da máscara, hopper | Personagem inteiro, marcador, tanque, skins |
+| Mira | Mira precisa, zoom (ADS) | Mira no centro, dispara do ombro |
+| Cobertura | Sem ver o que está ao redor | Espiar por cima/lateral sem se expor (tiro "cego" permitido) |
+| Pontos fortes | Imersão, precisão | Consciência de cenário, mostra skins (bom para vídeos) |
+
+**Equilíbrio:** em 3ª pessoa a câmera não "enxerga através" de paredes (colisão da câmera) e o tiro sai sempre do cano real, não do centro da tela, então espiar da cobertura expõe o marcador. Modos competitivos podem **travar a câmera** (só FPP, só TPP ou livre) e o matchmaking separa as filas se necessário.
+
+**Splat na máscara (impacto no rosto)**
+- **Tiro no rosto/máscara:** a tinta cobre a viseira. Em **1ª pessoa**, a tela é coberta por uma mancha na cor do time atirador, com gotas escorrendo, e a visão fica bloqueada. Em **3ª pessoa**, o rosto do personagem fica pintado e a tela recebe um efeito leve de respingo.
+- **Marcado:** como no esporte, o acerto também conta como eliminação, e o jogador levanta o marcador e sai. O splat na máscara é o **feedback principal** da eliminação (sem sangue).
+- **Splats que não eliminam** (em modos com "mais de uma vida" ou treino): tinta parcial na viseira, com tamanho e opacidade variáveis. Limpa com o botão **Limpar máscara** (animação do jogador passando a mão, 1–2 s), ou aos poucos com o tempo.
+- **Tinta no resto do corpo:** respingos no colete, braços e marcador aparecem nos dois pontos de vista. Cor e formato seguem o tipo de bolinha.
+- **Clima:** chuva ajuda a lavar, neblina e calor embaçam a máscara.
+- **Técnica:** decals na viseira (render texture + shader de gotas escorrendo), pool de splats, intensidade reduzida em mobile e opção de acessibilidade para diminuir o efeito (fotossensibilidade).
+
 ## 3. Armas (marcadores)
 
 Capacidade real e referências **[F/C]**: bolinha calibre **.68**; hopper clássico de **200 bolinhas** por gravidade **[F]**; hoppers elétricos alimentam 30+ bolinhas/s **[F]**; marcadores semiautomáticos cadenciam ~10–15 bolinhas/s em torneio, modos auto chegam a ~1.400/min **[F]**; *pods* de reabastecimento típicos de **140 bolinhas** **[C]**; classe *Stock* usa **bomba (pump) + cartucho de CO₂ de 12 g** para limitar cadência e capacidade **[F]**. Marcas de referência reais: Tippmann (Stormer Elite, Cronus, A-5), Planet Eclipse, Dye, Empire, Valken.
@@ -127,7 +149,7 @@ Free-to-play, **só cosméticos**: skins de máscara/roupa, cascas de bolinha, t
 
 - Nome definitivo e identidade visual.
 - Engine: Unity vs Unreal vs Godot/web (para teste rápido nas redes).
-- Perspectiva: 3ª pessoa (estilo Free Fire) ou 1ª (estilo CoD)? *Recomendação:* 1ª pessoa, com opção 3ª em modos casuais.
+- Perspectiva: **definido**, o jogo terá 1ª e 3ª pessoa alternáveis (ver 2.1). Falta decidir quais modos travam a câmera.
 - Se começa como **protótipo web jogável** (compartilhável por link) antes do app nativo.
 - Estilo de arte: realista suave, cartoon (estilo Fortnite) ou low-poly.
 
