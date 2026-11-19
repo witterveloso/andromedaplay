@@ -572,3 +572,15 @@ body.online #netinfo { display: block; } body.online #netinfo.bad { color: #ff8a
 #toast { position: fixed; left: 50%; bottom: calc(24px + var(--safe-b)); transform: translate(-50%, 20px); z-index: 90; max-width: 90vw; padding: 12px 18px; border-radius: 14px; background: rgba(16, 22, 32, .96); border: 1px solid var(--line); color: #fff; font: 600 14px var(--font); opacity: 0; pointer-events: none; transition: .25s; }
 #toast.on { opacity: 1; transform: translate(-50%, 0); }
 .lobby #l-start { position: sticky; bottom: -6px; box-shadow: 0 -12px 18px var(--panel); }
+
+/* telas estreitas (retrato / janela pequena): as duas colunas viram uma pilha, sem se sobrepor */
+@media (max-width: 760px) and (min-height: 521px) {
+  #home { flex-direction: column; overflow-y: auto; overflow-x: hidden; gap: 18px; justify-content: flex-start; }
+  .home-left, .home-right { flex: 0 0 auto !important; width: 100%; min-height: auto; overflow: visible !important; }
+  .home-left { justify-content: flex-start; padding-top: 70px; }
+  .home-right { padding-top: 0; padding-bottom: calc(24px + var(--safe-b)); }
+  .home-left > *, .home-right > * { flex-shrink: 0; }
+  .home-left h1 { font-size: clamp(34px, 11vw, 56px); margin-bottom: 12px; }
+  .cta { min-height: 64px; justify-content: center; }
+  .loadout .field { flex-wrap: wrap; row-gap: 8px; }
+}
