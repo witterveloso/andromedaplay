@@ -92,6 +92,19 @@ export class Input {
       b.addEventListener('pointerup', end); b.addEventListener('pointercancel', end);
     };
     bindBtn('btn-fire', () => { this.fireTouch = true; }, () => { this.fireTouch = false; });
+    // arrastar com o dedo no botão de fogo também gira a câmera (atirar e acompanhar o alvo com um só dedo)
+    {
+      const fb = document.getElementById('btn-fire');
+      let fid = null, fx = 0, fy = 0;
+      fb.addEventListener('pointerdown', (e) => { fid = e.pointerId; fx = e.clientX; fy = e.clientY; });
+      fb.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== fid) return;
+        this.lx += (e.clientX - fx) * 1.6; this.ly += (e.clientY - fy) * 1.6;
+        fx = e.clientX; fy = e.clientY;
+      });
+      const endF = (e) => { if (e.pointerId === fid) fid = null; };
+      fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF);
+    }
     bindBtn('btn-reload', () => this.on.reload());
     bindBtn('btn-crouch', () => { this.crouchTouch = !this.crouchTouch; document.getElementById('btn-crouch').classList.toggle('active', this.crouchTouch); });
     bindBtn('btn-cam', () => this.on.cam());
