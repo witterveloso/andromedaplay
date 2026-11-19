@@ -2,7 +2,7 @@ import * as THREE from './vendor/three.module.min.js';
 import { createWorld, ARENA, TEAM_PAINT, segSphere, segCyl } from './world.js';
 import { MAPS, MAP_LIST } from './maps.js';
 import { buildMarker, loadCharacterAssets } from './models.js';
-import { Combatant, Bot, DIFFICULTY } from './combatants.js';
+import { Combatant, Bot, HITS_TO_OUT, DIFFICULTY } from './combatants.js';
 import { Particles } from './effects.js';
 import { Sfx } from './audio.js';
 import { HUD, MaskOverlay, TEAM_CSS, TEAM_NAME } from './ui.js';
@@ -182,20 +182,20 @@ const game = {
     }
   },
 
-  // 1º tiro: o jogador fica com uma marca de tinta, mas segue na partida
+  // tiros que não eliminam: o jogador fica com uma marca de tinta (e a tinta fica na tela) mas segue na partida
   onHit(victim, shooter, head, point) {
-    const you = (c) => (c.isPlayer ? 'Você' : c.name);
-    hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> acertou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b> · 1ª marca${head ? ' 🎯' : ''}`, shooter.team);
+    const you = (c) => (c.isPlayer ? 'Você' : c.name), n = victim.hits, left = HITS_TO_OUT - n;
+    hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> acertou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b> · ${n}ª marca${head ? ' 🎯' : ''}`, shooter.team);
     if (shooter.isPlayer) { hud.hitmarker(); sfx.hitmarker(); this.buzz(head ? [30, 25, 50] : 35); }
     if (victim.isPlayer) {
-      sfx.splat(1); this.buzz([90, 40, 70]);
-      const col = TEAM_CSS[shooter.team], fx = settings.get('reduceFx') ? 0.45 : 1;
+      sfx.splat(1); this.buzz(n >= 2 ? [120, 40, 120] : [90, 40, 70]);
+      const col = TEAM_CSS[shooter.team], reduce = settings.get('reduceFx');
       const ang = Math.atan2(-(shooter.pos.x - victim.pos.x), -(shooter.pos.z - victim.pos.z)) - victim.yaw;
-      overlay.hitBody(col, -ang);
-      if (head) overlay.hitFace(col, 0.4 * fx);
-      this.shake = settings.get('reduceFx') ? 0 : 0.3;
+      overlay.hitStack(col, -ang, n, reduce ? 0.5 : 1);                   // a tinta acumula e permanece até o fim da rodada
+      if (head) overlay.hitFace(col, (0.35 + 0.15 * n) * (reduce ? 0.6 : 1));
+      this.shake = reduce ? 0 : 0.3 + 0.1 * n;
       this.hitInfo = { shooter, t: 3, col };
-      hud.banner('ATINGIDO! 1ª MARCA', 'Mais um tiro e você está fora — procure cobertura', 1100, col);
+      hud.banner(`ATINGIDO! ${n}ª MARCA`, left === 1 ? 'Mais um tiro e você está fora — procure cobertura' : `Aguenta mais ${left} tiros — a tinta fica na tela`, 1100, col);
     }
   },
 
@@ -211,7 +211,7 @@ const game = {
       else {
         const ang = Math.atan2(-(shooter.pos.x - victim.pos.x), -(shooter.pos.z - victim.pos.z)) - victim.yaw;
         overlay.hitBody(col, -ang);
-        if (this.camMode === 'fpp') overlay.hitFace(col, 0.5 * fx);
+        if (this.camMode === 'fpp') overlay.hitFace(col, 0.85 * fx);
       }
       this.shake = settings.get('reduceFx') ? 0 : 0.5;
       this.switchT = 1.2;
@@ -624,7 +624,7 @@ const game = {
     hud.ammo(p.hopper, p.pods, p.reloadT);
     $('reload-hint').classList.toggle('on', p.alive && this.state === 'playing' && (p.hopper < 30 || p.reloadT > 0) && p.reloadT <= 0 && p.pods > 0);
     hud.crosshair(p.spread, p.alive);
-    hud.lives(p.alive ? 2 - p.hits : 0);
+    hud.lives(p.alive ? HITS_TO_OUT - p.hits : 0);
     if (this.mode === 'flag') { const f = this.flag; $('flag-status').textContent = f.carrier ? `BANDEIRA: ${f.carrier.isPlayer ? 'VOCÊ' : f.carrier.name.toUpperCase()} (${TEAM_NAME[f.carrier.team]})` : 'BANDEIRA: NO CHÃO'; }
     const hidden = p.alive && this.state === 'playing' && world.isInterior(p.pos.x, p.pos.z) && !this.combatants.some((c) => c instanceof Bot && c.alive && c.target === p);
     $('stealth').classList.toggle('on', hidden);

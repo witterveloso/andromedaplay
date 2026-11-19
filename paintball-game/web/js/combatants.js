@@ -3,7 +3,7 @@ import { buildCharacter } from './models.js';
 import { ARENA, STEP } from './world.js';
 
 const MAX_HOPPER = 200;
-export const HITS_TO_OUT = 2;   // 1º tiro: fica marcado; 2º tiro: eliminado
+export const HITS_TO_OUT = 3;   // 1º e 2º tiros: ficam marcas (e tinta na tela); 3º tiro: eliminado
 const HIT_GRACE = 0.7;          // intervalo em que bolinhas da mesma rajada não contam como 2º tiro
 const FIRE_RATE = 10; // bolinhas por segundo
 const UP = new THREE.Vector3(0, 1, 0);

@@ -92,7 +92,7 @@ export function createScreens(game) {
   $('map-desc').textContent = MAPS[currentMap].blurb;
   mapsEl.querySelectorAll('.map').forEach((b) => { b.classList.add('map'); });
 
-  const MODES = { elim: ['Eliminação', 'Elimine todos os adversários: cada um aguenta 1 marca, no 2º tiro está fora. Melhor de 5 rodadas.'], flag: ['Centerflag', 'Pegue a bandeira no centro do campo e leve até a base inimiga, ou elimine o outro time. Quem carrega a bandeira derruba ela ao ser eliminado.'] };
+  const MODES = { elim: ['Eliminação', 'Elimine todos os adversários: cada um aguenta 2 marcas, no 3º tiro está fora. Melhor de 5 rodadas.'], flag: ['Centerflag', 'Pegue a bandeira no centro do campo e leve até a base inimiga, ou elimine o outro time. Quem carrega a bandeira derruba ela ao ser eliminado.'] };
   const modeText = () => { const m = S.get('mode'); $('mode-desc').textContent = MODES[m][1]; $('btn-play').querySelector('small').textContent = `${MODES[m][0]} · ${S.get('teamSize')} × ${S.get('teamSize')} · melhor de 5`; };
   radio($('modes'), [{ value: 'elim', label: 'Eliminação' }, { value: 'flag', label: 'Centerflag' }], S.get('mode'), (v) => { S.set('mode', v); modeText(); }, 'chip');
   { const br = document.createElement('span'); br.className = 'chip dis'; br.innerHTML = 'Battle Royale <i>em breve</i>'; $('modes').appendChild(br); }
@@ -229,7 +229,7 @@ export function createScreens(game) {
       const sc = game.score[t];
       html += `<div class="tt" style="--c:${TEAM_CSS[t]}">${TEAM_NAME[t]} · ${sc}</div><div class="tr h"><span>Jogador</span><span>Acertos</span><span>${final ? '' : 'Estado'}</span></div>`;
       cs.filter((c) => c.team === t).sort((a, b) => b.kills - a.kills).forEach((c) => {
-        html += `<div class="tr ${c.isPlayer ? 'me' : ''} ${!final && !c.alive ? 'out' : ''}" style="--c:${TEAM_CSS[t]}"><span><i class="dot"></i>${c.isPlayer ? 'Você' : c.name}</span><span>${c.kills}</span><span>${final ? '' : c.alive ? (c.hits ? '1 marca' : 'vivo') : 'fora'}</span></div>`;
+        html += `<div class="tr ${c.isPlayer ? 'me' : ''} ${!final && !c.alive ? 'out' : ''}" style="--c:${TEAM_CSS[t]}"><span><i class="dot"></i>${c.isPlayer ? 'Você' : c.name}</span><span>${c.kills}</span><span>${final ? '' : c.alive ? (c.hits ? `${c.hits} marca${c.hits > 1 ? 's' : ''}` : 'vivo') : 'fora'}</span></div>`;
       });
     });
     el.innerHTML = html;
@@ -257,7 +257,7 @@ export function createScreens(game) {
     touchTap: `<svg viewBox="0 0 290 120"><circle cx="145" cy="60" r="13" fill="#ff8a00"/><circle cx="145" cy="60" r="32" fill="none" stroke="#ff8a00" stroke-opacity=".65" stroke-width="3"/><circle cx="145" cy="60" r="52" fill="none" stroke="#ff8a00" stroke-opacity=".3" stroke-width="3"/><g stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-opacity=".8"><path d="M52 60h34M204 60h34M145 6v22M145 92v22"/></g></svg>`,
     goal: `<svg viewBox="0 0 290 120"><rect x="24" y="8" width="74" height="104" rx="12" fill="#0d1219" stroke="#fff" stroke-opacity=".28"/><rect x="44" y="30" width="22" height="18" fill="#46506a"/><rect x="62" y="64" width="22" height="14" fill="#46506a"/><circle cx="60" cy="98" r="5.5" fill="#fff"/><circle cx="44" cy="22" r="6" fill="#00b4ff" stroke="#fff" stroke-width="2"/><circle cx="82" cy="40" r="6" fill="#00b4ff" stroke="#fff" stroke-width="2"/><path d="M150 106V16" stroke="#ffd24a" stroke-width="5" stroke-linecap="round"/><path d="M152 18l56 18-56 18z" fill="#ffd24a"/><rect x="226" y="54" width="42" height="48" rx="5" fill="none" stroke="#7dff7a" stroke-width="3"/><path d="M238 102V82h18v20" stroke="#7dff7a" stroke-width="3" fill="none"/></svg>`,
   };
-  const GOAL = 'O 1º tiro deixa uma marca; o 2º elimina você. Entre nos barracos para se esconder, olhe o mapa para achar os inimigos e, no Centerflag, leve a bandeira até a base inimiga.';
+  const GOAL = 'Os 2 primeiros tiros deixam marcas (e tinta na sua tela); o 3º elimina você. Entre nos barracos para se esconder, olhe o mapa para achar os inimigos e, no Centerflag, leve a bandeira até a base inimiga.';
   const PC_SLIDES = [
     { art: ART.pcMove, title: 'Mova-se e mire', text: 'Use <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> para andar e o mouse para mirar. <kbd>Shift</kbd> corre.' },
     { art: ART.pcShoot, title: 'Atire e se proteja', text: 'Clique para atirar. <kbd>C</kbd> agacha atrás do bunker, <kbd>R</kbd> recarrega e <kbd>V</kbd> alterna entre 1ª e 3ª pessoa.' },

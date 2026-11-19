@@ -28,7 +28,7 @@ export class HUD {
     const el = document.getElementById('lives'); if (!el) return;
     if (this._lives === left) return; this._lives = left;
     el.querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < left));
-    el.classList.toggle('hurt', left === 1);
+    el.classList.toggle('hurt', left === 2); el.classList.toggle('crit', left === 1);
   }
   ammo(h, pods, reloading) {
     this.el.ammo.textContent = h;
@@ -86,13 +86,13 @@ export class MaskOverlay {
     this.W = this.c.width; this.H = this.c.height;
   }
   get active() { return this.blobs.length > 0; }
-  _blob(x, y, r, color, ttl) {
+  _blob(x, y, r, color, ttl, dripK = 1) {
     const pts = Array.from({ length: 22 }, (_, i) => 1 + Math.sin(i * 1.7 + x) * 0.2 + rand(-0.18, 0.2));
     const sats = Array.from({ length: 7 }, () => ({ a: rand(0, 6.28), d: rand(1.05, 1.5), r: rand(0.05, 0.14) }));
     this.blobs.push({ x, y, r, color, pts, sats, ttl, age: 0, grow: 0.35 });
     const drips = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < drips; i++) {
-      this.drips.push({ x: x + rand(-0.6, 0.6) * r, y: y + r * rand(0.2, 0.7), len: 0, max: rand(0.1, 0.45) * this.H, w: rand(0.012, 0.03) * this.W, v: rand(0.05, 0.16) * this.H, color, ttl, age: 0 });
+      this.drips.push({ x: x + rand(-0.6, 0.6) * r, y: y + r * rand(0.2, 0.7), len: 0, max: rand(0.1, 0.45) * this.H * dripK, w: rand(0.012, 0.03) * this.W, v: rand(0.05, 0.16) * this.H, color, ttl, age: 0 });
     }
   }
   hitFace(color, strength = 1) {
@@ -111,6 +111,19 @@ export class MaskOverlay {
     for (let i = 0; i < 3; i++) {
       this._blob(this.W / 2 + dx * this.W * rand(0.3, 0.46), this.H / 2 + dy * this.H * rand(0.25, 0.45), m * rand(0.08, 0.18), color, 3.0);
     }
+  }
+  // marcas acumuladas: a tinta dos tiros que não eliminam FICA na tela até o fim da rodada (level = 1, 2…)
+  hitStack(color, angle, level, soft = 1) {
+    const m = Math.min(this.W, this.H), dx = Math.sin(angle), dy = -Math.cos(angle);
+    const n = Math.max(2, Math.round((2 + level * 1.5) * soft));
+    for (let i = 0; i < n; i++) {
+      const near = i < n / 2;                                         // metade no lado de onde veio o tiro, o resto espalhado
+      const px = near ? this.W / 2 + dx * this.W * rand(0.22, 0.46) : rand(0.08, 0.92) * this.W;
+      const py = near ? this.H / 2 + dy * this.H * rand(0.2, 0.44) : rand(0.1, 0.9) * this.H;
+      this._blob(px, py, m * rand(0.045, 0.095) * (1 + 0.25 * level), color, 0, 0.45);
+    }
+    if (this.blobs.length > 26) this.blobs.splice(0, this.blobs.length - 26);
+    if (this.drips.length > 60) this.drips.splice(0, this.drips.length - 60);
   }
   clear(animated = true) {
     if (!this.blobs.length) return;

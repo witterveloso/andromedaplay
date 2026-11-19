@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-212125">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-212125", "./js/camo.js": "./js/camo.js?v=20261119-212125", "./js/combatants.js": "./js/combatants.js?v=20261119-212125", "./js/effects.js": "./js/effects.js?v=20261119-212125", "./js/input.js": "./js/input.js?v=20261119-212125", "./js/main.js": "./js/main.js?v=20261119-212125", "./js/maps.js": "./js/maps.js?v=20261119-212125", "./js/models.js": "./js/models.js?v=20261119-212125", "./js/radar.js": "./js/radar.js?v=20261119-212125", "./js/screens.js": "./js/screens.js?v=20261119-212125", "./js/settings.js": "./js/settings.js?v=20261119-212125", "./js/textures.js": "./js/textures.js?v=20261119-212125", "./js/ui.js": "./js/ui.js?v=20261119-212125", "./js/weapon.js": "./js/weapon.js?v=20261119-212125", "./js/world.js": "./js/world.js?v=20261119-212125"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-212804">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-212804", "./js/camo.js": "./js/camo.js?v=20261119-212804", "./js/combatants.js": "./js/combatants.js?v=20261119-212804", "./js/effects.js": "./js/effects.js?v=20261119-212804", "./js/input.js": "./js/input.js?v=20261119-212804", "./js/main.js": "./js/main.js?v=20261119-212804", "./js/maps.js": "./js/maps.js?v=20261119-212804", "./js/models.js": "./js/models.js?v=20261119-212804", "./js/radar.js": "./js/radar.js?v=20261119-212804", "./js/screens.js": "./js/screens.js?v=20261119-212804", "./js/settings.js": "./js/settings.js?v=20261119-212804", "./js/textures.js": "./js/textures.js?v=20261119-212804", "./js/ui.js": "./js/ui.js?v=20261119-212804", "./js/weapon.js": "./js/weapon.js?v=20261119-212804", "./js/world.js": "./js/world.js?v=20261119-212804"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -40,7 +40,7 @@
     <div id="banner" role="status" aria-live="polite"><div id="banner-t"></div><div id="banner-s"></div></div>
     <div id="reload-bar"><div id="reload-fill"></div></div>
     <div id="reload-hint">RECARREGAR <kbd>R</kbd></div>
-    <div id="lives" role="img" aria-label="Marcas restantes"><span>MARCAS</span><i class="on"></i><i class="on"></i></div>
+    <div id="lives" role="img" aria-label="Marcas restantes"><span>MARCAS</span><i class="on"></i><i class="on"></i><i class="on"></i></div>
     <div id="weapon">
       <img class="w-img" src="assets/marker.png" alt="">
       <div class="w-name">MARCADOR T-68 <span id="cam-label">1ª PESSOA</span></div>
@@ -93,7 +93,7 @@
       <img class="intro-marker" src="assets/marker.png" alt="">
       <h1 class="intro-logo" aria-label="Splat Arena"><span class="w1">SPLAT</span><span class="w2">ARENA</span></h1>
       <p class="intro-tag"><b>Mire.</b> <b>Cubra.</b> <b class="hl">Marque.</b></p>
-      <div class="intro-lines" id="intro-lines" aria-hidden="true"><span class="on">Sem sangue. Só tinta e tática.</span><span>Cada bunker é uma decisão.</span><span>Um tiro marca. O segundo elimina.</span><span>Quem se esconde bem, vence.</span></div>
+      <div class="intro-lines" id="intro-lines" aria-hidden="true"><span class="on">Sem sangue. Só tinta e tática.</span><span>Cada bunker é uma decisão.</span><span>Dois tiros marcam. O terceiro elimina.</span><span>Quem se esconde bem, vence.</span></div>
       <p class="sr-only">Splat Arena: paintball tático de 8 a 15 jogadores por equipe no navegador, para celular e PC.</p>
       <button id="intro-start" class="cta intro-cta"><span id="intro-cta-text">ENTRAR NO CAMPO</span></button>
       <small class="intro-sub" id="intro-sub">Clique ou aperte Enter</small>
@@ -110,7 +110,7 @@
     <section class="home-left">
       <p class="eyebrow">PAINTBALL TÁTICO · ATÉ 15 × 15</p>
       <h1 aria-label="Mire. Cubra. Marque."><span>Mire.</span><span>Cubra.</span><span class="hl">Marque.</span></h1>
-      <p class="lede">Equipes de 8, 10 ou 15 em galpão, favela, ferro-velho e cidade abandonada. Um tiro deixa a marca, o segundo tira você da rodada.</p>
+      <p class="lede">Equipes de 8, 10 ou 15 em galpão, favela, ferro-velho e cidade abandonada. Dois tiros deixam marca e tinta na tela; o terceiro tira você da rodada.</p>
       <button id="btn-play" class="cta"><span>JOGAR AGORA</span><small>Eliminação · melhor de 5</small></button>
       <div id="modes" class="modes" role="radiogroup" aria-label="Modos de jogo"></div>
       <p id="mode-desc" class="mode-desc"></p>
@@ -178,8 +178,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-212125</div>
+  <div id="build" aria-hidden="true">v20261119-212804</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-212125"></script>
+  <script type="module" src="js/main.js?v=20261119-212804"></script>
 </body>
 </html>

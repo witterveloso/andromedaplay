@@ -537,3 +537,5 @@ body.lefty #btn-zoom { right: auto; left: calc(22px + var(--safe-l)); }
 #lives i.on { background: #7dff7a; border-color: #7dff7a; opacity: 1; box-shadow: 0 0 8px rgba(125, 255, 122, .6); }
 #lives.hurt i.on { background: #ffb02e; border-color: #ffb02e; box-shadow: 0 0 10px rgba(255, 176, 46, .8); animation: hitpulse .5s ease-in-out infinite alternate; }
 body.touch #lives { top: calc(76px + var(--safe-t)); padding: 4px 10px; }
+#lives.hurt i.on { background: #ffb02e; border-color: #ffb02e; box-shadow: 0 0 10px rgba(255, 176, 46, .8); animation: none; }
+#lives.crit i.on { background: #ff4a3c; border-color: #ff4a3c; box-shadow: 0 0 12px rgba(255, 74, 60, .9); animation: hitpulse .4s ease-in-out infinite alternate; }
