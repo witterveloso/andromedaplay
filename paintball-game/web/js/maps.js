@@ -8,7 +8,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // ---------------------------------------------------------------------------
 // utilitários compartilhados pelos mapas
 // ---------------------------------------------------------------------------
-function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
+function helpers({ group, obstacles, quality, interiors = [], spots = [], ramps = [] }) {
   const hi = quality === 'high';
   const mats = new Map();
   const M = (kind, params = {}, opts = {}) => {
@@ -112,7 +112,7 @@ function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
     im.castShadow = false; im.receiveShadow = false; group.add(im);
     return im;
   }
-  return { M, paint, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles, interiors, spots };
+  return { M, paint, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles, interiors, spots, ramps };
 }
 
 // espelhamento por simetria central: fn(s) com s = +1 e -1 (posição*s, rotação +π se s<0)
@@ -256,6 +256,58 @@ function scatter(H, A, R, { count, tries = 60, margin = 2.4, zMin = 4, zMax, xMa
   }
   return placed;
 }
+
+// ---------------------------------------------------------------------------
+// Torres/plataformas elevadas: o jogador e os bots sobem pela rampa e atiram de cima (ninho de sniper).
+// dir = direção (unitária, eixo X ou Z) da base da rampa para a plataforma.
+function tower(H, { x, z, dir, h = 2.6, mat, railMat, size = 4.2, rw = 2.0 }) {
+  const [ux, uz] = dir, L = h / 0.4, edge = size / 2;
+  H.box({ x, z, w: size, d: size, h, mat }); H.obstacles[H.obstacles.length - 1].walk = true;
+  // rampa maciça (cunha): a superfície inclinada é por onde se anda
+  const cx = x - ux * (edge + L / 2), cz = z - uz * (edge + L / 2);
+  const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, h); sh.closePath();
+  const wg = new THREE.ExtrudeGeometry(sh, { depth: rw, bevelEnabled: false });
+  wg.translate(-L / 2, 0, -rw / 2); wg.rotateY(Math.atan2(-uz, ux));
+  const uv = wg.attributes.uv, tile = mat.userData.tile || 2; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / tile, uv.getY(i) / tile);
+  const wedge = new THREE.Mesh(wg, mat); wedge.position.set(cx, 0, cz); H.add(wedge);
+  H.ramps.push({ cx, cz, hw: rw / 2, hl: L / 2, ux, uz, h });
+  H.obstacles.push({ type: 'box', x: cx, z: cz, w: Math.abs(ux) * L + Math.abs(uz) * rw, d: Math.abs(uz) * L + Math.abs(ux) * rw, h: 0.02, ghost: true });
+  // muretas (cobertura) nos três lados fechados e nos cantos da entrada
+  const t = 0.2, rh = 0.9, sx = Math.abs(uz), sz = Math.abs(ux);          // eixo lateral
+  const wall = (px, pz, w, d) => H.box({ x: px, z: pz, w, d, h: rh, y: h, mat: railMat || mat });
+  // lado de frente (oposto à rampa)
+  wall(x + ux * (edge - t / 2), z + uz * (edge - t / 2), Math.abs(uz) * size + Math.abs(ux) * t, Math.abs(ux) * size + Math.abs(uz) * t);
+  // laterais
+  [-1, 1].forEach((sd) => wall(x + -uz * sd * (edge - t / 2), z + ux * sd * (edge - t / 2), Math.abs(ux) * size + Math.abs(uz) * t, Math.abs(uz) * size + Math.abs(ux) * t));
+  // cantos junto à rampa (deixam 2 m de abertura)
+  const gap = (size - rw) / 2;
+  [-1, 1].forEach((sd) => wall(x - ux * (edge - t / 2) + -uz * sd * (rw / 2 + gap / 2), z - uz * (edge - t / 2) + ux * sd * (rw / 2 + gap / 2), Math.abs(uz) * gap + Math.abs(ux) * t, Math.abs(ux) * gap + Math.abs(uz) * t));
+  // pontos de cobertura para os bots (em cima, atrás das muretas)
+  const low = { x: x - ux * (edge + L - 0.6), z: z - uz * (edge + L - 0.6) }, top = { x: x - ux * (edge - 0.7), z: z - uz * (edge - 0.7) };
+  const k = edge - 0.8;
+  [[ux * k, uz * k], [-uz * k, ux * k], [uz * k, -ux * k], [-uz * k * 0.6 + ux * k * 0.3, ux * k * 0.6 + uz * k * 0.3], [uz * k * 0.6 + ux * k * 0.3, -ux * k * 0.6 + uz * k * 0.3]]
+    .forEach(([ox, oz]) => H.spots.push({ x: x + ox, z: z + oz, y: h, via: low, via2: top }));
+}
+// sorteia `pairs` torres (e as espelhadas por simetria central) em lugares livres
+function towers(H, A, R, { pairs = 2, h = 2.6, mat, railMat }) {
+  const L = h / 0.4, size = 4.2, ext = size / 2 + L + 0.6;
+  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  let done = 0;
+  for (let n = 0; n < pairs; n++) {
+    for (let t = 0; t < 120; t++) {
+      const x = (R() * 2 - 1) * (A.hx - 8), z = 9 + R() * (A.hz - 25), dir = dirs[(R() * 4) | 0];
+      const [ux, uz] = dir, cx = x - ux * (size / 2 + L / 2), cz = z - uz * (size / 2 + L / 2);
+      const rw = Math.abs(ux) * L + Math.abs(uz) * 2.4, rd = Math.abs(uz) * L + Math.abs(ux) * 2.4;
+      if (Math.abs(cx) + rw / 2 > A.hx - 2 || Math.abs(x) + size / 2 > A.hx - 2 || z + size / 2 > A.hz - 10 || Math.abs(cz) + rd / 2 > A.hz - 10) continue;
+      if (Math.hypot(x, z) < ext + 2 || Math.hypot(cx, cz) < 6) continue;
+      const bad = overlaps(H, x, z, size, size, 2.2) || overlaps(H, cx, cz, rw, rd, 1.6) || overlaps(H, -x, -z, size, size, 2.2) || overlaps(H, -cx, -cz, rw, rd, 1.6);
+      if (bad) continue;
+      tower(H, { x, z, dir, h, mat, railMat }); tower(H, { x: -x, z: -z, dir: [-ux, -uz], h, mat, railMat });
+      done++; break;
+    }
+  }
+  return done;
+}
 function container(H, metal, { x, z, alongX, color, color2, stack }) {
   const w = alongX ? 6.1 : 2.5, d = alongX ? 2.5 : 6.1;
   H.box({ x, z, w, d, h: 2.6, mat: metal(color) });
@@ -300,6 +352,7 @@ function buildArena(ctx) {
   };
   bunker({ k: 'cyl', r: 0.65, h: 1.9 }, 0, 0, 0);
   let ci = 1;
+  towers(H, A, R, { pairs: 2, h: 2.6, mat: H.M('wood', { tile: 1.5 }), railMat: H.M('wood', { tile: 1.5 }) });
   scatter(H, A, R, { count: H.hi ? 78 : 56, margin: 2.7, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R(); let spec;
     if (t < 0.42) spec = { k: 'cyl', r: 0.6, h: R() < 0.5 ? 1.6 : 1.9 };
@@ -405,6 +458,7 @@ function buildGalpao(ctx) {
     hut(H, { x: -25 * s, z: 33 * s, w: 7, d: 6, h: 3, doors: flip(['+x'], s), wallMat: metal([100, 120, 130]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
     hut(H, { x: 25 * s, z: 14 * s, w: 6, d: 5, h: 3, doors: flip(['-x'], s), wallMat: metal([120, 110, 100]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
   });
+  towers(H, A, R, { pairs: 2, h: 2.4, mat: H.M('rust', { tile: 2 }), railMat: H.M('rust', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 34 : 24, margin: 2.4, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
     if (t < 0.22) { const tall = R() < 0.5; return { w: 1.6, d: 1.6, put: (x, z) => H.box({ x, z, w: 1.6, d: 1.6, h: tall ? 3.2 : 1.6, mat: tall ? woodDark : wood }) }; }
@@ -492,6 +546,7 @@ function buildFavela(ctx) {
   });
   // detalhes entre as casas
   const brickMat = H.M('brick', {}), concMat = H.M('concrete', { base: 190 }), woodMat = H.M('wood', {});
+  towers(H, A, R, { pairs: 2, h: 2.8, mat: H.M('concrete', { tile: 2 }), railMat: H.M('concrete', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 40 : 24, margin: 1.7, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
     if (t < 0.34) return { w: 2.4, d: 0.5, put: (x, z) => H.box({ x, z, w: 2.4, d: 0.5, h: 1.1, mat: R() < 0.5 ? concMat : brickMat }) };
@@ -554,6 +609,7 @@ function buildFerro(ctx) {
     hut(H, { x: -24 * s, z: 34 * s, w: 5, d: 4.4, h: 2.8, doors: flip(['+x'], s), wallMat: metal([120, 118, 108], 0.75), floorMat: M('dirt', { color: [96, 80, 60] }), roofMat: metal([110, 104, 92], 0.8) });
   });
   const CAR_COLORS = [[160, 66, 52], [70, 100, 140], [190, 170, 60], [80, 120, 90], [140, 140, 150], [180, 60, 60], [200, 120, 40]];
+  towers(H, A, R, { pairs: 2, h: 2.6, mat: H.M('corrugated', { tile: 2 }), railMat: H.M('rust', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 46 : 30, margin: 2.5, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
     if (t < 0.34) { const ax = R() < 0.5, st = R() < 0.35, c = CAR_COLORS[Math.floor(R() * 7)], c2 = CAR_COLORS[Math.floor(R() * 7)]; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => carStack(H, { x, z, alongX: ax, color: c, color2: c2, stacked: st, tilt: (R() - 0.5) * 0.16 }) }; }
@@ -622,6 +678,7 @@ function buildCidade(ctx) {
   });
   H.box({ x: 0, z: 0, w: 6.1, d: 2.5, h: 2.6, mat: M('corrugated', { color: [70, 110, 90], rust: 0.55, ridges: 8 }, { bump: 1.8 }) });
   const concS = M('concrete', { base: 175 }), rustS = H.paint('rust', [110, 100, 92], {}, { bump: 2 });
+  towers(H, A, R, { pairs: 2, h: 3.0, mat: H.M('concrete', { tile: 2 }), railMat: H.M('concrete', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 66 : 42, margin: 2.2, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
     if (t < 0.36) { const ax = R() < 0.3, bt = R() < 0.5; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => car(H, { x, z, alongX: ax, color: [[120, 120, 125], [140, 60, 50], [90, 100, 110]][Math.floor(R() * 3)], burnt: bt }) }; }

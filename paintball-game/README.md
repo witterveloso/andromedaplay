@@ -16,6 +16,7 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **Torres e mira de sniper:** cada campo tem torres/plataformas com rampa e muretas; você e os bots sobem e atiram de cima. **Botão direito** (ou **ZOOM** no celular) liga a luneta 4× / 8× (roda do mouse troca): giro mais lento, balanço de respiração (agache ou segure Shift para firmar) e menos dispersão.
 - **Tamanho da equipe:** escolha 8×8, 10×10 ou 15×15 no menu. Equipes grandes usam nível de detalhe por distância (sem acessórios e sombra nos distantes, sem desenhar quem está atrás da câmera).
 - **Desempenho:** geometria estática do campo e acessórios dos jogadores fundidos (de ~1.300 para ~500 chamadas de desenho), marcadores dos bots mais leves e um **ajuste automático de qualidade** (resolução → sombras → resolução menor) quando o aparelho não sustenta ~30 fps.
 - **Visual:** nuvens procedurais no céu, grama com falhas e trevo, copas de árvore volumosas, sombras de contato sob bunkers/obstáculos e vinheta de câmera.

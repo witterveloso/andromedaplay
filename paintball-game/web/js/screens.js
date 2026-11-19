@@ -5,6 +5,8 @@ import { IS_TOUCH } from './input.js';
 
 const $ = (id) => document.getElementById(id);
 const TIPS = [
+  'Suba nas torres pela rampa: de cima dá para ver o campo todo. Agache atrás da mureta.',
+  'Botão direito (ou ZOOM no celular) liga a mira de sniper: 4× e 8×. Agachado, a mira fica bem mais firme.',
   'Agache atrás do bunker: a mira fica mais firme e você vira um alvo menor.',
   'Tiro na cara? A tinta cobre a sua máscara. Proteja a cabeça.',
   'Recarregue atrás de cobertura. Pod vazio no meio do tiroteio custa a rodada.',

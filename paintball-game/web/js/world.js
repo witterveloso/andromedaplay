@@ -5,6 +5,7 @@ import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 
 export const ARENA = { hx: 20, hz: 30 };
 export const TEAM_PAINT = [0xff8a00, 0x00b4ff]; // 0 = equipe do jogador, 1 = adversária (mutável: paletas)
+export const STEP = 0.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
 
@@ -225,8 +226,8 @@ export function createWorld(scene, renderer, quality = 'high') {
       group = new THREE.Group();
       scene.add(group);
       const obstacles = [];
-      const interiors = [], hutSpots = [];
-      const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots });
+      const interiors = [], hutSpots = [], ramps = [];
+      const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots, ramps });
       batchStatic(group);
       // sombra de contato (oclusão ambiente falsa): uma mancha escura suave sob cada obstáculo, em 1 chamada de desenho
       if (obstacles.length && !cfg.indoor) {
@@ -274,7 +275,7 @@ export function createWorld(scene, renderer, quality = 'high') {
         : Math.abs(x - o.x) < o.w / 2 + m && Math.abs(z - o.z) < o.d / 2 + m));
       const coverSpots = [];
       obstacles.forEach((o) => {
-        if (o.h < 0.9) return;
+        if (o.h < 0.9 || o.ghost) return;
         for (let k = 0; k < 12; k++) {
           const a = (k / 12) * Math.PI * 2, dx = Math.cos(a), dz = Math.sin(a);
           let reach = o.type === 'cyl' ? o.r : Math.min(o.w / 2 / Math.max(Math.abs(dx), 1e-3), o.d / 2 / Math.max(Math.abs(dz), 1e-3));
@@ -292,7 +293,7 @@ export function createWorld(scene, renderer, quality = 'high') {
         }
       }
       this.flagSpot = fs;
-      this.obstacles = obstacles;
+      this.obstacles = obstacles; this.ramps = ramps;
       this.coverSpots = coverSpots;
       this.interiors = interiors;
       this.map = { id, name: def.name, tag: def.tag, blurb: def.blurb, menu: def.menu, indoor: !!cfg.indoor };
@@ -306,6 +307,7 @@ export function createWorld(scene, renderer, quality = 'high') {
       let best = null;
       const min = [0, 0, 0], max = [0, 0, 0];
       for (const o of this.obstacles) {
+        if (o.ghost) continue;
         let h = null;
         if (o.type === 'cyl') h = segCyl(p0, d, o.x, o.z, o.r, 0, o.h);
         else {
@@ -326,8 +328,26 @@ export function createWorld(scene, renderer, quality = 'high') {
         normal: new THREE.Vector3(best.nx, best.ny, best.nz),
       };
     },
+    // altura do chão em (x, z) para quem está na altura y: plataformas e rampas que ele consegue alcançar (degrau de 0,5 m)
+    floorAt(x, z, y) {
+      let best = 0;
+      for (const o of this.obstacles) {
+        if (!o.walk || o.h > y + STEP || o.h <= best) continue;
+        if (Math.abs(x - o.x) <= o.w / 2 && Math.abs(z - o.z) <= o.d / 2) best = o.h;
+      }
+      for (const r of this.ramps) {
+        const dx = x - r.cx, dz = z - r.cz;
+        if (Math.abs(dx * -r.uz + dz * r.ux) > r.hw) continue;
+        const t = (dx * r.ux + dz * r.uz) / (r.hl * 2) + 0.5;
+        if (t < 0 || t > 1) continue;
+        const h = r.h * t;
+        if (h <= y + STEP && h > best) best = h;
+      }
+      return best;
+    },
     collide(p, r) {
       for (const o of this.obstacles) {
+        if (o.ghost || (o.walk && p.y >= o.h - STEP)) continue;     // quem já está em cima da plataforma não bate nela
         if (o.type === 'cyl') {
           const dx = p.x - o.x, dz = p.z - o.z, dist = Math.hypot(dx, dz), min = o.r + r;
           if (dist < min) {

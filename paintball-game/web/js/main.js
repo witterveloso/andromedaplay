@@ -16,6 +16,7 @@ const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const Q = params.get('quality') || settings.get('quality');
 const LOW = Q === 'low' || (Q === 'auto' && IS_TOUCH);
+const SCOPE_ZOOM = [1, 4, 8];
 const ROUND_TIME = 150, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
 const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo', 'Vini', 'Lara', 'Pedro', 'Maju', 'Enzo', 'Livia', 'Kaio', 'Jade', 'Nando', 'Sol', 'Beto', 'Luna', 'Dani', 'Ravi', 'Isis', 'Toni', 'Mel', 'Zeca'];
 const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
@@ -137,7 +138,7 @@ const game = {
       if (c.team === team || !c.alive) continue;
       c.headCenter(hc);
       const th = segSphere(p0, d, hc, 0.16);
-      const tb = segCyl(p0, d, c.pos.x, c.pos.z, 0.3, 0, c.bodyTop);
+      const tb = segCyl(p0, d, c.pos.x, c.pos.z, 0.3, c.pos.y, c.bodyTop);
       let t = Infinity, head = false, normal = null;
       if (th >= 0) { t = th; head = true; normal = tmpB.set(0, 0, 0); }
       if (tb && tb.t < t) { t = tb.t; head = false; normal = tmpB.set(tb.nx, tb.ny, tb.nz); }
@@ -445,7 +446,7 @@ const game = {
   updatePlayer(dt) {
     const p = this.player;
     const look = input.consumeLook();
-    const s = 0.0022 * settings.get('sens');
+    const s = 0.0022 * settings.get('sens') / Math.pow(this.zoomK || 1, 0.9);       // zoom: giro mais lento e preciso
     p.yaw -= look.x * s;
     p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch - look.y * s * (settings.get('invertY') ? -1 : 1)));
     // tiro automático: dispara quando a mira cruza um inimigo visível (~3°)
@@ -464,6 +465,7 @@ const game = {
     p.vel.x += (wx - p.vel.x) * k; p.vel.z += (wz - p.vel.z) * k;
     p.pos.x += p.vel.x * dt; p.pos.z += p.vel.z * dt;
     world.collide(p.pos, 0.35);
+    p.updateY(dt);
     p.tick(dt);
     p.wantShoot = input.fire;
   },
@@ -517,21 +519,37 @@ const game = {
       camera.updateMatrixWorld(true);
       return;
     }
-    const fov = settings.get('fov');
-    if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
-    const fpp = this.camMode === 'fpp' && p.alive;
+    // mira com zoom: FOV encolhe suavemente (zoom óptico real: tan(fov/2) / zoom)
+    if (!p.alive || this.state === 'menu') this.scopeLvl = 0;
+    const zt = SCOPE_ZOOM[this.scopeLvl || 0];
+    this.zoomK = (this.zoomK || 1) + (zt - (this.zoomK || 1)) * Math.min(1, dt * 14);
+    if (Math.abs(this.zoomK - zt) < 0.01) this.zoomK = zt;
+    const scoped = this.zoomK > 1.5;
+    p.scoped = scoped; $('btn-zoom').classList.toggle('active', !!this.scopeLvl);
+    document.body.classList.toggle('scoped', scoped);
+    $('scope').classList.toggle('on', scoped);
+    if (scoped) $('scope-zoom').textContent = `${SCOPE_ZOOM[this.scopeLvl]}×`;
+    const base = settings.get('fov'), fov = this.zoomK > 1.001 ? (2 * Math.atan(Math.tan(base * Math.PI / 360) / this.zoomK)) * 180 / Math.PI : base;
+    if (Math.abs(camera.fov - fov) > 0.005) { camera.fov = fov; camera.updateProjectionMatrix(); }
+    const fpp = (this.camMode === 'fpp' || scoped) && p.alive;
     const eye = tmpA.set(p.pos.x, p.eyeY, p.pos.z);
     camera.rotation.order = 'YXZ';
     this.shake = Math.max(0, this.shake - dt * 2.5);
     const sh = settings.get('reduceFx') ? 0 : this.shake * 0.02;
-    camera.rotation.y = p.yaw + (Math.random() - 0.5) * sh;
-    camera.rotation.x = p.pitch + (Math.random() - 0.5) * sh;
+    // respiração do atirador: oscilação que cresce com o zoom (agachar ou segurar Shift estabiliza)
+    let swx = 0, swy = 0;
+    if (scoped && !settings.get('reduceFx')) {
+      const steady = (p.crouch ? 0.4 : 1) * (input.keys.ShiftLeft || input.keys.ShiftRight ? 0.25 : 1), t = performance.now() / 1000, a = 0.0009 * this.zoomK * steady;
+      swx = Math.sin(t * 1.7) * a + Math.sin(t * 3.1) * a * 0.4; swy = Math.cos(t * 1.3) * a * 0.8;
+    }
+    camera.rotation.y = p.yaw + swx + (Math.random() - 0.5) * sh;
+    camera.rotation.x = p.pitch + swy + (Math.random() - 0.5) * sh;
     camera.rotation.z = 0;
     camera.updateMatrixWorld(true);
     const dir = camera.getWorldDirection(tmpB);
     if (fpp) {
       camera.position.copy(eye);
-      fp.visible = true;
+      fp.visible = !scoped;
       p.model.root.visible = false;
     } else {
       const right = tmpC.crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
@@ -645,7 +663,7 @@ const game = {
   },
   resume() { this.paused = false; ui.hidePause(); input.requestLock(); },
   goHome() {
-    this.paused = false; this.state = 'menu'; this.matchOver = false; this.hitInfo = null; $('hitdir').classList.remove('on'); $('shooter-tag').style.display = 'none';
+    this.paused = false; this.state = 'menu'; this.matchOver = false; this.hitInfo = null; this.scopeLvl = 0; $('hitdir').classList.remove('on'); $('shooter-tag').style.display = 'none';
     hud.hideBanner(); overlay.clear(false); this.cine = null;
     balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
     if (this.flag.mesh) this.flag.mesh.visible = false;
@@ -670,6 +688,9 @@ mapLabel(); settings.onChange((k) => { if (k === 'mode') mapLabel(); });
 sfx.setVolume(settings.get('volume'));
 settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); if (k === 'music') sfx.setMusic(v); if (k === 'ambient') sfx.setAmbientLevel(v); });
 sfx.setMusic(settings.get('music')); sfx.ambKind = startMap; sfx.setAmbientLevel(settings.get('ambient'));
+input.on.scope = (down) => { if (down) { if (game.player.alive && game.state !== 'menu' && !game.paused) game.scopeLvl = game.lastScope || 1; } else { if (game.scopeLvl) game.lastScope = game.scopeLvl; game.scopeLvl = 0; } };
+input.on.scopeStep = (d) => { if (game.scopeLvl) { game.scopeLvl = d > 0 ? 2 : 1; game.lastScope = game.scopeLvl; } };
+input.on.scopeToggle = () => { if (!game.player.alive || game.state === 'menu' || game.paused) return; game.scopeLvl = ((game.scopeLvl || 0) + 1) % 3; document.getElementById('btn-zoom').classList.toggle('active', !!game.scopeLvl); };
 input.on.reload = () => { if (game.state === 'playing' && !game.paused) game.player.startReload(); };
 input.on.cam = () => { if (!game.paused && game.state !== 'menu') game.toggleCam(); };
 input.on.pause = () => {

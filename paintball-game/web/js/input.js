@@ -10,7 +10,7 @@ export class Input {
     this.joy = { x: 0, y: 0 };
     this.crouchTouch = false;
     this.sens = 1;
-    this.on = { reload() {}, cam() {}, pause() {}, lockChange() {} };
+    this.on = { reload() {}, cam() {}, pause() {}, lockChange() {}, scope() {}, scopeToggle() {}, scopeStep() {} };
     this.locked = false;
 
     addEventListener('keydown', (e) => {
@@ -26,8 +26,9 @@ export class Input {
     addEventListener('mousemove', (e) => {
       if (this.locked || (this.dragging && !IS_TOUCH)) { this.lx += e.movementX; this.ly += e.movementY; }
     });
-    canvas.addEventListener('mousedown', (e) => { if (e.button === 0) { this.fireMouse = true; this.dragging = true; } });
-    addEventListener('mouseup', (e) => { if (e.button === 0) { this.fireMouse = false; this.dragging = false; } });
+    canvas.addEventListener('mousedown', (e) => { if (e.button === 0) { this.fireMouse = true; this.dragging = true; } else if (e.button === 2) this.on.scope(true); });
+    addEventListener('mouseup', (e) => { if (e.button === 0) { this.fireMouse = false; this.dragging = false; } else if (e.button === 2) this.on.scope(false); });
+    addEventListener('wheel', (e) => { if (document.body.classList.contains('ingame')) this.on.scopeStep(e.deltaY < 0 ? 1 : -1); }, { passive: true });
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === canvas;
       this.on.lockChange(this.locked);
@@ -106,6 +107,7 @@ export class Input {
     bindBtn('btn-reload', () => this.on.reload());
     bindBtn('btn-crouch', () => { this.crouchTouch = !this.crouchTouch; document.getElementById('btn-crouch').classList.toggle('active', this.crouchTouch); });
     bindBtn('btn-cam', () => this.on.cam());
+    bindBtn('btn-zoom', () => this.on.scopeToggle());
     bindBtn('btn-pause', () => this.on.pause());
     document.addEventListener('touchmove', (e) => { if (document.body.classList.contains('ingame')) e.preventDefault(); }, { passive: false });
   }

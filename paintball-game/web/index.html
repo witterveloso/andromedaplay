@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-161842">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-161842", "./js/camo.js": "./js/camo.js?v=20261119-161842", "./js/combatants.js": "./js/combatants.js?v=20261119-161842", "./js/effects.js": "./js/effects.js?v=20261119-161842", "./js/input.js": "./js/input.js?v=20261119-161842", "./js/main.js": "./js/main.js?v=20261119-161842", "./js/maps.js": "./js/maps.js?v=20261119-161842", "./js/models.js": "./js/models.js?v=20261119-161842", "./js/radar.js": "./js/radar.js?v=20261119-161842", "./js/screens.js": "./js/screens.js?v=20261119-161842", "./js/settings.js": "./js/settings.js?v=20261119-161842", "./js/textures.js": "./js/textures.js?v=20261119-161842", "./js/ui.js": "./js/ui.js?v=20261119-161842", "./js/weapon.js": "./js/weapon.js?v=20261119-161842", "./js/world.js": "./js/world.js?v=20261119-161842"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-162901">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-162901", "./js/camo.js": "./js/camo.js?v=20261119-162901", "./js/combatants.js": "./js/combatants.js?v=20261119-162901", "./js/effects.js": "./js/effects.js?v=20261119-162901", "./js/input.js": "./js/input.js?v=20261119-162901", "./js/main.js": "./js/main.js?v=20261119-162901", "./js/maps.js": "./js/maps.js?v=20261119-162901", "./js/models.js": "./js/models.js?v=20261119-162901", "./js/radar.js": "./js/radar.js?v=20261119-162901", "./js/screens.js": "./js/screens.js?v=20261119-162901", "./js/settings.js": "./js/settings.js?v=20261119-162901", "./js/textures.js": "./js/textures.js?v=20261119-162901", "./js/ui.js": "./js/ui.js?v=20261119-162901", "./js/weapon.js": "./js/weapon.js?v=20261119-162901", "./js/world.js": "./js/world.js?v=20261119-162901"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -24,6 +24,15 @@
       <div class="team b"><span id="score-b">0</span><div id="alive-b" class="alive"></div></div>
     </div>
     <div id="feed" role="log" aria-live="polite" aria-relevant="additions"></div>
+    <div id="scope" aria-hidden="true">
+      <svg viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#000" stroke-linecap="round">
+        <g stroke-width=".35"><path d="M-100 0H-9M9 0H100M0 -100V-9M0 9V100"/></g>
+        <g stroke-width="1.6"><path d="M-100 0H-46M46 0H100M0 -100V-46M0 46V100"/></g>
+        <g fill="#000" stroke="none"><circle cx="-18" r=".9"/><circle cx="-27" r=".9"/><circle cx="-36" r=".9"/><circle cx="18" r=".9"/><circle cx="27" r=".9"/><circle cx="36" r=".9"/><circle cy="18" r=".9"/><circle cy="27" r=".9"/><circle cy="36" r=".9"/><circle cy="-18" r=".9"/><circle cy="-27" r=".9"/><circle cy="-36" r=".9"/></g>
+        <circle r="1.1" fill="#d22" stroke="none"/>
+      </svg>
+      <b id="scope-zoom">4×</b>
+    </div>
     <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
     <div id="hitmarker"></div>
     <div id="hitdir" aria-hidden="true"><i></i></div>
@@ -40,7 +49,7 @@
     <div id="map-label"></div>
     <canvas id="radar" width="300" height="450" role="img" aria-label="Mapa de localização dos inimigos"></canvas>
     <div id="stealth">ESCONDIDO</div>
-    <small id="keys" class="pc-only">V câmera · R recarregar · C agachar · Shift correr · M mapa grande · Tab placar · Esc pausa</small>
+    <small id="keys" class="pc-only">V câmera · R recarregar · C agachar · Shift correr · Botão direito: mira com zoom (roda troca 4×/8×) · M mapa · Tab placar · Esc pausa</small>
   </div>
 
   <!-- tutorial do primeiro acesso (passo a passo) -->
@@ -63,6 +72,7 @@
     <button id="btn-pause" aria-label="Pausar"><svg class="ico fill" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
     <button id="btn-cam" aria-label="Trocar câmera"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><small>CAM</small></button>
     <button id="btn-reload" aria-label="Recarregar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
+    <button id="btn-zoom" aria-label="Mira com zoom (sniper)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg><small>ZOOM</small></button>
     <button id="btn-crouch" aria-label="Agachar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6 6 6-6"/><path d="M6 14l6 6 6-6"/></svg></button>
   </div>
 
@@ -167,8 +177,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-161842</div>
+  <div id="build" aria-hidden="true">v20261119-162901</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-161842"></script>
+  <script type="module" src="js/main.js?v=20261119-162901"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import { buildCharacter } from './models.js';
-import { ARENA } from './world.js';
+import { ARENA, STEP } from './world.js';
 
 const MAX_HOPPER = 200;
 const FIRE_RATE = 10; // bolinhas por segundo
@@ -18,7 +18,7 @@ export class Combatant {
   constructor(game, { name, team, isPlayer = false }) {
     this.game = game; this.name = name; this.team = team; this.isPlayer = isPlayer;
     this.pos = new THREE.Vector3();
-    this.vel = new THREE.Vector3();
+    this.vel = new THREE.Vector3(); this.vy = 0; this.scoped = false;
     this.yaw = 0; this.pitch = 0; this.crouch = false;
     this.state = 'alive';
     this.hopper = MAX_HOPPER; this.pods = 4; this.reloadT = 0; this.fireCd = 0; this.heat = 0;
@@ -27,7 +27,7 @@ export class Combatant {
     this.kills = 0;
   }
   get alive() { return this.state === 'alive'; }
-  get eyeY() { return 1.62 - 0.45 * this.model.pose.crouch; }
+  get eyeY() { return this.pos.y + 1.62 - 0.45 * this.model.pose.crouch; }
   headCenter(out) { return out.set(this.pos.x, this.eyeY - 0.02, this.pos.z); }
   chestCenter(out) { return out.set(this.pos.x, this.eyeY - 0.5, this.pos.z); }
   get bodyTop() { return this.eyeY - 0.17; }
@@ -37,16 +37,25 @@ export class Combatant {
   }
   get spread() {
     const moving = Math.min(1, this.vel.length() / 5);
-    return (0.008 + moving * 0.016 + this.heat) * (this.crouch ? 0.65 : 1);
+    return (0.008 + moving * 0.016 + this.heat) * (this.crouch ? 0.65 : 1) * (this.scoped ? 0.3 : 1);
   }
 
   reset(x, z, yaw) {
-    this.pos.set(x, 0, z); this.vel.set(0, 0, 0);
+    this.pos.set(x, 0, z); this.vel.set(0, 0, 0); this.vy = 0; this.scoped = false;
     this.yaw = yaw; this.pitch = 0; this.crouch = false;
     this.state = 'alive'; this.hopper = MAX_HOPPER; this.reloadT = 0; this.fireCd = 0; this.heat = 0;
     this.model.clearSplats();
     this.model.pose.crouch = 0; this.model.pose.hands = 0;
     this.syncModel(0.016);
+  }
+
+  // sobe em plataformas/rampas e cai das bordas
+  updateY(dt) {
+    const fl = this.game.world.floorAt(this.pos.x, this.pos.z, this.pos.y);
+    if (this.pos.y > fl + 0.01) {
+      this.vy -= 20 * dt; this.pos.y += this.vy * dt;
+      if (this.pos.y <= fl) { this.pos.y = fl; this.vy = 0; }
+    } else { this.pos.y = fl; this.vy = 0; }
   }
 
   canFire() { return this.alive && this.reloadT <= 0 && this.hopper > 0 && this.fireCd <= 0 && this.game.state === 'playing'; }
@@ -97,7 +106,7 @@ export class Combatant {
 
   syncModel(dt) {
     const m = this.model;
-    m.root.position.set(this.pos.x, 0, this.pos.z);
+    m.root.position.set(this.pos.x, this.pos.y, this.pos.z);
     m.root.rotation.y = this.yaw;
     // LOD de equipes grandes: quem está atrás da câmera (ou muito longe) não é desenhado e anima só de vez em quando
     const cam = this.game.camera;
@@ -145,7 +154,12 @@ export class Bot extends Combatant {
       const inner = spots.filter((s) => s.via);
       if (inner.length) best = inner[(Math.random() * inner.length) | 0];
     }
-    this.dest.set(best.x, 0, best.z);
+    // e às vezes sobe numa torre para atirar de cima
+    if (!first && Math.random() < 0.14) {
+      const high = spots.filter((s) => s.y > 0);
+      if (high.length) best = high[(Math.random() * high.length) | 0];
+    }
+    this.dest.set(best.x, best.y || 0, best.z);
     this.via = best.via || null; this.via2 = best.via2 || null; this.stage = 0;
     this.stuckT = 0; this.lastPos.copy(this.pos);
   }
@@ -292,5 +306,6 @@ export class Bot extends Combatant {
     this.vel.set(wishX * speed, 0, wishZ * speed);
     this.pos.addScaledVector(this.vel, dt);
     g.world.collide(this.pos, 0.35);
+    this.updateY(dt);
   }
 }
