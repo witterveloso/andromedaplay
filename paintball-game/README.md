@@ -16,6 +16,7 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **Abertura e tutorial:** tela de abertura animada com frases que se alternam e chamada adequada ao aparelho; o tutorial de 3 passos aparece só no primeiro acesso (refaça em Configurações → *Rever o tutorial*).
 - **Centerflag:** uma bandeira no centro do campo; pegue e leve até a base inimiga para vencer a rodada (ou elimine o outro time). Quem carrega derruba a bandeira ao ser marcado. Os bots pegam, escoltam e perseguem o portador. Escolha o modo no menu.
 - **Barracos com porta:** dá para entrar em barracos/escritórios (favela, ferro-velho, cidade e galpão), se esconder e atirar pela porta. As paredes bloqueiam tiros e visão; aparece **ESCONDIDO** quando nenhum inimigo te enxerga.
 - **Mapa de localização (radar):** vista de cima com aliados, bandeira e inimigos. Modos em Configurações: *Avistados* (quem você ou um aliado enxerga), *Todos* e *Desligado*. **M** ou toque no mapa amplia.

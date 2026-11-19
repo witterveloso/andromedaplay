@@ -19,8 +19,8 @@ const LOW = Q === 'low' || (Q === 'auto' && IS_TOUCH);
 const ROUND_TIME = 150, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
 const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo'];
 const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
-const loaderProgress = (p, tip) => { $('ld-fill').style.width = `${Math.round(p * 100)}%`; if (tip) $('ld-tip').textContent = tip; };
-loaderProgress(0.05, 'Preparando o campo…');
+const loaderProgress = (p, tip) => { $('ld-fill').style.width = `${Math.round(p * 100)}%`; $('ld-fill').parentElement.setAttribute('aria-valuenow', String(Math.round(p * 100))); $('ld-pct').textContent = `${Math.round(p * 100)}%`; if (tip) $('ld-tip').textContent = tip; };
+loaderProgress(0.05, 'Calibrando os marcadores…');
 await nextFrame();
 
 // paleta de tinta (altera as cores globais antes de construir qualquer coisa)
@@ -44,12 +44,12 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 520);
 scene.add(camera);
 const world = createWorld(scene, renderer, LOW ? 'low' : 'high');
-loaderProgress(0.2, 'Montando o campo…');
+loaderProgress(0.2, 'Posicionando os bunkers…');
 await nextFrame();
 const startMap = MAPS[params.get('map')] ? params.get('map') : MAPS[settings.get('map')] ? settings.get('map') : 'arena';
 settings.set('map', startMap);
 world.loadMap(startMap);
-loaderProgress(0.55, 'Carregando os jogadores…');
+loaderProgress(0.55, 'Enchendo os loaders de tinta…');
 await nextFrame();
 const particles = new Particles(scene, LOW ? 120 : 240);
 const sfx = new Sfx();
@@ -622,7 +622,7 @@ const game = {
 };
 
 // ---------- ligações de UI ----------
-loaderProgress(0.75, 'Vestindo os soldados…');
+loaderProgress(0.75, 'Vestindo os jogadores…');
 await nextFrame();
 await loadCharacterAssets();
 game.setup();
@@ -647,14 +647,18 @@ input.on.pause = () => {
 input.on.lockChange = (locked) => { if (!locked && game.state !== 'menu' && !game.paused && !IS_TOUCH && !ui.settingsOpen()) game.openPause(); };
 canvas.addEventListener('mousedown', () => { if (!IS_TOUCH && !input.locked && game.state !== 'menu' && !game.paused) input.requestLock(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { game.openPause(); sfx.suspend(); } else sfx.resume(); });
-addEventListener('keydown', (e) => { if (e.code === 'Tab') { e.preventDefault(); if (game.state !== 'menu') ui.toggleBoard(true); } });
+addEventListener('keydown', (e) => { if (e.code === 'Tab' && !game.paused && !ui.settingsOpen() && game.state !== 'menu') { e.preventDefault(); ui.toggleBoard(true); } });
 addEventListener('keyup', (e) => { if (e.code === 'Tab') ui.toggleBoard(false); });
 addEventListener('keydown', (e) => { if (e.code === 'KeyM' && !e.repeat && game.state !== 'menu') radar.toggleBig(); });
 if (IS_TOUCH) { let bt = 0; $('top').addEventListener('pointerdown', () => { ui.toggleBoard(true); clearTimeout(bt); bt = setTimeout(() => ui.toggleBoard(false), 3000); }); }
-loaderProgress(1, 'Pronto!');
+loaderProgress(1, 'Tudo pronto para o primeiro tiro.');
 await nextFrame();
 ui.hideLoader();
-ui.showHome();
+// abertura -> (tutorial só no primeiro acesso) -> menu
+ui.showIntro(() => {
+  unlockAudio();
+  if (settings.get('coach')) ui.showHome(); else ui.openTutorial(() => ui.showHome());
+});
 
 // ---------- loop ----------
 window.__game = game;

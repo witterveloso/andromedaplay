@@ -5,12 +5,14 @@ import { IS_TOUCH } from './input.js';
 
 const $ = (id) => document.getElementById(id);
 const TIPS = [
-  'Agache atrás do bunker: a mira fica mais precisa e você vira um alvo menor.',
-  'Tiro na cara cobre a sua máscara de tinta. Proteja a cabeça!',
-  'Pods extras ficam na reserva: recarregue atrás de cobertura.',
-  'Troque entre 1ª e 3ª pessoa para espiar o canto sem se expor.',
-  'Correr abre a mira. Pare por um instante antes de atirar.',
-  'No galpão, os feixes de luz denunciam quem passa por eles.',
+  'Agache atrás do bunker: a mira fica mais firme e você vira um alvo menor.',
+  'Tiro na cara? A tinta cobre a sua máscara. Proteja a cabeça.',
+  'Recarregue atrás de cobertura. Pod vazio no meio do tiroteio custa a rodada.',
+  'Alterne entre 1ª e 3ª pessoa para espiar o canto sem se expor.',
+  'Correr abre a mira. Pare um instante antes de atirar.',
+  'Barracos têm porta: entre, se esconda e atire quando alguém cruzar.',
+  'No galpão, os feixes de luz entregam quem passa por eles.',
+  'Olhe o mapa antes de avançar: ele mostra quem você e seus aliados enxergam.',
 ];
 
 // grupo de botões de rádio acessível (setas movem a seleção)
@@ -105,6 +107,7 @@ export function createScreens(game) {
       range('sens', 'Sensibilidade', 'Velocidade de mira', 0.3, 2.5, 0.05),
       toggle('invertY', 'Inverter eixo vertical', 'Para cima/para baixo invertidos'),
       range('fov', 'Campo de visão', 'Maior = vê mais dos lados', 60, 100, 1),
+      action('Rever o tutorial', 'Mostra de novo o passo a passo inicial.', 'Abrir', () => { api.closeSettings(); api.openTutorial(); }),
       select('radar', 'Mapa de localização', 'Avistados: só quem você ou um aliado enxerga. Todos: mostra todos os inimigos.', [['spotted', 'Avistados'], ['all', 'Todos (fácil)'], ['off', 'Desligado']]),
       range('aimAssist', 'Assistência de mira', 'Enquanto atira, puxa a mira para o inimigo mais próximo. 0 = desligada', 0, 1, 0.05),
     ] },
@@ -152,6 +155,11 @@ export function createScreens(game) {
     const upd = () => { st.textContent = game.sfx.running ? 'Áudio ativo' : 'Áudio bloqueado'; };
     b.onclick = () => { game.sfx.unlock(); game.sfx.setAmbient(game.sfx.ambKind); game.sfx.shot(1); setTimeout(() => game.sfx.hitmarker(), 250); setTimeout(upd, 300); };
     setTimeout(upd, 0);
+    return r;
+  }
+  function action(t, d, label, fn) {
+    const r = mk(head(t, d) + `<button class="btn" style="width:auto;margin:0;padding:10px 18px">${label}</button>`);
+    r.querySelector('button').onclick = fn;
     return r;
   }
   function note(t) { const d = document.createElement('p'); d.className = 'note'; d.textContent = t; return d; }
@@ -224,19 +232,83 @@ export function createScreens(game) {
     show('end', true); document.body.classList.remove('ingame'); $('e-again').focus();
   };
 
-  // ---------------- coach (primeiro jogo) ----------------
-  // devolve true quando o tutorial foi aberto (a partida espera o jogador confirmar)
-  api.maybeCoach = () => {
-    if (S.get('coach')) return false;
-    $('coach').classList.add('on');
-    $('coach-ok').focus();
-    return true;
+  // ---------------- abertura + tutorial (só no primeiro acesso) ----------------
+  const key = (t) => `<rect width="38" height="38" rx="8" fill="#1b2230" stroke="#fff" stroke-opacity=".32"/><text x="19" y="26" text-anchor="middle" fill="#fff" font-family="Rajdhani,Inter,sans-serif" font-weight="700" font-size="21">${t}</text>`;
+  const g = (x, y, inner) => `<g transform="translate(${x},${y})">${inner}</g>`;
+  const mouse = (x, leftOn) => `<g transform="translate(${x},10)"><rect width="52" height="88" rx="26" fill="#1b2230" stroke="#fff" stroke-opacity=".38" stroke-width="2"/>${leftOn ? '<path d="M26 0v36H0V26A26 26 0 0 1 26 0z" fill="#ff8a00"/>' : ''}<path d="M26 0v36" stroke="#fff" stroke-opacity=".38" stroke-width="2"/></g>`;
+  const ART = {
+    pcMove: `<svg viewBox="0 0 290 120">${g(66, 6, key('W'))}${g(24, 50, key('A'))}${g(66, 50, key('S'))}${g(108, 50, key('D'))}${mouse(196, false)}<path d="M262 36a34 34 0 0 1 0 40" stroke="#ff8a00" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`,
+    pcShoot: `<svg viewBox="0 0 290 120">${mouse(60, true)}${g(150, 14, key('C'))}${g(196, 14, key('R'))}${g(242, 14, key('V'))}<text x="169" y="72" text-anchor="middle" fill="#9aa6b5" font-size="12" font-family="Inter,sans-serif">agachar</text><text x="215" y="72" text-anchor="middle" fill="#9aa6b5" font-size="12" font-family="Inter,sans-serif">recarregar</text><text x="261" y="72" text-anchor="middle" fill="#9aa6b5" font-size="12" font-family="Inter,sans-serif">câmera</text><text x="86" y="112" text-anchor="middle" fill="#ff8a00" font-size="13" font-family="Inter,sans-serif" font-weight="700">clique = atirar</text></svg>`,
+    touchMove: `<svg viewBox="0 0 290 120"><circle cx="70" cy="62" r="40" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3"/><circle cx="80" cy="54" r="17" fill="#fff" fill-opacity=".88"/><circle cx="178" cy="86" r="11" fill="#ff8a00"/><path d="M178 86q38-62 86-20" stroke="#ff8a00" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="2 10"/><path d="M252 60l14 6-8 12" stroke="#ff8a00" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    touchTap: `<svg viewBox="0 0 290 120"><circle cx="145" cy="60" r="13" fill="#ff8a00"/><circle cx="145" cy="60" r="32" fill="none" stroke="#ff8a00" stroke-opacity=".65" stroke-width="3"/><circle cx="145" cy="60" r="52" fill="none" stroke="#ff8a00" stroke-opacity=".3" stroke-width="3"/><g stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-opacity=".8"><path d="M52 60h34M204 60h34M145 6v22M145 92v22"/></g></svg>`,
+    goal: `<svg viewBox="0 0 290 120"><rect x="24" y="8" width="74" height="104" rx="12" fill="#0d1219" stroke="#fff" stroke-opacity=".28"/><rect x="44" y="30" width="22" height="18" fill="#46506a"/><rect x="62" y="64" width="22" height="14" fill="#46506a"/><circle cx="60" cy="98" r="5.5" fill="#fff"/><circle cx="44" cy="22" r="6" fill="#00b4ff" stroke="#fff" stroke-width="2"/><circle cx="82" cy="40" r="6" fill="#00b4ff" stroke="#fff" stroke-width="2"/><path d="M150 106V16" stroke="#ffd24a" stroke-width="5" stroke-linecap="round"/><path d="M152 18l56 18-56 18z" fill="#ffd24a"/><rect x="226" y="54" width="42" height="48" rx="5" fill="none" stroke="#7dff7a" stroke-width="3"/><path d="M238 102V82h18v20" stroke="#7dff7a" stroke-width="3" fill="none"/></svg>`,
   };
-  api.closeCoach = () => { $('coach').classList.remove('on'); S.set('coach', true); game.tutorialDone(); };
-  $('coach-ok').onclick = api.closeCoach;
+  const GOAL = 'Um tiro e você está marcado. Entre nos barracos para se esconder, olhe o mapa para achar os inimigos e, no Centerflag, leve a bandeira até a base inimiga.';
+  const PC_SLIDES = [
+    { art: ART.pcMove, title: 'Mova-se e mire', text: 'Use <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> para andar e o mouse para mirar. <kbd>Shift</kbd> corre.' },
+    { art: ART.pcShoot, title: 'Atire e se proteja', text: 'Clique para atirar. <kbd>C</kbd> agacha atrás do bunker, <kbd>R</kbd> recarrega e <kbd>V</kbd> alterna entre 1ª e 3ª pessoa.' },
+    { art: ART.goal, title: 'Marque, esconda-se, vença', text: GOAL + ' A tecla <kbd>M</kbd> amplia o mapa.' },
+  ];
+  const TOUCH_SLIDES = [
+    { art: ART.touchMove, title: 'Mova e mire', text: 'Joystick à esquerda para andar. <b>Arraste</b> o dedo na tela para virar a câmera.' },
+    { art: ART.touchTap, title: 'Toque para atirar', text: 'Achou o alvo? <b>Toque na tela</b> para disparar. <b>Segure</b> o dedo para uma rajada contínua. Dica: gire com um polegar e toque do outro lado para atirar.' },
+    { art: ART.goal, title: 'Marque, esconda-se, vença', text: GOAL + ' Toque no mapa para ampliar.' },
+  ];
+  let slide = 0, onDone = null;
+  const slides = () => (IS_TOUCH ? TOUCH_SLIDES : PC_SLIDES);
+  const renderSlide = () => {
+    const list = slides(), s = list[slide], last = slide === list.length - 1;
+    $('coach-art').innerHTML = s.art; $('coach-step').textContent = `Passo ${slide + 1} de ${list.length}`;
+    $('coach-title').textContent = s.title; $('coach-text').innerHTML = s.text;
+    $('coach-dots').innerHTML = list.map((_, i) => `<i class="${i === slide ? 'on' : ''}"></i>`).join('');
+    $('coach-ok').textContent = last ? 'Começar' : 'Próximo'; $('coach-skip').style.visibility = last ? 'hidden' : 'visible';
+  };
+  api.openTutorial = (done) => { slide = 0; onDone = done || null; renderSlide(); $('coach').classList.add('on'); $('coach-ok').focus(); };
+  const finishTutorial = () => {
+    $('coach').classList.remove('on'); S.set('coach', true);
+    const d = onDone; onDone = null;
+    if (game.tutorialDone) game.tutorialDone();
+    if (d) d();
+  };
+  $('coach-ok').onclick = () => { if (slide < slides().length - 1) { slide++; renderSlide(); } else finishTutorial(); };
+  $('coach-skip').onclick = finishTutorial;
   addEventListener('keydown', (e) => {
-    if ($('coach').classList.contains('on') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); api.closeCoach(); }
-  });
+    if (!$('coach').classList.contains('on')) return;
+    if (e.code === 'Enter' || e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); $('coach-ok').click(); }
+    else if (e.code === 'ArrowLeft' && slide > 0) { e.preventDefault(); slide--; renderSlide(); }
+    else if (e.code === 'Escape') { e.preventDefault(); finishTutorial(); }
+  }, true);
+  // rede de segurança: se a partida começar sem o tutorial ter sido visto, mostra agora e segura a contagem
+  api.maybeCoach = () => { if (S.get('coach')) return false; api.openTutorial(); return true; };
+  api.closeCoach = finishTutorial;
+
+  // abertura: "toque para começar" (também libera o áudio no celular)
+  api.showIntro = (onStart) => {
+    const el = $('intro');
+    // chamada adequada ao aparelho: toque no celular, clique/Enter no computador
+    $('intro-cta-text').textContent = IS_TOUCH ? 'TOQUE PARA ENTRAR NO CAMPO' : 'ENTRAR NO CAMPO';
+    $('intro-sub').textContent = IS_TOUCH ? 'Paintball tático 5 contra 5 · PC e celular' : 'Clique ou aperte Enter';
+    // frases que se alternam (3,6 s cada)
+    const lines = [...document.querySelectorAll('#intro-lines span')]; let li = 0;
+    const rot = setInterval(() => { lines[li].classList.remove('on'); li = (li + 1) % lines.length; lines[li].classList.add('on'); }, 3600);
+    el.classList.add('on'); $('intro-start').focus({ preventScroll: true });
+    const keyGo = (e) => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); go(); } };
+    const go = () => { if (!el.classList.contains('on')) return; clearInterval(rot); el.classList.remove('on'); removeEventListener('keydown', keyGo, true); onStart(); };
+    el.onclick = go; addEventListener('keydown', keyGo, true);
+  };
+
+  // foco preso dentro do diálogo aberto (Tab/Shift+Tab circulam)
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const open = ['#settings.on .sheet', '#pause.on .sheet', '#end.on .sheet', '#coach.on .coach-card'].map((q) => document.querySelector(q)).filter(Boolean).pop();
+    if (!open) return;
+    const f = [...open.querySelectorAll('button, [href], input, select, [tabindex]:not([tabindex="-1"])')].filter((el) => !el.disabled && el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (!open.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }, true);
 
   // ---------------- aplicação das preferências ----------------
   api.apply = () => {

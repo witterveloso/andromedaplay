@@ -4,29 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#0a0d12">
-  <meta name="description" content="Splat Arena — paintball tático online no navegador, para celular e PC.">
+  <meta name="description" content="Splat Arena — paintball tático 5 contra 5 no navegador, para celular e PC.">
   <title>Splat Arena — Paintball Online</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-042226">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-042226", "./js/camo.js": "./js/camo.js?v=20261119-042226", "./js/combatants.js": "./js/combatants.js?v=20261119-042226", "./js/effects.js": "./js/effects.js?v=20261119-042226", "./js/input.js": "./js/input.js?v=20261119-042226", "./js/main.js": "./js/main.js?v=20261119-042226", "./js/maps.js": "./js/maps.js?v=20261119-042226", "./js/models.js": "./js/models.js?v=20261119-042226", "./js/radar.js": "./js/radar.js?v=20261119-042226", "./js/screens.js": "./js/screens.js?v=20261119-042226", "./js/settings.js": "./js/settings.js?v=20261119-042226", "./js/textures.js": "./js/textures.js?v=20261119-042226", "./js/ui.js": "./js/ui.js?v=20261119-042226", "./js/weapon.js": "./js/weapon.js?v=20261119-042226", "./js/world.js": "./js/world.js?v=20261119-042226"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-043556">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-043556", "./js/camo.js": "./js/camo.js?v=20261119-043556", "./js/combatants.js": "./js/combatants.js?v=20261119-043556", "./js/effects.js": "./js/effects.js?v=20261119-043556", "./js/input.js": "./js/input.js?v=20261119-043556", "./js/main.js": "./js/main.js?v=20261119-043556", "./js/maps.js": "./js/maps.js?v=20261119-043556", "./js/models.js": "./js/models.js?v=20261119-043556", "./js/radar.js": "./js/radar.js?v=20261119-043556", "./js/screens.js": "./js/screens.js?v=20261119-043556", "./js/settings.js": "./js/settings.js?v=20261119-043556", "./js/textures.js": "./js/textures.js?v=20261119-043556", "./js/ui.js": "./js/ui.js?v=20261119-043556", "./js/weapon.js": "./js/weapon.js?v=20261119-043556", "./js/world.js": "./js/world.js?v=20261119-043556"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
   <canvas id="mask" aria-hidden="true"></canvas>
 
   <!-- HUD em jogo -->
-  <div id="hud" aria-live="polite">
+  <div id="hud">
     <div id="top" role="button" tabindex="-1" aria-label="Placar">
       <div class="team o"><span id="score-o">0</span><div id="alive-o" class="alive"></div></div>
       <div id="center"><div id="timer">2:00</div><div id="round">RODADA 1</div><div id="flag-status"></div></div>
       <div class="team b"><span id="score-b">0</span><div id="alive-b" class="alive"></div></div>
     </div>
-    <div id="feed"></div>
+    <div id="feed" role="log" aria-live="polite" aria-relevant="additions"></div>
     <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
     <div id="hitmarker"></div>
-    <div id="banner"><div id="banner-t"></div><div id="banner-s"></div></div>
+    <div id="banner" role="status" aria-live="polite"><div id="banner-t"></div><div id="banner-s"></div></div>
     <div id="reload-bar"><div id="reload-fill"></div></div>
     <div id="reload-hint">RECARREGAR <kbd>R</kbd></div>
     <div id="weapon">
@@ -34,21 +34,22 @@
       <div class="w-name">MARCADOR T-68 <span id="cam-label">1ª PESSOA</span></div>
       <div class="w-row"><div id="ammo">200</div><div class="w-side"><div class="w-bar"><i id="ammo-fill"></i></div><div id="pods">PODS 4</div></div></div>
     </div>
+    <div id="tap-hint">Arraste para mirar · toque para atirar</div>
     <div id="map-label"></div>
     <canvas id="radar" width="300" height="450" role="img" aria-label="Mapa de localização dos inimigos"></canvas>
     <div id="stealth">ESCONDIDO</div>
     <small id="keys" class="pc-only">V câmera · R recarregar · C agachar · Shift correr · M mapa grande · Tab placar · Esc pausa</small>
   </div>
 
-  <!-- coach: dicas no primeiro jogo -->
-  <div id="coach" role="dialog" aria-label="Como jogar">
+  <!-- tutorial do primeiro acesso (passo a passo) -->
+  <div id="coach" role="dialog" aria-modal="true" aria-labelledby="coach-title">
     <div class="coach-card">
-      <h3>Como jogar</h3>
-      <ul class="pc-only"><li><kbd>W A S D</kbd> mover</li><li><b>Mouse</b> mirar · <b>clique</b> atirar</li><li><kbd>V</kbd> troca 1ª/3ª pessoa</li><li><kbd>C</kbd> agacha atrás do bunker</li></ul>
-      <ul class="touch-only"><li><b>Joystick</b> à esquerda para mover</li><li><b>Arraste</b> na tela para virar a câmera</li><li>Achou o alvo? <b>Toque na tela</b> para atirar</li><li><b>Segure</b> o dedo para disparar em rajada enquanto mira</li><li>Dica: gire com um polegar e <b>toque do outro lado</b> para atirar</li></ul>
-      <p>Um tiro e você está <b>marcado</b>. Entre nos barracos para se esconder e use o <b>mapa</b> no canto para ver onde estão os inimigos.</p>
-      <button id="coach-ok" class="btn primary">Entendi, começar</button>
-      <p class="hint pc-only">ou aperte <kbd>Enter</kbd></p>
+      <div class="coach-art" id="coach-art" aria-hidden="true"></div>
+      <p class="coach-step" id="coach-step"></p>
+      <h3 id="coach-title"></h3>
+      <p id="coach-text"></p>
+      <div class="dots" id="coach-dots" aria-hidden="true"></div>
+      <div class="row"><button id="coach-skip" class="btn ghost">Pular</button><button id="coach-ok" class="btn primary">Próximo</button></div>
     </div>
   </div>
 
@@ -67,21 +68,36 @@
   <div id="loader" class="screen on">
     <img class="ld-marker" src="assets/marker.png" alt="">
     <div class="ld-logo">SPLAT<span>ARENA</span></div>
-    <div class="ld-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i id="ld-fill"></i></div>
+    <div class="ld-bar" role="progressbar" aria-label="Carregando" aria-valuemin="0" aria-valuemax="100"><i id="ld-fill"></i></div>
+    <div class="ld-pct" id="ld-pct" aria-hidden="true">0%</div>
     <p id="ld-tip"></p>
+  </div>
+
+  <!-- abertura -->
+  <div id="intro" class="screen" role="dialog" aria-label="Abertura">
+    <div class="intro-bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="grid"></i></div>
+    <div class="intro-center">
+      <img class="intro-marker" src="assets/marker.png" alt="">
+      <h1 class="intro-logo" aria-label="Splat Arena"><span class="w1">SPLAT</span><span class="w2">ARENA</span></h1>
+      <p class="intro-tag"><b>Mire.</b> <b>Cubra.</b> <b class="hl">Marque.</b></p>
+      <div class="intro-lines" id="intro-lines" aria-hidden="true"><span class="on">Sem sangue. Só tinta e tática.</span><span>Cada bunker é uma decisão.</span><span>Um tiro e você está marcado.</span><span>Quem se esconde bem, vence.</span></div>
+      <p class="sr-only">Splat Arena: paintball tático 5 contra 5 no navegador, para celular e PC.</p>
+      <button id="intro-start" class="cta intro-cta"><span id="intro-cta-text">ENTRAR NO CAMPO</span></button>
+      <small class="intro-sub" id="intro-sub">Clique ou aperte Enter</small>
+    </div>
   </div>
 
   <!-- menu inicial -->
   <main id="home" class="screen">
     <header class="home-top">
       <div class="logo">SPLAT<span>ARENA</span></div>
-      <div class="top-actions"><button id="btn-sound" class="icon-btn" aria-label="Som"></button>
+      <div class="top-actions"><button id="btn-sound" class="icon-btn" aria-label="Som" title="Som"></button>
       <button id="btn-settings" class="icon-btn" aria-label="Configurações"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
     </header>
     <section class="home-left">
-      <p class="eyebrow">PAINTBALL TÁTICO ONLINE</p>
+      <p class="eyebrow">PAINTBALL TÁTICO · 5 CONTRA 5</p>
       <h1 aria-label="Mire. Cubra. Marque."><span>Mire.</span><span>Cubra.</span><span class="hl">Marque.</span></h1>
-      <p class="lede">Paintball tático 5 contra 5 em campos reais: galpão, favela, ferro-velho e cidade abandonada. Um tiro e você está marcado.</p>
+      <p class="lede">Cinco contra cinco em galpão, favela, ferro-velho e cidade abandonada. Um tiro de tinta e você está marcado.</p>
       <button id="btn-play" class="cta"><span>JOGAR AGORA</span><small>Eliminação · melhor de 5</small></button>
       <div id="modes" class="modes" role="radiogroup" aria-label="Modos de jogo"></div>
       <p id="mode-desc" class="mode-desc"></p>
@@ -110,9 +126,9 @@
   </main>
 
   <!-- pausa -->
-  <div id="pause" class="screen">
+  <div id="pause" class="screen" role="dialog" aria-modal="true" aria-labelledby="pause-title">
     <div class="sheet small">
-      <h2>Pausado</h2>
+      <h2 id="pause-title">Pausado</h2>
       <button id="p-resume" class="btn primary">Continuar</button>
       <button id="p-settings" class="btn">Configurações</button>
       <button id="p-restart" class="btn">Reiniciar partida</button>
@@ -121,7 +137,7 @@
   </div>
 
   <!-- fim de partida -->
-  <div id="end" class="screen">
+  <div id="end" class="screen" role="dialog" aria-modal="true" aria-labelledby="end-title">
     <div class="sheet">
       <p id="end-eyebrow" class="eyebrow">FIM DE PARTIDA</p>
       <h2 id="end-title">VITÓRIA</h2>
@@ -143,12 +159,12 @@
     <div class="sheet">
       <div class="sheet-head"><h2>Configurações</h2><button id="s-close" class="icon-btn" aria-label="Fechar">✕</button></div>
       <div class="tabs" role="tablist" id="s-tabs"></div>
-      <div id="s-body"></div>
+      <div id="s-body" role="tabpanel"></div>
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-042226</div>
+  <div id="build" aria-hidden="true">v20261119-043556</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-042226"></script>
+  <script type="module" src="js/main.js?v=20261119-043556"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ const DEFAULTS = {
   radar: 'spotted',
   volume: 0.7, music: 0.4, ambient: 0.7, quality: 'auto',
   autoFire: false, fireLeft: false,
-  reduceFx: false, hudScale: 1, crossColor: '#ffffff', crossStyle: 'cross',
+  reduceFx: (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches), tapHints: 0, hudScale: 1, crossColor: '#ffffff', crossStyle: 'cross',
   touchScale: 1, lefty: false, haptics: true, coach: false,
 };
 const listeners = new Set();

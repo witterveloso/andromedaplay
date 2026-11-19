@@ -80,8 +80,6 @@ body.touch #ammo { font-size: 34px; min-width: 60px; }
 #keys { position: absolute; right: calc(14px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); font-size: 11px; color: rgba(255, 255, 255, .6); }
 
 /* =============================== coach ================================ */
-#coach { position: fixed; inset: 0; z-index: 12; display: none; align-items: center; justify-content: center; background: rgba(5, 7, 11, .45); }
-#coach.on { display: flex; }
 .coach-card { width: min(90vw, 360px); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; backdrop-filter: blur(10px); animation: pop .3s var(--ease); }
 .coach-card h3 { margin: 0 0 8px; font: 800 20px var(--display); letter-spacing: .06em; text-transform: uppercase; }
 .coach-card ul { margin: 0 0 8px; padding-left: 18px; line-height: 1.7; font-size: 14px; }
@@ -387,3 +385,83 @@ body.lefty #weapon { left: auto; right: 34%; }
   .map, .map:nth-child(-n+2) { grid-column: span 1; }
   .map::before, .map:nth-child(-n+2)::before { padding-top: 52%; }
 }
+
+/* ================== acessibilidade (revisão WCAG 2.1 AA) ================== */
+:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(0, 0, 0, .65); }
+/* alvos de toque >= 44 px */
+.seg button { min-height: 44px; padding: 8px 14px; }
+.chip { min-height: 40px; display: inline-flex; align-items: center; }
+.sw { height: 44px; min-width: 56px; }
+.tabs button { min-height: 44px; }
+.icon-btn, #btn-pause { min-width: 44px; min-height: 44px; }
+.sw-toggle { position: relative; height: 30px; }
+.sw-toggle::before { content: ''; position: absolute; inset: -8px -6px; }
+.set input[type=range] { height: 32px; }
+.btn { min-height: 48px; }
+/* textos pequenos: mínimo de 11 px */
+.map .m-tag, .a-tag, .a-stats label, #round, #flag-status, #touch button small { font-size: 11px; }
+.w-name { font-size: 12px; }
+/* dica de teclas legível sobre qualquer fundo */
+#keys { background: rgba(10, 13, 19, .72); color: #cfd8e6; padding: 4px 9px; border-radius: 8px; }
+/* zoom: o menu rola em vez de cortar */
+#home { overflow-y: auto; }
+.home-right { min-height: 0; }
+/* dica de toque */
+body.touch.ingame #tap-hint { display: block; opacity: 0; transition: opacity .6s; background: rgba(10, 13, 19, .72); padding: 5px 12px; border-radius: 999px; color: #e6ecf5; }
+body.touch.ingame #tap-hint.on { opacity: 1; }
+#tap-hint { pointer-events: none; }
+/* alto contraste do sistema */
+@media (forced-colors: active) {
+  .map, .chip, .seg, .btn, .cta, .sw, .icon-btn, #touch button { border: 1px solid ButtonText; }
+  .map[aria-checked=true], .chip[aria-checked=true], .seg button[aria-checked=true], .sw[aria-checked=true] { outline: 3px solid Highlight; }
+}
+
+/* ======================= ABERTURA ======================= */
+#intro { z-index: 30; align-items: center; justify-content: center; text-align: center; padding: 20px; background: radial-gradient(ellipse at 50% 40%, rgba(10, 14, 22, .55), rgba(6, 9, 15, .94)); backdrop-filter: blur(3px); cursor: pointer; overflow: hidden; }
+.intro-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.intro-bg .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; animation: drift 14s ease-in-out infinite alternate; }
+.intro-bg .b1 { width: 46vmax; height: 46vmax; left: -12vmax; top: -10vmax; background: #ff7a00; }
+.intro-bg .b2 { width: 40vmax; height: 40vmax; right: -12vmax; bottom: -14vmax; background: #00a9ff; animation-delay: -4s; }
+.intro-bg .b3 { width: 22vmax; height: 22vmax; left: 55%; top: 8%; background: #ff2e93; opacity: .28; animation-delay: -8s; }
+.intro-bg .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%); }
+@keyframes drift { to { transform: translate(6vmax, 4vmax) scale(1.15); } }
+.intro-center { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.intro-marker { width: min(70vw, 440px); filter: drop-shadow(0 22px 40px rgba(255, 122, 0, .32)); animation: slideIn 1.1s var(--ease) both, float 5s 1.2s ease-in-out infinite; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-60px) rotate(-4deg); } }
+.intro-logo { margin: 0; display: flex; gap: .28em; font: 700 clamp(48px, 11vw, 120px)/.9 var(--display); letter-spacing: .08em; text-shadow: 0 8px 40px rgba(0, 0, 0, .5); }
+.intro-logo span { display: inline-block; animation: rise .8s var(--ease) both; }
+.intro-logo .w2 { color: var(--accent); animation-delay: .18s; text-shadow: 0 0 38px rgba(255, 138, 0, .55); }
+@keyframes rise { from { opacity: 0; transform: translateY(40px) skewY(4deg); } }
+.intro-tag { margin: 2px 0 8px; font: 700 clamp(16px, 2.6vw, 26px) var(--display); letter-spacing: .3em; text-transform: uppercase; color: #dfe6f0; animation: rise .8s .4s var(--ease) both; }
+.intro-tag .hl { color: var(--accent); }
+.intro-cta { width: min(88vw, 380px); animation: rise .8s .6s var(--ease) both, breathe 2.4s 1.6s ease-in-out infinite; }
+.intro-cta span { font-size: clamp(18px, 2.6vw, 24px); letter-spacing: .12em; }
+@keyframes breathe { 50% { transform: scale(1.035); box-shadow: 0 16px 44px rgba(255, 122, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .5); } }
+.intro-sub { color: #8e9bb0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; animation: rise .8s .8s var(--ease) both; }
+@media (max-height: 520px) { .intro-center { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px 22px; } .intro-marker { width: 34vw; } .intro-center > * { flex: 0 1 auto; } .intro-logo { font-size: 46px; } }
+/* loader: porcentagem */
+.ld-pct { font: 700 14px var(--display); letter-spacing: .2em; color: var(--accent-2); margin-top: -8px; }
+
+/* ======================= TUTORIAL (primeiro acesso) ======================= */
+#coach { position: fixed; inset: 0; z-index: 35; display: none; align-items: center; justify-content: center; padding: 14px; background: rgba(5, 7, 11, .72); backdrop-filter: blur(5px); }
+#coach.on { display: flex; }
+.coach-card { width: min(94vw, 460px); max-height: 94vh; overflow: auto; padding: 0 0 18px; border-radius: 24px; text-align: center; }
+.coach-art { height: 150px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 120%, rgba(255, 138, 0, .28), transparent 65%), linear-gradient(180deg, #151c29, #0f141e); border-radius: 24px 24px 0 0; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.coach-art svg { width: min(78%, 300px); height: auto; overflow: visible; }
+.coach-step { margin: 14px 0 0; font: 700 11px var(--display); letter-spacing: .24em; color: var(--accent); text-transform: uppercase; }
+.coach-card h3 { margin: 4px 22px 6px; font: 700 28px/1.05 var(--display); letter-spacing: .04em; text-transform: uppercase; }
+.coach-card #coach-text { margin: 0 24px 14px; font-size: 14.5px; line-height: 1.5; color: #c4cdd9; min-height: 3.2em; }
+.coach-card kbd { font-size: .85em; }
+.dots { display: flex; justify-content: center; gap: 7px; margin-bottom: 12px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .2); transition: .25s var(--ease); }
+.dots i.on { width: 24px; border-radius: 4px; background: var(--accent); }
+.coach-card .row { padding: 0 18px; } .coach-card .row .btn { margin-top: 4px; }
+.coach-card .row .btn.primary { flex: 2; }
+@media (max-height: 520px) { .coach-art { height: 84px; } .coach-art svg { width: 30%; } .coach-card h3 { font-size: 22px; } .coach-card #coach-text { min-height: 0; margin-bottom: 8px; } .coach-step { margin-top: 8px; } }
+
+/* abertura: frases que se alternam + texto só para leitores de tela */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.intro-lines { position: relative; height: 1.7em; width: min(88vw, 420px); font: 500 clamp(15px, 2.1vw, 19px) var(--font); color: #c9d3e2; animation: rise .8s .5s var(--ease) both; margin-bottom: 4px; }
+.intro-lines span { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transform: translateY(6px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.intro-lines span.on { opacity: 1; transform: none; }
+.intro-sub { min-height: 1.2em; }
