@@ -182,6 +182,23 @@ const game = {
     }
   },
 
+  // 1º tiro: o jogador fica com uma marca de tinta, mas segue na partida
+  onHit(victim, shooter, head, point) {
+    const you = (c) => (c.isPlayer ? 'Você' : c.name);
+    hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> acertou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b> · 1ª marca${head ? ' 🎯' : ''}`, shooter.team);
+    if (shooter.isPlayer) { hud.hitmarker(); sfx.hitmarker(); this.buzz(head ? [30, 25, 50] : 35); }
+    if (victim.isPlayer) {
+      sfx.splat(1); this.buzz([90, 40, 70]);
+      const col = TEAM_CSS[shooter.team], fx = settings.get('reduceFx') ? 0.45 : 1;
+      const ang = Math.atan2(-(shooter.pos.x - victim.pos.x), -(shooter.pos.z - victim.pos.z)) - victim.yaw;
+      overlay.hitBody(col, -ang);
+      if (head) overlay.hitFace(col, 0.4 * fx);
+      this.shake = settings.get('reduceFx') ? 0 : 0.3;
+      this.hitInfo = { shooter, t: 3, col };
+      hud.banner('ATINGIDO! 1ª MARCA', 'Mais um tiro e você está fora — procure cobertura', 1100, col);
+    }
+  },
+
   onMarked(victim, shooter, head, point) {
     const you = (c) => (c.isPlayer ? 'Você' : c.name);
     hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> marcou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b>${head ? ' 🎯' : ''}`, shooter.team);
@@ -607,6 +624,7 @@ const game = {
     hud.ammo(p.hopper, p.pods, p.reloadT);
     $('reload-hint').classList.toggle('on', p.alive && this.state === 'playing' && (p.hopper < 30 || p.reloadT > 0) && p.reloadT <= 0 && p.pods > 0);
     hud.crosshair(p.spread, p.alive);
+    hud.lives(p.alive ? 2 - p.hits : 0);
     if (this.mode === 'flag') { const f = this.flag; $('flag-status').textContent = f.carrier ? `BANDEIRA: ${f.carrier.isPlayer ? 'VOCÊ' : f.carrier.name.toUpperCase()} (${TEAM_NAME[f.carrier.team]})` : 'BANDEIRA: NO CHÃO'; }
     const hidden = p.alive && this.state === 'playing' && world.isInterior(p.pos.x, p.pos.z) && !this.combatants.some((c) => c instanceof Bot && c.alive && c.target === p);
     $('stealth').classList.toggle('on', hidden);

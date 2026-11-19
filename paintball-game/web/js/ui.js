@@ -24,6 +24,12 @@ export class HUD {
     el.classList.toggle('many', flags.length > 8);
     el.innerHTML = flags.map((a) => `<i class="${a ? 'on' : ''}" style="--c:${TEAM_CSS[team]}"></i>`).join('');
   }
+  lives(left) {
+    const el = document.getElementById('lives'); if (!el) return;
+    if (this._lives === left) return; this._lives = left;
+    el.querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < left));
+    el.classList.toggle('hurt', left === 1);
+  }
   ammo(h, pods, reloading) {
     this.el.ammo.textContent = h;
     const fill = document.getElementById('ammo-fill'); if (fill) fill.style.transform = `scaleX(${Math.max(0, h) / 200})`;

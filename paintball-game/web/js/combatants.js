@@ -3,6 +3,8 @@ import { buildCharacter } from './models.js';
 import { ARENA, STEP } from './world.js';
 
 const MAX_HOPPER = 200;
+export const HITS_TO_OUT = 2;   // 1º tiro: fica marcado; 2º tiro: eliminado
+const HIT_GRACE = 0.7;          // intervalo em que bolinhas da mesma rajada não contam como 2º tiro
 const FIRE_RATE = 10; // bolinhas por segundo
 const UP = new THREE.Vector3(0, 1, 0);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -18,7 +20,7 @@ export class Combatant {
   constructor(game, { name, team, isPlayer = false }) {
     this.game = game; this.name = name; this.team = team; this.isPlayer = isPlayer;
     this.pos = new THREE.Vector3();
-    this.vel = new THREE.Vector3(); this.vy = 0; this.scoped = false;
+    this.vel = new THREE.Vector3(); this.vy = 0; this.scoped = false; this.hits = 0; this.hitCd = 0;
     this.yaw = 0; this.pitch = 0; this.crouch = false;
     this.state = 'alive';
     this.hopper = MAX_HOPPER; this.pods = 4; this.reloadT = 0; this.fireCd = 0; this.heat = 0;
@@ -41,7 +43,7 @@ export class Combatant {
   }
 
   reset(x, z, yaw) {
-    this.pos.set(x, 0, z); this.vel.set(0, 0, 0); this.vy = 0; this.scoped = false;
+    this.pos.set(x, 0, z); this.vel.set(0, 0, 0); this.vy = 0; this.scoped = false; this.hits = 0; this.hitCd = 0;
     this.yaw = yaw; this.pitch = 0; this.crouch = false;
     this.state = 'alive'; this.hopper = MAX_HOPPER; this.reloadT = 0; this.fireCd = 0; this.heat = 0;
     this.model.clearSplats();
@@ -83,7 +85,7 @@ export class Combatant {
   }
 
   tick(dt) {
-    this.fireCd -= dt;
+    this.fireCd -= dt; this.hitCd = Math.max(0, this.hitCd - dt);
     this.heat = Math.max(0, this.heat - dt * 0.03);
     if (this.reloadT > 0) {
       this.reloadT -= dt;
@@ -94,6 +96,16 @@ export class Combatant {
   // acertado por uma bolinha
   mark(shooter, head, point) {
     if (!this.alive) return;
+    // 1º tiro: ganha uma marca de tinta e continua no jogo; 2º tiro: eliminado
+    if (this.hitCd > 0) { this.model.addSplat(point, shooter.team); return; }          // bolinha da mesma rajada
+    if (this.hits + 1 < HITS_TO_OUT) {
+      this.hits++; this.hitCd = HIT_GRACE;
+      this.model.addSplat(point, shooter.team); if (head) this.model.addSplat(point, shooter.team);
+      if (this.onFirstHit) this.onFirstHit(shooter);
+      this.game.onHit(this, shooter, head, point);
+      return;
+    }
+    this.hits = HITS_TO_OUT;
     this.state = 'marked';
     this.crouch = false;
     this.vel.set(0, 0, 0);
@@ -205,6 +217,12 @@ export class Bot extends Combatant {
     if (tx === null) return;
     this.objActive = true; this.via = null; this.via2 = null; this.stage = 2;
     this.dest.set(tx, 0, tz);
+  }
+
+  // levou o 1º tiro: vira para o atirador e, às vezes, procura outra cobertura
+  onFirstHit(shooter) {
+    this.target = shooter; this.seenT = Math.max(this.seenT, 0.5);
+    if (Math.random() < 0.55 && !this.objActive) { this.pickDest(); this.idleT = 0; }
   }
 
   think(dt) {

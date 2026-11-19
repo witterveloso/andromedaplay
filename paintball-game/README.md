@@ -16,6 +16,7 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **2 tiros para sair:** o 1º tiro deixa uma marca de tinta no corpo e o jogador continua (um indicador *MARCAS* mostra o seu); o 2º tiro elimina. Bolinhas da mesma rajada em até 0,7 s contam como um só acerto. Vale para você e para os bots, que reagem ao 1º tiro. Acertar na cara ainda conta como 1 acerto.
 - **Vibração (celular):** toque curto ao acertar (duplo na cara) e pulso longo ao ser marcado; ligada por padrão, com botão de teste em Configurações → Celular. Só funciona onde o navegador permite (Chrome no Android; iPhone não suporta).
 - **Torres e mira de sniper:** cada campo tem torres/plataformas com rampa e muretas; você e os bots sobem e atiram de cima. **Botão direito** (ou **ZOOM** no celular) liga a luneta 4× / 8× (roda do mouse troca): giro mais lento, balanço de respiração (agache ou segure Shift para firmar) e menos dispersão.
 - **Tamanho da equipe:** escolha 8×8, 10×10 ou 15×15 no menu. Equipes grandes usam nível de detalhe por distância (sem acessórios e sombra nos distantes, sem desenhar quem está atrás da câmera).
@@ -65,7 +66,7 @@ Cada campo tem luz, céu, névoa e materiais próprios. As texturas (tijolo, reb
 ## Jogabilidade
 - Marcador com hopper de 200 bolinhas, pods, recarga, ~10 bolinhas/s, queda de projétil e dispersão por movimento/rajada.
 - Respingos de tinta nas paredes, no chão e nos jogadores; partículas no impacto.
-- Acertado = **marcado** (mãos para cima). Tiro na cara/máscara **cobre a tela de tinta** com gotas escorrendo; a câmera passa para a 3ª pessoa.
+- Acertado uma vez = **marca** de tinta; acertado de novo = **eliminado** (mãos para cima). Tiro na cara/máscara **cobre a tela de tinta** com gotas escorrendo; a câmera passa para a 3ª pessoa.
 - Bots com IA (fácil/normal/difícil): cobertura, rajadas, reação. Partida melhor de 5 rodadas, eliminação, 2 min por rodada.
 - Personagens 3D com esqueleto: soldado com **camuflagem por equipe** (deserto × urbano azulado), máscara de paintball com lente espelhada, protetores de orelha, tira da cor do time, pods no colete e cilindro de ar nas costas; animações de andar/correr, mira, agachar e mãos para cima.
 
