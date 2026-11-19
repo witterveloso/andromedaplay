@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-100040">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-100040", "./js/camo.js": "./js/camo.js?v=20261119-100040", "./js/combatants.js": "./js/combatants.js?v=20261119-100040", "./js/effects.js": "./js/effects.js?v=20261119-100040", "./js/input.js": "./js/input.js?v=20261119-100040", "./js/main.js": "./js/main.js?v=20261119-100040", "./js/maps.js": "./js/maps.js?v=20261119-100040", "./js/models.js": "./js/models.js?v=20261119-100040", "./js/radar.js": "./js/radar.js?v=20261119-100040", "./js/screens.js": "./js/screens.js?v=20261119-100040", "./js/settings.js": "./js/settings.js?v=20261119-100040", "./js/textures.js": "./js/textures.js?v=20261119-100040", "./js/ui.js": "./js/ui.js?v=20261119-100040", "./js/weapon.js": "./js/weapon.js?v=20261119-100040", "./js/world.js": "./js/world.js?v=20261119-100040"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-161504">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-161504", "./js/camo.js": "./js/camo.js?v=20261119-161504", "./js/combatants.js": "./js/combatants.js?v=20261119-161504", "./js/effects.js": "./js/effects.js?v=20261119-161504", "./js/input.js": "./js/input.js?v=20261119-161504", "./js/main.js": "./js/main.js?v=20261119-161504", "./js/maps.js": "./js/maps.js?v=20261119-161504", "./js/models.js": "./js/models.js?v=20261119-161504", "./js/radar.js": "./js/radar.js?v=20261119-161504", "./js/screens.js": "./js/screens.js?v=20261119-161504", "./js/settings.js": "./js/settings.js?v=20261119-161504", "./js/textures.js": "./js/textures.js?v=20261119-161504", "./js/ui.js": "./js/ui.js?v=20261119-161504", "./js/weapon.js": "./js/weapon.js?v=20261119-161504", "./js/world.js": "./js/world.js?v=20261119-161504"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -26,6 +26,8 @@
     <div id="feed" role="log" aria-live="polite" aria-relevant="additions"></div>
     <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
     <div id="hitmarker"></div>
+    <div id="hitdir" aria-hidden="true"><i></i></div>
+    <div id="shooter-tag" aria-hidden="true"><b></b><span></span></div>
     <div id="banner" role="status" aria-live="polite"><div id="banner-t"></div><div id="banner-s"></div></div>
     <div id="reload-bar"><div id="reload-fill"></div></div>
     <div id="reload-hint">RECARREGAR <kbd>R</kbd></div>
@@ -164,8 +166,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-100040</div>
+  <div id="build" aria-hidden="true">v20261119-161504</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-100040"></script>
+  <script type="module" src="js/main.js?v=20261119-161504"></script>
 </body>
 </html>

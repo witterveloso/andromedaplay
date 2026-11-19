@@ -197,11 +197,32 @@ const game = {
       }
       this.shake = settings.get('reduceFx') ? 0 : 0.5;
       this.switchT = 1.2;
+      if (shooter !== victim) this.hitInfo = { shooter, t: 3.6, col };
       hud.banner('VOCÊ FOI MARCADO!', 'Mãos para cima — aguarde a rodada', 0, TEAM_CSS[shooter.team]);
     }
     this.dropFlag(victim);
     this.updateAlive();
     this.checkRoundEnd();
+  },
+
+  // seta apontando para quem te marcou (acompanha a câmera) + etiqueta com nome e distância sobre o atirador
+  updateHitDir(dt) {
+    const hi = this.hitInfo, dirEl = $('hitdir'), tag = $('shooter-tag');
+    if (!hi || (hi.t -= dt) <= 0 || this.state === 'menu') { if (hi) this.hitInfo = null; dirEl.classList.remove('on'); tag.style.display = 'none'; return; }
+    const sh = hi.shooter, p = this.player;
+    const f = camera.getWorldDirection(tmpB), fl = Math.hypot(f.x, f.z) || 1;
+    const tx = sh.pos.x - p.pos.x, tz = sh.pos.z - p.pos.z, dist = Math.hypot(tx, tz) || 1;
+    const fwd = (tx * f.x + tz * f.z) / fl, rgt = (tx * -f.z + tz * f.x) / fl;
+    dirEl.style.setProperty('--hc', hi.col); tag.style.setProperty('--hc', hi.col);
+    dirEl.style.transform = `rotate(${Math.atan2(rgt, fwd)}rad)`;
+    dirEl.classList.toggle('on', hi.t > 0.4);
+    // etiqueta sobre o atirador, se ele estiver no campo de visão
+    const v = tmpC.set(sh.pos.x, (sh.pos.y || 0) + 2.15, sh.pos.z).project(camera);
+    if (v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05) {
+      tag.style.display = 'block'; tag.style.opacity = Math.min(1, hi.t * 1.5);
+      tag.style.left = `${(v.x * 0.5 + 0.5) * innerWidth}px`; tag.style.top = `${Math.max(40, (-v.y * 0.5 + 0.5) * innerHeight)}px`;
+      tag.firstChild.textContent = sh.name || 'Adversário'; tag.lastChild.textContent = `${Math.round(dist)} m`;
+    } else tag.style.display = 'none';
   },
 
   updateAlive() {
@@ -403,6 +424,7 @@ const game = {
     this.stepBalls(dt);
     particles.update(dt);
     this.updateCamera(dt);
+    this.updateHitDir(dt);
     this.updateHud(dt);
     this.updateFlag(dt);
     if (this.radar) this.radar.update(dt);
@@ -589,6 +611,7 @@ const game = {
     this.updateAlive();
   },
   begin(restart) {
+    this.hitInfo = null;
     unlockAudio(); sfx.setMusicScale(0.55);
     if (IS_TOUCH) {
       try { document.documentElement.requestFullscreen?.(); screen.orientation?.lock?.('landscape').catch(() => {}); } catch (e) { /* ignora */ }
@@ -612,7 +635,7 @@ const game = {
   },
   resume() { this.paused = false; ui.hidePause(); input.requestLock(); },
   goHome() {
-    this.paused = false; this.state = 'menu'; this.matchOver = false;
+    this.paused = false; this.state = 'menu'; this.matchOver = false; this.hitInfo = null; $('hitdir').classList.remove('on'); $('shooter-tag').style.display = 'none';
     hud.hideBanner(); overlay.clear(false); this.cine = null;
     balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
     if (this.flag.mesh) this.flag.mesh.visible = false;
