@@ -275,7 +275,7 @@ const game = {
     if (this.state === 'menu') { this.menuOrbit += dt * 0.12; this.menuCamera(); particles.update(dt); return; }
     // fases da rodada
     if (this.state === 'countdown') {
-      this.cd -= dt;
+      if (!this.tutorialWait) this.cd -= dt;
       const n = Math.ceil(this.cd);
       if (n !== this.lastCd && n >= 1 && n <= 3) { this.lastCd = n; hud.banner(String(n), 'Prepare-se', 1000, '#fff'); sfx.beep(false); }
       if (this.cd <= 0) { this.state = 'playing'; hud.banner('TIRO LIVRE!', '', 1200, '#ffd24a'); sfx.beep(true); }
@@ -462,13 +462,19 @@ const game = {
     this.paused = false;
     ui.hideHome(); ui.hidePause();
     this.startMatch();
-    input.requestLock();
-    ui.maybeCoach();
+    // primeiro acesso: o tutorial segura a contagem até o jogador confirmar
+    this.tutorialWait = ui.maybeCoach();
+    if (!this.tutorialWait) input.requestLock();
   },
   openPause() {
     if (this.state === 'menu' || this.paused) return;
     this.paused = true; ui.showPause();
     if (document.pointerLockElement) document.exitPointerLock();
+  },
+  tutorialDone() { // jogador confirmou o tutorial: libera a contagem
+    if (!this.tutorialWait) return;
+    this.tutorialWait = false; this.cd = Math.max(this.cd, 3.4); this.lastCd = 4;
+    input.requestLock();
   },
   resume() { this.paused = false; ui.hidePause(); input.requestLock(); },
   goHome() {

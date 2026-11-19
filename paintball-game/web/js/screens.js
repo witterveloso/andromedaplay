@@ -59,12 +59,37 @@ export function createScreens(game) {
       b.setAttribute('aria-label', MAPS[id].name);
     },
   }));
-  const mapRadio = radio(mapsEl, mapItems, currentMap, (v) => { currentMap = v; S.set('map', v); $('map-desc').textContent = MAPS[v].blurb; game.setMap(v); }, 'map');
+  // Trabalhos pesados (montar campo, trocar cores) rodam depois de a tela repintar:
+  // o clique responde na hora e aparece "Carregando…". Se houver vários cliques, vale o último.
+  let busy = false, pending = null, wantPlay = false;
+  const paint = () => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(res, 0))));
+  const setBusy = (on) => {
+    document.body.classList.toggle('busy', on);
+    $('btn-play').querySelector('span').textContent = on ? 'CARREGANDO…' : 'JOGAR AGORA';
+    mapsEl.querySelectorAll('.map').forEach((b) => b.classList.toggle('loading', on && b.getAttribute('aria-checked') === 'true' && pending === null && busyMap));
+  };
+  let busyMap = false;
+  async function pump() {
+    if (busy) return;
+    busy = true;
+    while (pending) {
+      const job = pending; pending = null; busyMap = job.map; setBusy(true);
+      await paint();
+      try { job.run(); } catch (e) { console.error(e); }
+    }
+    busy = false; busyMap = false; setBusy(false);
+    if (wantPlay) { wantPlay = false; game.begin(); }
+  }
+  const queue = (map, run) => { pending = { map, run }; pump(); };
+  const mapRadio = radio(mapsEl, mapItems, currentMap, (v) => {
+    $('map-desc').textContent = MAPS[v].blurb;
+    queue(true, () => { currentMap = v; S.set('map', v); game.setMap(v); });
+  }, 'map');
   $('map-desc').textContent = MAPS[currentMap].blurb;
   mapsEl.querySelectorAll('.map').forEach((b) => { b.classList.add('map'); });
 
   radio($('palette'), PALETTES.map((p, i) => ({ value: String(i), render(b) { b.style.setProperty('--a', p.a); b.style.setProperty('--c', p.b); b.title = `${p.name}: ${p.note}`; b.setAttribute('aria-label', `${p.name}: ${p.note}`); } })),
-    String(S.get('palette')), (v) => { S.set('palette', Number(v)); game.setPalette(Number(v)); }, 'sw');
+    String(S.get('palette')), (v) => queue(false, () => { S.set('palette', Number(v)); game.setPalette(Number(v)); }), 'sw');
   radio($('seg-cam'), [{ value: 'fpp', label: '1ª pessoa' }, { value: 'tpp', label: '3ª pessoa' }], S.get('cam'), (v) => S.set('cam', v));
   radio($('seg-diff'), [{ value: 'facil', label: 'Fácil' }, { value: 'normal', label: 'Normal' }, { value: 'dificil', label: 'Difícil' }], S.get('diff'), (v) => S.set('diff', v));
   const camRadio = null; // (mantido simples)
@@ -140,7 +165,7 @@ export function createScreens(game) {
   api.hideHome = () => { show('home', false); document.body.classList.add('ingame'); };
   api.showPause = () => { show('pause', true); $('p-resume').focus(); };
   api.hidePause = () => show('pause', false);
-  $('btn-play').onclick = () => game.begin();
+  $('btn-play').onclick = () => { if (busy || pending) { wantPlay = true; return; } game.begin(); };
   $('p-resume').onclick = () => game.resume();
   $('p-restart').onclick = () => { api.hidePause(); game.begin(true); };
   $('p-home').onclick = () => { api.hidePause(); game.goHome(); };
@@ -173,13 +198,18 @@ export function createScreens(game) {
   };
 
   // ---------------- coach (primeiro jogo) ----------------
+  // devolve true quando o tutorial foi aberto (a partida espera o jogador confirmar)
   api.maybeCoach = () => {
-    if (S.get('coach')) return;
+    if (S.get('coach')) return false;
     $('coach').classList.add('on');
-    setTimeout(() => api.closeCoach(), 9000);
+    $('coach-ok').focus();
+    return true;
   };
-  api.closeCoach = () => { $('coach').classList.remove('on'); S.set('coach', true); };
+  api.closeCoach = () => { $('coach').classList.remove('on'); S.set('coach', true); game.tutorialDone(); };
   $('coach-ok').onclick = api.closeCoach;
+  addEventListener('keydown', (e) => {
+    if ($('coach').classList.contains('on') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); api.closeCoach(); }
+  });
 
   // ---------------- aplicação das preferências ----------------
   api.apply = () => {

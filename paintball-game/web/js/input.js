@@ -96,7 +96,7 @@ export class Input {
     bindBtn('btn-crouch', () => { this.crouchTouch = !this.crouchTouch; document.getElementById('btn-crouch').classList.toggle('active', this.crouchTouch); });
     bindBtn('btn-cam', () => this.on.cam());
     bindBtn('btn-pause', () => this.on.pause());
-    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    document.addEventListener('touchmove', (e) => { if (document.body.classList.contains('ingame')) e.preventDefault(); }, { passive: false });
   }
 
   consumeLook() {
