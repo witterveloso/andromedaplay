@@ -185,9 +185,9 @@ const game = {
   onMarked(victim, shooter, head, point) {
     const you = (c) => (c.isPlayer ? 'Você' : c.name);
     hud.feed(`<b style="color:${TEAM_CSS[shooter.team]}">${you(shooter)}</b> marcou <b style="color:${TEAM_CSS[victim.team]}">${you(victim)}</b>${head ? ' 🎯' : ''}`, shooter.team);
-    if (shooter.isPlayer) { hud.hitmarker(); sfx.hitmarker(); this.buzz(25); }
+    if (shooter.isPlayer && victim !== shooter) { hud.hitmarker(); sfx.hitmarker(); this.buzz(head ? [40, 30, 90] : 55); }   // acertou: toque curto (na cara: duplo e mais forte)
     if (victim.isPlayer) {
-      sfx.marked(); this.buzz([60, 40, 90]);
+      sfx.marked(); this.buzz([160, 60, 240]);                                                                  // foi marcado: pulso longo e forte
       const col = TEAM_CSS[shooter.team];
       const fx = settings.get('reduceFx') ? 0.45 : 1;
       if (head) overlay.hitFace(col, (this.camMode === 'fpp' ? 1 : 0.6) * fx);

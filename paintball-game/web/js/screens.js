@@ -131,7 +131,8 @@ export function createScreens(game) {
       note('Para atirar: toque na tela (rajada curta) ou segure o dedo (rajada contínua). Arraste para virar a câmera.'),
       toggle('autoFire', 'Tiro automático', 'Atira sozinho quando a mira cruza um inimigo'),
       toggle('lefty', 'Modo canhoto', 'Inverte joystick e botões'),
-      toggle('haptics', 'Vibração', 'Vibra quando você acerta ou é marcado'),
+      toggle('haptics', 'Vibração', navigator.vibrate ? 'Vibra quando você acerta (toque curto) ou é marcado (pulso longo)' : 'Seu navegador não permite vibração (iPhone/iPad não suportam). Use Chrome no Android.'),
+      action('Testar vibração', 'Sente o toque de acerto e o de ser marcado.', 'Testar', () => { if (navigator.vibrate) navigator.vibrate([55, 250, 160, 60, 240]); }),
     ] },
   ];
   let curTab = 'play';
@@ -145,7 +146,7 @@ export function createScreens(game) {
   function toggle(k, t, d) {
     const r = mk(head(t, d) + `<button class="sw-toggle" role="switch" aria-checked="${S.get(k)}" aria-label="${t}"></button>`);
     const b = r.querySelector('button');
-    b.onclick = () => { const v = !S.get(k); S.set(k, v); b.setAttribute('aria-checked', String(v)); };
+    b.onclick = () => { const v = !S.get(k); S.set(k, v); b.setAttribute('aria-checked', String(v)); if (k === 'haptics' && v && navigator.vibrate) navigator.vibrate(60); };
     return r;
   }
   function select(k, t, d, opts) {
