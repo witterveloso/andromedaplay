@@ -18,7 +18,7 @@ const TIPS = [
 ];
 
 // grupo de botões de rádio acessível (setas movem a seleção)
-function radio(container, items, value, onChange, cls) {
+export function radio(container, items, value, onChange, cls) {
   container.innerHTML = '';
   const btns = items.map((it) => {
     const b = document.createElement('button');
@@ -203,23 +203,23 @@ export function createScreens(game) {
   const show = (id, on) => $(id).classList.toggle('on', on);
   api.showHome = () => { show('home', true); show('pause', false); show('end', false); document.body.classList.remove('ingame'); $('btn-play').focus({ preventScroll: true }); };
   api.hideHome = () => { show('home', false); document.body.classList.add('ingame'); };
-  api.showPause = () => { show('pause', true); $('p-quit').classList.remove('armed'); $('p-quit').textContent = 'Sair do jogo'; $('p-resume').focus(); };
+  api.showPause = () => { const on = !!(game.online && game.online.active); $('pause-title').textContent = on ? 'Menu' : 'Pausado'; $('p-restart').style.display = on ? 'none' : ''; $('p-home').textContent = on ? 'Sair da sala' : 'Voltar ao menu'; show('pause', true); $('p-quit').classList.remove('armed'); $('p-quit').textContent = 'Sair do jogo'; $('p-resume').focus(); };
   api.hidePause = () => show('pause', false);
   $('btn-play').onclick = () => { if (busy || pending) { wantPlay = true; return; } game.begin(); };
   $('p-resume').onclick = () => game.resume();
   $('p-restart').onclick = () => { api.hidePause(); game.begin(true); };
-  $('p-home').onclick = () => { api.hidePause(); game.goHome(); };
+  $('p-home').onclick = () => { api.hidePause(); if (game.online && game.online.active) game.online.leave(); else game.goHome(); };
   // sair do jogo: pede confirmação (segundo toque) e volta para a tela de abertura
   const quit = $('p-quit'); let quitT = 0;
   const quitReset = () => { clearTimeout(quitT); quit.textContent = 'Sair do jogo'; quit.classList.remove('armed'); };
   quit.onclick = () => {
     if (!quit.classList.contains('armed')) { quit.textContent = 'Toque de novo para sair'; quit.classList.add('armed'); quitT = setTimeout(quitReset, 3500); return; }
-    quitReset(); api.hidePause(); game.goHome();
+    quitReset(); api.hidePause(); if (game.online && game.online.active) game.online.leave(); else game.goHome();
     api.showIntro(() => { game.unlockAudio && game.unlockAudio(); api.showHome(); });
     try { window.close(); } catch (e) { /* abas abertas pelo usuário não fecham: a abertura já cumpre o papel */ }
   };
-  $('e-again').onclick = () => { show('end', false); game.begin(true); };
-  $('e-home').onclick = () => { show('end', false); game.goHome(); };
+  $('e-again').onclick = () => { if (game.online && game.online.active) { if (game.online.role === 'host') game.online.rematch(); return; } show('end', false); game.begin(true); };
+  $('e-home').onclick = () => { show('end', false); if (game.online && game.online.active) game.online.leave(); else game.goHome(); };
 
   // ---------------- placar / fim de partida ----------------
   function table(el, final) {
@@ -236,7 +236,10 @@ export function createScreens(game) {
   }
   api.toggleBoard = (on) => { if (on) table($('board-table'), false); $('board').classList.toggle('on', on); };
   api.showEnd = () => {
-    const won = game.score[0] > game.score[1];
+    const me = game.player.team, won = game.score[me] > game.score[1 - me];
+    const on = !!(game.online && game.online.active), host = on && game.online.role === 'host';
+    $('e-again').style.display = on && !host ? 'none' : ''; $('e-again').textContent = on ? 'Jogar de novo (todos)' : 'Jogar de novo'; $('e-home').textContent = on ? 'Sair da sala' : 'Trocar campo';
+    $('end-eyebrow').textContent = on && !host ? 'FIM DE PARTIDA · O ANFITRIÃO PODE COMEÇAR OUTRA' : 'FIM DE PARTIDA';
     $('end-title').textContent = won ? 'VITÓRIA' : 'DERROTA';
     $('end-title').style.color = won ? 'var(--ok)' : 'var(--bad)';
     $('end-score').innerHTML = `<span style="color:${TEAM_CSS[0]}">${game.score[0]}</span> – <span style="color:${TEAM_CSS[1]}">${game.score[1]}</span>`;

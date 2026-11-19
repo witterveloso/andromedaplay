@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-212804">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-212804", "./js/camo.js": "./js/camo.js?v=20261119-212804", "./js/combatants.js": "./js/combatants.js?v=20261119-212804", "./js/effects.js": "./js/effects.js?v=20261119-212804", "./js/input.js": "./js/input.js?v=20261119-212804", "./js/main.js": "./js/main.js?v=20261119-212804", "./js/maps.js": "./js/maps.js?v=20261119-212804", "./js/models.js": "./js/models.js?v=20261119-212804", "./js/radar.js": "./js/radar.js?v=20261119-212804", "./js/screens.js": "./js/screens.js?v=20261119-212804", "./js/settings.js": "./js/settings.js?v=20261119-212804", "./js/textures.js": "./js/textures.js?v=20261119-212804", "./js/ui.js": "./js/ui.js?v=20261119-212804", "./js/weapon.js": "./js/weapon.js?v=20261119-212804", "./js/world.js": "./js/world.js?v=20261119-212804"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-220551">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-220551", "./js/camo.js": "./js/camo.js?v=20261119-220551", "./js/combatants.js": "./js/combatants.js?v=20261119-220551", "./js/effects.js": "./js/effects.js?v=20261119-220551", "./js/input.js": "./js/input.js?v=20261119-220551", "./js/main.js": "./js/main.js?v=20261119-220551", "./js/maps.js": "./js/maps.js?v=20261119-220551", "./js/models.js": "./js/models.js?v=20261119-220551", "./js/net.js": "./js/net.js?v=20261119-220551", "./js/online.js": "./js/online.js?v=20261119-220551", "./js/radar.js": "./js/radar.js?v=20261119-220551", "./js/screens.js": "./js/screens.js?v=20261119-220551", "./js/settings.js": "./js/settings.js?v=20261119-220551", "./js/textures.js": "./js/textures.js?v=20261119-220551", "./js/ui.js": "./js/ui.js?v=20261119-220551", "./js/weapon.js": "./js/weapon.js?v=20261119-220551", "./js/world.js": "./js/world.js?v=20261119-220551"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -48,6 +48,7 @@
     </div>
     <div id="tap-hint">Arraste para mirar · toque para atirar</div>
     <div id="map-label"></div>
+    <div id="netinfo" aria-hidden="true"></div>
     <canvas id="radar" width="300" height="450" role="img" aria-label="Mapa de localização dos inimigos"></canvas>
     <div id="stealth">ESCONDIDO</div>
     <small id="keys" class="pc-only">V câmera · R recarregar · C agachar · Shift correr · Botão direito: mira com zoom (roda troca 4×/8×) · M mapa · Tab placar · Esc pausa</small>
@@ -112,6 +113,7 @@
       <h1 aria-label="Mire. Cubra. Marque."><span>Mire.</span><span>Cubra.</span><span class="hl">Marque.</span></h1>
       <p class="lede">Equipes de 8, 10 ou 15 em galpão, favela, ferro-velho e cidade abandonada. Dois tiros deixam marca e tinta na tela; o terceiro tira você da rodada.</p>
       <button id="btn-play" class="cta"><span>JOGAR AGORA</span><small>Eliminação · melhor de 5</small></button>
+      <button id="btn-online" class="btn online-btn" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.8"/></svg><span>Jogar online com amigos</span></button>
       <div id="modes" class="modes" role="radiogroup" aria-label="Modos de jogo"></div>
       <p id="mode-desc" class="mode-desc"></p>
       <div class="loadout">
@@ -138,6 +140,32 @@
       </div>
     </section>
   </main>
+
+
+  <!-- online: entrar / criar sala -->
+  <div id="online" class="screen" role="dialog" aria-modal="true" aria-labelledby="online-title">
+    <div class="sheet">
+      <div class="sheet-head"><h2 id="online-title">Jogar online</h2><button id="o-close" class="icon-btn" aria-label="Fechar">✕</button></div>
+      <p class="note o-lede">Um amigo cria a sala e os outros entram com o código (ou o link). Vocês jogam juntos contra os bots ou uns contra os outros.</p>
+      <label class="o-field"><span>Seu nome</span><input id="o-name" maxlength="14" autocomplete="nickname" placeholder="Seu apelido"></label>
+      <button id="o-create" class="btn primary" type="button">Criar sala</button>
+      <div class="o-or"><span>ou entre numa sala</span></div>
+      <div class="o-join"><input id="o-code" maxlength="5" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="CÓDIGO" aria-label="Código da sala"><button id="o-join" class="btn" type="button">Entrar</button></div>
+      <p id="o-status" class="o-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- sala (lobby) -->
+  <div id="lobby" class="screen" role="dialog" aria-modal="true" aria-labelledby="lobby-title">
+    <div class="sheet lobby">
+      <div class="sheet-head"><h2 id="lobby-title">Sala</h2><button id="l-leave" class="icon-btn" aria-label="Sair da sala">✕</button></div>
+      <div class="l-code"><div><span>CÓDIGO DA SALA</span><b id="l-code">-----</b></div><button id="l-copy" class="btn" type="button">Copiar link</button></div>
+      <div id="l-players" class="l-players" aria-live="polite"></div>
+      <div id="l-cfg" class="l-cfg"></div>
+      <p id="l-info" class="note"></p>
+      <button id="l-start" class="btn primary" type="button">Começar partida</button>
+    </div>
+  </div>
 
   <!-- pausa -->
   <div id="pause" class="screen" role="dialog" aria-modal="true" aria-labelledby="pause-title">
@@ -178,8 +206,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-212804</div>
+  <div id="build" aria-hidden="true">v20261119-220551</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-212804"></script>
+  <script type="module" src="js/main.js?v=20261119-220551"></script>
 </body>
 </html>

@@ -16,6 +16,8 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **Jogar online com amigos:** no menu, *Jogar online com amigos*. Um jogador cria a **sala** (código de 5 letras + link `?sala=CÓDIGO`), os outros entram pelo código ou link. O anfitrião escolhe **Amigos × Bots** (todos no mesmo time contra os bots) ou **Amigos × Amigos** (cada um escolhe a equipe; dá para completar as equipes com bots), campo, modo (Eliminação/Centerflag), tamanho da equipe (8/10/15) e dificuldade. Até 10 jogadores. Conexão **direta entre os aparelhos (WebRTC, via PeerJS)**: sem servidor próprio; o anfitrião roda a simulação (bots, tiros, acertos, rodadas) e os convidados recebem o estado ~15×/s e mandam posição, mira e tiros. Se o anfitrião sair, a sala fecha; quem sai no meio some da partida.
+  - *Observações:* usa o servidor público gratuito do PeerJS só para o "aperto de mão" e servidores STUN/TURN públicos; se algum deles estiver fora do ar ou a rede (ex.: alguns 4G/CGNAT) bloquear a conexão, a sala pode não conectar. Para usar o seu próprio broker: `?peerhost=SEU_HOST&peerport=9000&peerpath=/&peersecure=1`. Não há anti-trapaça (é jogo entre amigos).
 - **3 tiros para sair:** os 2 primeiros tiros deixam uma marca de tinta no corpo — e a **tinta fica na sua tela** até o fim da rodada, acumulando a cada acerto — e o jogador segue na partida (o indicador *MARCAS* mostra as 3 gotas: verde, laranja, vermelho). O 3º tiro elimina. Bolinhas da mesma rajada em até 0,7 s contam como um só acerto. Vale para você e para os bots.
 - **Vibração (celular):** toque curto ao acertar (duplo na cara) e pulso longo ao ser marcado; ligada por padrão, com botão de teste em Configurações → Celular. Só funciona onde o navegador permite (Chrome no Android; iPhone não suporta).
 - **Torres e mira de sniper:** cada campo tem torres/plataformas com rampa e muretas; você e os bots sobem e atiram de cima. **Botão direito** (ou **ZOOM** no celular) liga a luneta 4× / 8× (roda do mouse troca): giro mais lento, balanço de respiração (agache ou segure Shift para firmar) e menos dispersão.
@@ -73,7 +75,7 @@ Cada campo tem luz, céu, névoa e materiais próprios. As texturas (tijolo, reb
 ## Limitações conhecidas
 - **Realismo:** cenários e personagens são procedurais/gratuitos; ficam em um nível "jogo indie estilizado-realista", não fotorrealista de CoD. Para chegar lá é preciso arte 3D profissional (modelos, texturas fotográficas e animações próprias).
 - O soldado é um modelo provisório (veja abaixo).
-- Ainda **não há multiplayer online**: hoje são equipes de até 15 com bots.
+- O online é **peer-to-peer entre amigos** (sem servidor dedicado, sem anti-trapaça, sem reconexão no meio da partida).
 - Testado em Chromium (desktop e emulação de celular). Falta teste em aparelhos reais.
 
 ## Próximos passos
@@ -82,7 +84,7 @@ Multiplayer online (servidor autoritativo + salas/squads), Centerflag e outros m
 Design completo em [`GDD.md`](GDD.md). Reel de divulgação (gravado do próprio jogo): [`reel/splat-arena-reel.mp4`](reel/splat-arena-reel.mp4).
 
 ## Créditos e licença dos assets
-- Three.js (MIT) — `web/js/vendor`.
+- Three.js (MIT) e PeerJS 1.5.5 (MIT) — `web/js/vendor`.
 - `web/assets/soldier.glb`: modelo "Vanguard" do Mixamo/Adobe, distribuído nos exemplos do Three.js. **Provisório**: antes de lançar comercialmente, troque por personagens próprios/licenciados (camuflagem, máscara e acessórios já são separados do modelo e podem ser reaproveitados).
 - Miniaturas em `web/assets/maps` e o Reel foram gerados a partir do próprio jogo.
 
