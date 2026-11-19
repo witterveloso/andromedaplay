@@ -19,7 +19,7 @@ python3 -m http.server 8080     # ou: npx serve .
 - **Centerflag:** uma bandeira no centro do campo; pegue e leve até a base inimiga para vencer a rodada (ou elimine o outro time). Quem carrega derruba a bandeira ao ser marcado. Os bots pegam, escoltam e perseguem o portador. Escolha o modo no menu.
 - **Barracos com porta:** dá para entrar em barracos/escritórios (favela, ferro-velho, cidade e galpão), se esconder e atirar pela porta. As paredes bloqueiam tiros e visão; aparece **ESCONDIDO** quando nenhum inimigo te enxerga.
 - **Mapa de localização (radar):** vista de cima com aliados, bandeira e inimigos. Modos em Configurações: *Avistados* (quem você ou um aliado enxerga), *Todos* e *Desligado*. **M** ou toque no mapa amplia.
-- **Celular:** arraste no botão **FOGO** para girar a câmera enquanto atira; botão de fogo extra à esquerda; **tiro automático** ao cruzar um inimigo; assistência de mira.
+- **Celular:** sem botões de fogo. **Arraste** na tela para virar a câmera; ao achar o alvo, **toque** (rajada curta) ou **segure** (rajada contínua). Também atira com um toque na metade esquerda (gira com um polegar, atira com o outro). Tiro automático e assistência de mira opcionais.
 - **Áudio:** música, **som ambiente por campo** (vento, pássaros, pingos, percussão distante, cidade), passos e botão 🔊 no menu. No iPhone, tire o modo silencioso; o botão 🔇 pulsa enquanto o navegador estiver bloqueando o som.
 - **Atualização automática:** a versão aparece no canto do menu (vAAAAMMDD-HHMMSS). Antes de cada commit rode `python3 tools/stamp.py` para o celular baixar os arquivos novos em vez de usar o cache.
 
@@ -46,8 +46,8 @@ Cada campo tem luz, céu, névoa e materiais próprios. As texturas (tijolo, reb
 | | PC | Celular |
 |---|---|---|
 | Mover | WASD (Shift corre, C agacha) | joystick à esquerda |
-| Mirar | mouse | arrastar à direita |
-| Atirar | clique | botão FOGO |
+| Mirar | mouse | arrastar na tela |
+| Atirar | clique | toque na tela (segure para rajada) |
 | Recarregar | R | ⟳ |
 | Trocar câmera 1ª/3ª | V | CAM |
 | Placar | Tab | tocar no placar |
@@ -75,3 +75,7 @@ Design completo em [`GDD.md`](GDD.md). Reel de divulgação (gravado do próprio
 - Three.js (MIT) — `web/js/vendor`.
 - `web/assets/soldier.glb`: modelo "Vanguard" do Mixamo/Adobe, distribuído nos exemplos do Three.js. **Provisório**: antes de lançar comercialmente, troque por personagens próprios/licenciados (camuflagem, máscara e acessórios já são separados do modelo e podem ser reaproveitados).
 - Miniaturas em `web/assets/maps` e o Reel foram gerados a partir do próprio jogo.
+
+## Referências usadas no visual
+- Marcador tático (.68): corpo com trilhos Picatinny, cano ventilado dentro de capa, empunhadura vertical, loader, cilindro HPA com regulador e coronha retrátil — baseado em marcadores táticos como o Tippmann Cronus ([Academy](https://www.academy.com/p/tippmann-cronus-68-caliber-tactical-paintball-marker), [Tippmann Parts](https://tippmannparts.com/collections/tippmann-cronus-paintball-gun-information-hub)) e na anatomia geral de marcadores ([Lone Wolf Paintball](https://lonewolfpaintball.com/blogs/news/markers-101-a-guide-to-paintball-guns-for-beginners), [Wikipedia](https://www.wikipedia.org/wiki/Paintball_gun)).
+- Equipamento do jogador (máscara, jersey, harness com pods, joelheiras e cotoveleiras, camuflagem): guias de woodsball como [paintballer.co](https://paintballer.co/what-to-wear-to-play-paintball/) e [Mad Dog Sports](https://maddogsports.com/collections/paintball-harnesses-vests-pods).

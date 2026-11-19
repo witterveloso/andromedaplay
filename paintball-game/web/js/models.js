@@ -6,54 +6,8 @@ import * as SkeletonUtils from './vendor/utils/SkeletonUtils.js';
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...o });
 const lerp = (a, b, t) => a + (b - a) * t;
 
-// Marcador: cano aponta para -Z. userData.muzzle = ponta do cano.
-export function buildMarker(paint) {
-  const g = new THREE.Group();
-  const dark = std(0x1b1d20, { roughness: 0.35, metalness: 0.8 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.11, 0.32), dark);
-  g.add(body);
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.4, 10), std(0x8b9097, { roughness: 0.3, metalness: 0.9 }));
-  barrel.rotation.x = Math.PI / 2; barrel.position.z = -0.34; g.add(barrel);
-  const shroud = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.14), dark);
-  shroud.position.set(0, -0.005, -0.2); g.add(shroud);
-  const hopperMat = new THREE.MeshStandardMaterial({
-    color: paint, emissive: paint, emissiveIntensity: 0.3, roughness: 0.2, transparent: true, opacity: 0.85,
-  });
-  const hopper = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 10), hopperMat);
-  hopper.scale.y = 0.9; hopper.position.set(0, 0.16, 0.02); g.add(hopper);
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.07, 8), dark);
-  neck.position.set(0, 0.095, 0.02); g.add(neck);
-  const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.26, 12), std(0xb8bcc2, { roughness: 0.3, metalness: 0.85 }));
-  tank.rotation.x = Math.PI / 2; tank.position.set(0, -0.11, 0.24); g.add(tank);
-  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.05), dark);
-  grip.position.set(0, -0.1, 0.05); grip.rotation.x = 0.25; g.add(grip);
-  const muzzle = new THREE.Object3D();
-  muzzle.position.set(0, 0, -0.55);
-  g.add(muzzle);
-  g.userData.muzzle = muzzle;
-  g.traverse((m) => { if (m.isMesh) m.castShadow = true; });
-  return g;
-}
-
-let camoTex = null;
-function procCamoTexture() {
-  if (camoTex) return camoTex;
-  const c = document.createElement('canvas');
-  c.width = c.height = 128;
-  const g = c.getContext('2d');
-  g.fillStyle = '#3b4230'; g.fillRect(0, 0, 128, 128);
-  const cols = ['#2b3123', '#4d5640', '#232820', '#5f6650'];
-  for (let i = 0; i < 38; i++) {
-    g.fillStyle = cols[i % cols.length];
-    g.beginPath();
-    g.ellipse(Math.random() * 128, Math.random() * 128, 8 + Math.random() * 16, 5 + Math.random() * 10, Math.random() * 3, 0, 7);
-    g.fill();
-  }
-  camoTex = new THREE.CanvasTexture(c);
-  camoTex.wrapS = camoTex.wrapT = THREE.RepeatWrapping;
-  camoTex.colorSpace = THREE.SRGBColorSpace;
-  return camoTex;
-}
+import { buildMarker } from './weapon.js';
+export { buildMarker };
 
 export function buildProceduralCharacter(team, world) {
   const paint = TEAM_PAINT[team];
@@ -225,7 +179,9 @@ export function buildCharacter(team, world) {
     o.material = o.material.clone();
     if (o.material.name === 'VanguardBodyMat') {
       o.material.map = camoTexture(team);
-      o.material.roughness = 0.85; o.material.metalness = 0.05;
+      o.material.bumpMap = camoTexture(team); o.material.bumpScale = 1.4;      // trama do tecido
+      o.material.roughness = 0.9; o.material.metalness = 0.04; o.material.envMapIntensity = 0.55;
+      o.material.color.setScalar(0.86 + Math.random() * 0.2);                 // cada jogador com um tom levemente diferente
     } else {
       o.material.color = new THREE.Color(paint).multiplyScalar(0.1);
       o.material.emissive = new THREE.Color(paint).multiplyScalar(0.07);
@@ -264,6 +220,23 @@ export function buildCharacter(team, world) {
     [-1, 1].forEach((sx) => put(hf, new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 14), dark), sx * 0.112, 0.095, -0.02, 0, 0, Math.PI / 2)); // orelhas
     put(hf, new THREE.Mesh(new THREE.TorusGeometry(0.113, 0.011, 8, 28), accent), 0, 0.125, -0.012, Math.PI / 2, 0, 0); // tira do time
   }
+  {
+    // espuma da máscara, aberturas de ventilação e tira traseira
+    put(hf, new THREE.Mesh(new THREE.CapsuleGeometry(0.052, 0.14, 6, 12), new THREE.MeshStandardMaterial({ color: 0x0f1013, roughness: 0.95 })), 0, 0.1, -0.098, 0, 0, Math.PI / 2).scale.set(1, 1, 0.82);
+    for (let i = -2; i <= 2; i++) put(hf, new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.004, 0.006), dark), i * 0.022, 0.052, -0.146);
+    put(hf, new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.02), accent), 0, 0.12, 0.1);
+  }
+  // joelheiras e cotoveleiras (proteção de woodsball)
+  const padMat = new THREE.MeshStandardMaterial({ color: 0x1a1c20, roughness: 0.75, metalness: 0.1 });
+  [bones.legL, bones.legR].forEach((b) => {
+    const f = gearFrame(b);
+    put(f, new THREE.Mesh(new THREE.SphereGeometry(0.07, 14, 10), padMat), 0, 0.0, -0.085).scale.set(1.05, 1.25, 0.6);
+    put(f, new THREE.Mesh(new THREE.TorusGeometry(0.062, 0.006, 6, 20), accent), 0, 0.0, -0.085).scale.set(1.05, 1.25, 1);
+  });
+  [bones.foreL, bones.foreR].forEach((b) => {
+    const f = gearFrame(b);
+    put(f, new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 9), padMat), 0, 0.0, 0.055).scale.set(1, 1, 0.7);
+  });
   const cf = gearFrame(bones.spine2);
   {
     for (let i = 0; i < 4; i++) {
@@ -298,7 +271,7 @@ export function buildCharacter(team, world) {
   const pivot = new THREE.Group();
   pivot.position.y = 1.36;
   const marker = buildMarker(paint);
-  marker.position.set(0.0, -0.1, -0.42);
+  marker.position.set(0.03, -0.1, -0.3);
   pivot.add(marker);
   root.add(pivot);
   const paintOverlay = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.34), world.splatMaterial(team, 3));
@@ -398,7 +371,7 @@ export function buildCharacter(team, world) {
       bones.armR.getWorldPosition(tv); const sr = root.worldToLocal(tv);
       pivot.position.set(0, (sl.y + sr.y) / 2 - 0.05, (sl.z + sr.z) / 2);
       pivot.rotation.x = lerp(pitch, 0, h);
-      marker.position.set(lerp(0.0, 0.26, h), lerp(-0.1, 0.78, h), lerp(-0.42, 0, h));
+      marker.position.set(lerp(0.03, 0.26, h), lerp(-0.1, 0.78, h), lerp(-0.3, 0, h));
       marker.rotation.x = lerp(0, Math.PI / 2, h);
       bones.head.getWorldPosition(tv);
       root.worldToLocal(tv);

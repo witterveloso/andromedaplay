@@ -11,7 +11,7 @@ const DEFAULTS = {
   aimAssist: (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) ? 0.5 : 0,
   radar: 'spotted',
   volume: 0.7, music: 0.4, ambient: 0.7, quality: 'auto',
-  autoFire: (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches), fireLeft: true,
+  autoFire: false, fireLeft: false,
   reduceFx: false, hudScale: 1, crossColor: '#ffffff', crossStyle: 'cross',
   touchScale: 1, lefty: false, haptics: true, coach: false,
 };

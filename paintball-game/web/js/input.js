@@ -6,7 +6,7 @@ export class Input {
     this.canvas = canvas;
     this.keys = {};
     this.lx = 0; this.ly = 0;           // look acumulado
-    this.fireMouse = false; this.fireTouch = false; this.fireTouchL = false; this.auto = false;
+    this.fireMouse = false; this.holdFire = false; this.fireUntil = 0; this.auto = false;
     this.joy = { x: 0, y: 0 };
     this.crouchTouch = false;
     this.sens = 1;
@@ -60,30 +60,42 @@ export class Input {
       let dx = e.clientX - ox, dy = e.clientY - oy;
       const l = Math.hypot(dx, dy);
       if (l > R) { dx *= R / l; dy *= R / l; }
-      this.joy.x = dx / R; this.joy.y = dy / R;
+      this.joy.x = dx / R; this.joy.y = dy / R; jmax = Math.max(jmax, Math.hypot(this.joy.x, this.joy.y));
       stick.style.transform = `translate(${dx}px, ${dy}px)`;
     });
+    let jst = 0, jmax = 0;
+    zoneL.addEventListener('pointerdown', () => { jst = performance.now(); jmax = 0; }, true);
     const endJoy = (e) => {
       if (e.pointerId !== joyId) return;
+      if (jmax < 0.25 && performance.now() - jst < 240) this.burst();
       joyId = null; this.joy.x = this.joy.y = 0;
       stick.style.transform = 'translate(0,0)'; base.classList.remove('on');
     };
     zoneL.addEventListener('pointerup', endJoy);
     zoneL.addEventListener('pointercancel', endJoy);
 
-    let lookId = null, lastX = 0, lastY = 0;
+    // Zona de mira: arrastar = virar a câmera · toque rápido = rajada curta · segurar parado = rajada contínua
+    let lookId = null, lastX = 0, lastY = 0, sx = 0, sy = 0, st = 0, moved = false, holdT = null;
     zoneR.addEventListener('pointerdown', (e) => {
       if (lookId !== null) return;
-      lookId = e.pointerId; lastX = e.clientX; lastY = e.clientY; zoneR.setPointerCapture(lookId);
+      lookId = e.pointerId; lastX = sx = e.clientX; lastY = sy = e.clientY; st = performance.now(); moved = false;
+      zoneR.setPointerCapture(lookId);
+      clearTimeout(holdT); holdT = setTimeout(() => { if (!moved && lookId !== null) this.holdFire = true; }, 170);
     });
     zoneR.addEventListener('pointermove', (e) => {
       if (e.pointerId !== lookId) return;
+      if (!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 14) { moved = true; clearTimeout(holdT); }
       this.lx += (e.clientX - lastX) * 1.6; this.ly += (e.clientY - lastY) * 1.6;
       lastX = e.clientX; lastY = e.clientY;
     });
-    const endLook = (e) => { if (e.pointerId === lookId) lookId = null; };
+    const endLook = (e) => {
+      if (e.pointerId !== lookId) return;
+      clearTimeout(holdT); lookId = null;
+      if (this.holdFire) this.holdFire = false;
+      else if (!moved && performance.now() - st < 280) this.burst();
+    };
     zoneR.addEventListener('pointerup', endLook);
-    zoneR.addEventListener('pointercancel', endLook);
+    zoneR.addEventListener('pointercancel', (e) => { if (e.pointerId === lookId) { clearTimeout(holdT); lookId = null; this.holdFire = false; } });
 
     const bindBtn = (id, down, up) => {
       const b = document.getElementById(id);
@@ -91,21 +103,6 @@ export class Input {
       const end = (e) => { e.stopPropagation(); b.classList.remove('down'); if (up) up(); };
       b.addEventListener('pointerup', end); b.addEventListener('pointercancel', end);
     };
-    bindBtn('btn-fire', () => { this.fireTouch = true; }, () => { this.fireTouch = false; });
-    // arrastar com o dedo no botão de fogo também gira a câmera (atirar e acompanhar o alvo com um só dedo)
-    {
-      const fb = document.getElementById('btn-fire');
-      let fid = null, fx = 0, fy = 0;
-      fb.addEventListener('pointerdown', (e) => { fid = e.pointerId; fx = e.clientX; fy = e.clientY; });
-      fb.addEventListener('pointermove', (e) => {
-        if (e.pointerId !== fid) return;
-        this.lx += (e.clientX - fx) * 1.6; this.ly += (e.clientY - fy) * 1.6;
-        fx = e.clientX; fy = e.clientY;
-      });
-      const endF = (e) => { if (e.pointerId === fid) fid = null; };
-      fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF);
-    }
-    bindBtn('btn-fire-l', () => { this.fireTouchL = true; }, () => { this.fireTouchL = false; });
     bindBtn('btn-reload', () => this.on.reload());
     bindBtn('btn-crouch', () => { this.crouchTouch = !this.crouchTouch; document.getElementById('btn-crouch').classList.toggle('active', this.crouchTouch); });
     bindBtn('btn-cam', () => this.on.cam());
@@ -127,6 +124,7 @@ export class Input {
     if (l > 1) { x /= l; y /= l; }
     return { x, y, sprint: !!(k.ShiftLeft || k.ShiftRight) || this.joy.y < -0.95 };
   }
-  get fire() { return this.fireMouse || this.fireTouch || this.fireTouchL || this.auto; }
+  burst() { this.fireUntil = performance.now() + 300; }          // toque: ~3 bolinhas
+  get fire() { return this.fireMouse || this.holdFire || this.auto || performance.now() < this.fireUntil; }
   get crouch() { return !!(this.keys.KeyC || this.keys.ControlLeft) || this.crouchTouch; }
 }

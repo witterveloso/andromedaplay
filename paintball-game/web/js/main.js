@@ -87,7 +87,7 @@ fp.add(viewmodel);
     return mesh;
   };
   const hand = (p, r) => { const h = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), glove); h.position.copy(p); h.scale.set(1, 0.9, 1.25); return h; };
-  const gripR = new THREE.Vector3(0.0, -0.06, 0.03), gripL = new THREE.Vector3(0.0, -0.025, -0.15);
+  const gripR = new THREE.Vector3(0.0, -0.05, 0.035), gripL = new THREE.Vector3(0.0, -0.045, -0.135);
   fp.add(limb(new THREE.Vector3(0.3, -0.42, 0.42), gripR, 0.05), hand(gripR, 0.042));
   fp.add(limb(new THREE.Vector3(-0.2, -0.4, 0.34), gripL, 0.046), hand(gripL, 0.04));
 }
