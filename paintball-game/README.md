@@ -24,6 +24,7 @@ python3 -m http.server 8080     # ou: npx serve .
 - **Atualização automática:** a versão aparece no canto do menu (vAAAAMMDD-HHMMSS). Antes de cada commit rode `python3 tools/stamp.py` para o celular baixar os arquivos novos em vez de usar o cache.
 
 ## Campos
+Todos os campos têm **60 × 90 m** (antes 40 × 60 m), com 70–190 obstáculos cada, largadas livres e layouts simétricos (justos para os dois times). Em celular as texturas são geradas em resolução menor.
 | Campo | Estilo | O que tem |
 |---|---|---|
 | **Arena Speedball** | torneio | bunkers infláveis simétricos, rede, grama |

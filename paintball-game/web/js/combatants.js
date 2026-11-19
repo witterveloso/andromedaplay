@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import { buildCharacter } from './models.js';
+import { ARENA } from './world.js';
 
 const MAX_HOPPER = 200;
 const FIRE_RATE = 10; // bolinhas por segundo
@@ -109,7 +110,7 @@ export class Bot extends Combatant {
     this.target = null; this.seenT = 0; this.scanT = Math.random() * 0.2;
     this.burst = 0; this.pauseT = 0; this.idleT = 0; this.strafe = 0; this.strafeT = 0;
     this.noiseY = 0; this.noiseP = 0; this.noiseT = 0;
-    this.stuckT = 0; this.lastPos = new THREE.Vector3(); this.aggr = Math.random(); this.via = null; this.via2 = null; this.stage = 0; this.objT = 0; this.objActive = false;
+    this.stuckT = 0; this.lastPos = new THREE.Vector3(); this.aggr = Math.random(); this.via = null; this.via2 = null; this.stage = 0; this.objT = 0; this.objActive = false; this.sideT = 0; this.sideDir = 1; this.stuckN = 0;
   }
   reset(x, z, yaw) {
     super.reset(x, z, yaw);
@@ -121,8 +122,9 @@ export class Bot extends Combatant {
   pickDest(first = false) {
     const g = this.game, spots = g.world.coverSpots;
     const own = this.team === 0 ? 1 : -1; // laranja começa em +z
-    const progress = first ? 0.15 : Math.min(1, g.roundTime / 60);
-    const wantZ = own * (22 - (22 + 6 * this.aggr) * Math.min(1, 0.25 + progress * 0.6 + this.aggr * 0.35)) ;
+    const progress = first ? 0.15 : Math.min(1, g.roundTime / 85);
+    const B = ARENA.hz - 8;
+    const wantZ = own * (B - (B + 8 * this.aggr) * Math.min(1, 0.25 + progress * 0.6 + this.aggr * 0.35));
     let best = null, bs = 1e9;
     for (let i = 0; i < 6; i++) {
       const s = spots[(Math.random() * spots.length) | 0];
@@ -143,7 +145,7 @@ export class Bot extends Combatant {
     const g = this.game;
     const eye = new THREE.Vector3(this.pos.x, this.eyeY, this.pos.z);
     const f = this.forward(new THREE.Vector3());
-    let best = null, bd = 50;
+    let best = null, bd = 58;
     const pt = new THREE.Vector3();
     for (const c of g.combatants) {
       if (c.team === this.team || !c.alive) continue;
@@ -173,7 +175,7 @@ export class Bot extends Combatant {
       if (Math.hypot(m.pos.x - goal.x, m.pos.z - goal.z) < Math.hypot(this.pos.x - goal.x, this.pos.z - goal.z)) rank++;
     }
     let tx = null, tz = null;
-    if (f.carrier === this) { tx = this.pos.x * 0.4; tz = this.team === 0 ? -27.5 : 27.5; }
+    if (f.carrier === this) { tx = this.pos.x * 0.4; tz = this.team === 0 ? -(ARENA.hz - 2.5) : ARENA.hz - 2.5; }
     else if (!f.carrier) { if (rank < 2) { tx = f.pos.x; tz = f.pos.z; } }
     else if (f.carrier.team === this.team) { if (rank < 3) { tx = f.carrier.pos.x + (rank - 1) * 1.6; tz = f.carrier.pos.z + (this.team === 0 ? -2 : 2); } }
     else if (rank < 3) { tx = f.carrier.pos.x; tz = f.carrier.pos.z; }
@@ -260,13 +262,19 @@ export class Bot extends Combatant {
         this.crouch = true;
       } else {
         wishX = dx / d; wishZ = dz / d; speed = P.speed;
+        // preso num obstáculo: contorna pelo lado por um instante
+        if (this.sideT > 0) { this.sideT -= dt; wishX = wishX * 0.35 - wishZ * this.sideDir; wishZ = wishZ * 0.35 + dx / d * this.sideDir; }
         const wantYaw = Math.atan2(-dx, -dz);
         let dyaw = Math.atan2(Math.sin(wantYaw - this.yaw), Math.cos(wantYaw - this.yaw));
         this.yaw += dyaw * Math.min(1, dt * 6);
         this.pitch += (0 - this.pitch) * Math.min(1, dt * 4);
         this.stuckT += dt;
-        if (this.stuckT > 1.4) {
-          if (this.pos.distanceTo(this.lastPos) < 0.6 && !this.objActive) this.pickDest();
+        if (this.stuckT > 0.9) {
+          if (this.pos.distanceTo(this.lastPos) < 0.5) {
+            this.stuckN = (this.stuckN || 0) + 1;
+            this.sideDir = Math.random() < 0.5 ? -1 : 1; this.sideT = 1.1;                 // desvia para o lado
+            if (!this.objActive && this.stuckN >= 2) { this.pickDest(); this.stuckN = 0; }   // e, se persistir, escolhe outro destino
+          } else this.stuckN = 0;
           this.stuckT = 0; this.lastPos.copy(this.pos);
         }
       }

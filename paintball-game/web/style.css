@@ -368,3 +368,22 @@ body.lefty #btn-cam { right: auto; left: calc(22px + var(--safe-l)); }
 body.lefty #weapon { left: auto; right: 34%; }
 #btn-fire, #btn-fire-l { display: none !important; }
 #tap-hint { position: absolute; left: 50%; bottom: calc(18px + var(--safe-b)); transform: translateX(-50%); font: 600 11px var(--display); letter-spacing: .16em; color: rgba(255,255,255,.55); text-transform: uppercase; display: none; }
+
+/* título da tela inicial: cartaz tipográfico */
+.home-left h1 { display: flex; flex-direction: column; margin: 0 0 16px; font-family: var(--display); font-weight: 700; text-transform: uppercase; font-size: clamp(46px, 7.4vw, 96px); line-height: .88; letter-spacing: .01em; }
+.home-left h1 span { display: block; }
+.home-left h1 .hl { background: linear-gradient(100deg, #ffc15a 0%, #ff8a00 55%, #ff5e00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; position: relative; width: fit-content; filter: drop-shadow(0 6px 22px rgba(255, 122, 0, .35)); }
+.home-left h1 .hl::after { content: ''; position: absolute; left: -2%; right: 4%; bottom: -.04em; height: .09em; border-radius: 3px; background: linear-gradient(90deg, #ff8a00, rgba(255, 138, 0, 0)); }
+.home-left h1 span:nth-child(1) { color: #fff; } .home-left h1 span:nth-child(2) { color: #dfe6f0; }
+.lede { max-width: 400px; font-size: clamp(14px, 1.3vw, 16px); color: #aab6c8; }
+
+/* cartões de campo: altura vem do próprio cartão (sem aspect-ratio), então nunca se sobrepõem */
+.map-grid { grid-auto-rows: max-content; align-items: start; }
+.map { aspect-ratio: auto !important; height: auto; min-height: 0; display: block; }
+.map::before { content: ''; display: block; padding-top: 62.5%; }
+.map:nth-child(-n+2)::before { padding-top: 42.8%; }
+@media (max-height: 520px) {
+  .map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
+  .map, .map:nth-child(-n+2) { grid-column: span 1; }
+  .map::before, .map:nth-child(-n+2)::before { padding-top: 52%; }
+}

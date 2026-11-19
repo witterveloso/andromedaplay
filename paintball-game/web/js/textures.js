@@ -140,7 +140,7 @@ function canvas(S) { const c = document.createElement('canvas'); c.width = c.hei
 export function pbr(kind, params = {}) {
   const key = kind + JSON.stringify(params) + QUALITY;
   if (cache.has(key)) return cache.get(key);
-  const S = QUALITY, gen = GEN[kind];
+  const S = params.small ? Math.min(QUALITY, 256) : QUALITY, gen = GEN[kind];
   const cc = canvas(S), ch = canvas(S), cr = canvas(S);
   const gc = cc.getContext('2d'), gh = ch.getContext('2d'), gr = cr.getContext('2d');
   const ic = gc.createImageData(S, S), ih = gh.createImageData(S, S), ir = gr.createImageData(S, S);

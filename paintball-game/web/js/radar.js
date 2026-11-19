@@ -6,13 +6,14 @@ import { settings } from './settings.js';
 // Modos: "Avistados" = inimigos que você ou um aliado enxerga; "Todos" = todos os inimigos; "Desligado".
 export function createRadar(game, canvas) {
   const ctx = canvas.getContext('2d');
-  const SC = canvas.width / (ARENA.hx * 2);
+  let SC = canvas.width / (ARENA.hx * 2);
   const X = (x) => (x + ARENA.hx) * SC, Y = (z) => (z + ARENA.hz) * SC;
   let bg = null, bgMap = null, acc = 0, big = false;
   const lastSeen = new Map();   // inimigo -> instante em que foi avistado
   let clock = 0;
 
   function buildBg() {
+    SC = canvas.width / (ARENA.hx * 2);
     bg = document.createElement('canvas'); bg.width = canvas.width; bg.height = canvas.height;
     const g = bg.getContext('2d');
     g.fillStyle = '#0d1219'; g.fillRect(0, 0, bg.width, bg.height);
@@ -51,6 +52,7 @@ export function createRadar(game, canvas) {
     document.body.classList.toggle('radar-off', mode === 'off');
     if (mode === 'off') return;
     if (bgMap !== (game.world.map && game.world.map.id)) buildBg();
+    SC = canvas.width / (ARENA.hx * 2);
     ctx.drawImage(bg, 0, 0);
     const p = game.player;
     // aliados
@@ -77,7 +79,7 @@ export function createRadar(game, canvas) {
     // Centerflag: base-alvo e bandeira (sempre visível)
     if (game.mode === 'flag') {
       const f = game.flag, enemyZ = p.team === 0 ? -ARENA.hz : ARENA.hz;
-      ctx.fillStyle = 'rgba(255,210,74,.12)'; ctx.fillRect(X(-8), enemyZ < 0 ? Y(-ARENA.hz) : Y(25), 16 * SC, 5 * SC);
+      ctx.fillStyle = 'rgba(255,210,74,.12)'; ctx.fillRect(X(-11), enemyZ < 0 ? Y(-ARENA.hz) : Y(ARENA.hz - 5), 22 * SC, 5 * SC);
       const fp = f.carrier ? f.carrier.pos : f.pos, fx0 = X(fp.x), fy0 = Y(fp.z);
       ctx.strokeStyle = '#ffd24a'; ctx.fillStyle = '#ffd24a'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(fx0, fy0 + 9); ctx.lineTo(fx0, fy0 - 11); ctx.stroke();

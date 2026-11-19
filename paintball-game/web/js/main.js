@@ -16,7 +16,7 @@ const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const Q = params.get('quality') || settings.get('quality');
 const LOW = Q === 'low' || (Q === 'auto' && IS_TOUCH);
-const ROUND_TIME = 120, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
+const ROUND_TIME = 150, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
 const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo'];
 const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
 const loaderProgress = (p, tip) => { $('ld-fill').style.width = `${Math.round(p * 100)}%`; if (tip) $('ld-tip').textContent = tip; };
@@ -276,8 +276,9 @@ const game = {
     // captura: portador chega à base inimiga
     const c = f.carrier;
     if (c && this.state === 'playing') {
-      const ok = c.team === 0 ? c.pos.z < -25 : c.pos.z > 25;
-      if (ok && Math.abs(c.pos.x) < 8) this.endRound(c.team, 'flag');
+      const goal = ARENA.hz - 5;
+      const ok = c.team === 0 ? c.pos.z < -goal : c.pos.z > goal;
+      if (ok && Math.abs(c.pos.x) < 11) this.endRound(c.team, 'flag');
     }
   },
 
@@ -292,11 +293,12 @@ const game = {
 
   layout() {
     // laranja: você no centro + 4 bots; azul: 5 bots. Cada time ocupa 5 posições na linha de largada.
-    const slots = [[0, -8, -4, 4, 8], [-8, -4, 0, 4, 8]];
+    const k = ARENA.hx / 20 * 0.85;
+    const slots = [[0, -8, -4, 4, 8].map((v) => v * k), [-8, -4, 0, 4, 8].map((v) => v * k)];
     const idx = [0, 0];
     this.combatants.forEach((c) => {
       const x = slots[c.team][idx[c.team]++];
-      c.reset(x, c.team === 0 ? 27 : -27, c.team === 0 ? 0 : Math.PI);
+      c.reset(x, c.team === 0 ? ARENA.hz - 3 : -(ARENA.hz - 3), c.team === 0 ? 0 : Math.PI);
     });
   },
 

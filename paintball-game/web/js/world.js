@@ -160,6 +160,8 @@ export function createWorld(scene, renderer, quality = 'high') {
 
     loadMap(id) {
       const def = MAPS[id] || MAPS.arena;
+      const size = def.size || { hx: 20, hz: 30 };
+      ARENA.hx = size.hx; ARENA.hz = size.hz;                 // cada campo define o seu tamanho
       if (group) { scene.remove(group); disposeGroup(group); }
       group = new THREE.Group();
       scene.add(group);
@@ -176,8 +178,9 @@ export function createWorld(scene, renderer, quality = 'high') {
       sun.castShadow = true;
       const ss = sun.shadow;
       ss.mapSize.set(hi ? 2048 : 1024, hi ? 2048 : 1024);
-      ss.camera.left = -42; ss.camera.right = 42; ss.camera.top = 42; ss.camera.bottom = -42;
-      ss.camera.near = 5; ss.camera.far = 150; ss.bias = -0.0004; ss.normalBias = 0.04;
+      const SR = Math.hypot(ARENA.hx, ARENA.hz) * 0.82 + 6;
+      ss.camera.left = -SR; ss.camera.right = SR; ss.camera.top = SR; ss.camera.bottom = -SR;
+      ss.camera.near = 5; ss.camera.far = 220; ss.bias = -0.0004; ss.normalBias = 0.04;
       group.add(sun);
       (cfg.lights || []).forEach((l) => {
         const p = new THREE.PointLight(l.color, l.intensity, l.distance, 1.6);

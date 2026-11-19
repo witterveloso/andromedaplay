@@ -15,6 +15,9 @@ function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
     if (!mats.has(k)) mats.set(k, material(kind, params, opts));
     return mats.get(k);
   };
+  const hexOf = (c, k = 1.2) => ((Math.min(255, c[0] * k) | 0) << 16) | ((Math.min(255, c[1] * k) | 0) << 8) | (Math.min(255, c[2] * k) | 0);
+  // mesma textura-base (cinza) para todas as cores: a cor vem do material (carrega bem mais rápido)
+  const paint = (kind, rgb, params = {}, opts = {}) => M(kind, { color: [205, 208, 208], small: true, ...params }, { ...opts, tint: hexOf(rgb) });
   const rnd = hashRand(11);
   const add = (mesh, shadow = true, receive = true) => { mesh.castShadow = shadow; mesh.receiveShadow = receive; group.add(mesh); return mesh; };
 
@@ -108,7 +111,7 @@ function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
     im.castShadow = false; im.receiveShadow = false; group.add(im);
     return im;
   }
-  return { M, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles, interiors, spots };
+  return { M, paint, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles, interiors, spots };
 }
 
 // espelhamento por simetria central: fn(s) com s = +1 e -1 (posição*s, rotação +π se s<0)
@@ -154,15 +157,15 @@ function roundedBox(w, h, d, r) {
 // carro destruído (alinhado aos eixos) — alongX: comprimento no eixo X
 function car(H, { x, z, alongX = false, color = [150, 60, 50], y = 0, stack = 0, tilt = 0, burnt = false, collide = true }) {
   const g = new THREE.Group();
-  const body = H.M('rust', { color: burnt ? [40, 34, 30] : color }), glass = new THREE.MeshStandardMaterial({ color: 0x0c1014, roughness: 0.2, metalness: 0.6 });
+  const body = H.paint('rust', burnt ? [40, 34, 30] : color), glass = new THREE.MeshStandardMaterial({ color: 0x0c1014, roughness: 0.2, metalness: 0.6 });
   const tire = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.95 });
   const L = 4.4, W = 1.85;
   const mk = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
   mk(boxGeo(L, 0.7, W, 1.8), body, 0, 0.55, 0);
   mk(boxGeo(2.3, 0.62, W - 0.2, 1.8), body, -0.25, 1.2, 0);
   mk(boxGeo(2.0, 0.5, W - 0.14, 1.8), glass, -0.25, 1.22, 0).scale.set(1.02, 1, 1.02);
-  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95] }), L / 2, 0.38, 0);
-  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95] }), -L / 2, 0.38, 0);
+  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95], small: true }), L / 2, 0.38, 0);
+  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95], small: true }), -L / 2, 0.38, 0);
   const wg = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 14);
   [[1.4, 0.9], [1.4, -0.9], [-1.4, 0.9], [-1.4, -0.9]].forEach(([px, pz], i) => {
     if (H.rnd() < 0.2) return;
@@ -178,7 +181,7 @@ function car(H, { x, z, alongX = false, color = [150, 60, 50], y = 0, stack = 0,
 }
 
 function barrel(H, x, z, color, collide = true) {
-  H.cyl({ x, z, r: 0.3, h: 0.95, mat: H.M('rust', { color, tile: 1 }), seg: 14, collide });
+  H.cyl({ x, z, r: 0.3, h: 0.95, mat: H.paint('rust', color, { tile: 1 }), seg: 14, collide });
 }
 
 
@@ -208,108 +211,147 @@ function hut(H, { x, z, w, d, h = 3, doors = ['+z'], doorW = 1.5, t = 0.25, wall
 }
 const flip = (doors, s) => (s > 0 ? doors : doors.map((d) => (d[0] === '+' ? '-' : '+') + d[1]));
 
+// ---------------------------------------------------------------------------
+// geração de obstáculos: posição aleatória (semente fixa), sem sobrepor, sempre em pares simétricos
+// ---------------------------------------------------------------------------
+function overlaps(H, x, z, w, d, m) {
+  for (const o of H.obstacles) {
+    const ow = o.type === 'cyl' ? o.r * 2 : o.w, od = o.type === 'cyl' ? o.r * 2 : o.d;
+    if (Math.abs(x - o.x) < (w + ow) / 2 + m && Math.abs(z - o.z) < (d + od) / 2 + m) return true;
+  }
+  return false;
+}
+// make(R) -> { w, d, put(x, z, s) }; s = +1 (original) / -1 (espelho por rotação de 180°)
+function scatter(H, A, R, { count, tries = 60, margin = 2.4, zMin = 4, zMax, xMax, make }) {
+  let placed = 0;
+  for (let n = 0; n < count; n++) {
+    for (let t = 0; t < tries; t++) {
+      const spec = make(R);
+      const x = (R() * 2 - 1) * xMax, z = zMin + R() * (zMax - zMin);
+      if (z - spec.d / 2 < 2.5) continue;
+      if (z + spec.d / 2 > A.hz - 8 && Math.abs(x) < 14 + spec.w / 2) continue;      // área de largada livre
+      if (overlaps(H, x, z, spec.w, spec.d, margin) || overlaps(H, -x, -z, spec.w, spec.d, margin)) continue;
+      spec.put(x, z, 1); spec.put(-x, -z, -1); placed++; break;
+    }
+  }
+  return placed;
+}
+function container(H, metal, { x, z, alongX, color, color2, stack }) {
+  const w = alongX ? 6.1 : 2.5, d = alongX ? 2.5 : 6.1;
+  H.box({ x, z, w, d, h: 2.6, mat: metal(color) });
+  if (stack) { H.box({ x, z, w, d, h: 2.6, y: 2.6, mat: metal(color2 || color), collide: false }); H.obstacles[H.obstacles.length - 1].h = 5.2; }
+}
+function carStack(H, o) {
+  car(H, { ...o, stack: o.stacked ? 1.4 : 0 });
+  if (o.stacked) car(H, { x: o.x, z: o.z, alongX: o.alongX, color: o.color2 || [70, 100, 140], y: 1.5, tilt: o.tilt || 0.06, collide: false });
+}
+
 // ===========================================================================
-// MAPA 1 — ARENA SPEEDBALL (campo de torneio)
+// MAPA 1 — ARENA SPEEDBALL (campo de torneio, 60 × 90 m)
 // ===========================================================================
 function buildArena(ctx) {
-  const H = helpers(ctx), { group } = H;
+  const H = helpers(ctx), { group } = H, A = ctx.ARENA, hx = A.hx, hz = A.hz, R = hashRand(21);
   const turf = H.M('grass', { color: [66, 104, 50], tile: 3 }, { bump: 0.6 });
-  H.ground(turf, 44, 64);
-  const outer = H.M('grass', { color: [70, 90, 52], tile: 6 }); outer.map.repeat.set(1, 1);
-  H.ground(outer, 700, 700, -0.02);
+  H.ground(turf, hx * 2 + 4, hz * 2 + 4);
+  const outer = H.M('grass', { color: [70, 90, 52], tile: 6 }); H.ground(outer, 900, 900, -0.02);
   const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 });
-  const mid = new THREE.Mesh(new THREE.PlaneGeometry(40, 0.15), lineMat); mid.rotation.x = -PI / 2; mid.position.y = 0.01; group.add(mid);
+  const mid = new THREE.Mesh(new THREE.PlaneGeometry(hx * 2, 0.15), lineMat); mid.rotation.x = -PI / 2; mid.position.y = 0.01; group.add(mid);
   [1, -1].forEach((s, i) => {
-    const st = new THREE.Mesh(new THREE.BoxGeometry(14, 0.12, 2.4), new THREE.MeshStandardMaterial({ color: i ? 0x00b4ff : 0xff8a00, roughness: 0.6 }));
-    st.position.set(0, 0.06, s * 28.6); st.receiveShadow = true; group.add(st);
+    const st = new THREE.Mesh(new THREE.BoxGeometry(18, 0.12, 2.4), new THREE.MeshStandardMaterial({ color: i ? 0x00b4ff : 0xff8a00, roughness: 0.6 }));
+    st.position.set(0, 0.06, s * (hz - 1.4)); st.receiveShadow = true; group.add(st);
   });
   const PAL = [0xf2c230, 0xe8eef2, 0x2c3036, 0x2f7fc9, 0xe0701f, 0xc83a3a];
-  const HALF = [
-    ['cyl', -8, 5.5, 0.6, 1.6], ['cyl', 8, 5.5, 0.6, 1.6], ['cyl', 0, 9.5, 0.6, 1.9], ['cyl', -14, 12, 0.6, 1.6], ['cyl', 14, 12, 0.6, 1.6],
-    ['cyl', -5, 17, 0.6, 1.9], ['cyl', 5, 17, 0.6, 1.9], ['cyl', -4, 24, 0.65, 1.7], ['cyl', 4, 24, 0.65, 1.7],
-    ['box', -3.5, 6, 1.8, 1.8, 1.1], ['box', 3.5, 6, 1.8, 1.8, 1.1], ['box', -10, 16, 3.2, 0.9, 1.9], ['box', 10, 16, 3.2, 0.9, 1.9],
-    ['box', -17, 4, 0.9, 3, 1.9], ['box', 17, 4, 0.9, 3, 1.9], ['box', -11, 22, 1.8, 1.8, 1.1], ['box', 11, 22, 1.8, 1.8, 1.1], ['box', 0, 13.5, 2.4, 0.9, 1.9],
-  ];
-  const list = [['cyl', 0, 0, 0.65, 1.9]];
-  HALF.forEach((o) => { list.push(o); const m = o.slice(); m[1] = -o[1]; m[2] = -o[2]; list.push(m); });
-  list.forEach((o, idx) => {
-    const mat = fabricMaterial(PAL[Math.floor((idx + 1) / 2) % PAL.length]);
+  const fab = new Map();
+  const bunker = (spec, x, z, idx) => {
+    const col = PAL[idx % PAL.length];
+    if (!fab.has(col)) fab.set(col, fabricMaterial(col));
+    const mat = fab.get(col);
     let mesh;
-    if (o[0] === 'cyl') {
-      const [, x, z, r, h] = o;
+    if (spec.k === 'cyl') {
+      const r = spec.r, h = spec.h;
       const prof = [[r, 0], [r, h - 0.22], [r * 0.92, h - 0.08], [r * 0.7, h - 0.015], [0.001, h]].map((p) => new THREE.Vector2(p[0], p[1]));
-      mesh = new THREE.Mesh(new THREE.LatheGeometry(prof, 28), mat); mesh.position.set(x, 0, z);
+      mesh = new THREE.Mesh(new THREE.LatheGeometry(prof, 24), mat); mesh.position.set(x, 0, z);
       H.obstacles.push({ type: 'cyl', x, z, r, h });
     } else {
-      const [, x, z, w, d, h] = o;
-      mesh = new THREE.Mesh(roundedBox(w, h, d, 0.17), mat); mesh.position.set(x, h / 2, z);
-      H.obstacles.push({ type: 'box', x, z, w, d, h });
+      mesh = new THREE.Mesh(roundedBox(spec.w, spec.h, spec.d, 0.17), mat); mesh.position.set(x, spec.h / 2, z);
+      H.obstacles.push({ type: 'box', x, z, w: spec.w, d: spec.d, h: spec.h });
     }
     H.add(mesh);
-  });
+  };
+  bunker({ k: 'cyl', r: 0.65, h: 1.9 }, 0, 0, 0);
+  let ci = 1;
+  scatter(H, A, R, { count: H.hi ? 78 : 56, margin: 2.7, zMax: hz - 8, xMax: hx - 3, make: (R) => {
+    const t = R(); let spec;
+    if (t < 0.42) spec = { k: 'cyl', r: 0.6, h: R() < 0.5 ? 1.6 : 1.9 };
+    else if (t < 0.68) spec = { k: 'box', w: 1.8, d: 1.8, h: 1.1 };
+    else if (t < 0.86) spec = { k: 'box', w: 3.2, d: 0.9, h: 1.9 };
+    else spec = { k: 'box', w: 0.9, d: 3, h: 1.9 };
+    const idx = ci++;
+    return { w: spec.k === 'cyl' ? spec.r * 2 : spec.w, d: spec.k === 'cyl' ? spec.r * 2 : spec.d, put: (x, z) => bunker(spec, x, z, idx) };
+  } });
   // rede + postes
   const netC = document.createElement('canvas'); netC.width = netC.height = 64;
   const ng = netC.getContext('2d'); ng.strokeStyle = '#fff'; ng.lineWidth = 4; ng.beginPath(); ng.moveTo(0, 0); ng.lineTo(64, 64); ng.moveTo(64, 0); ng.lineTo(0, 64); ng.stroke();
   const net = new THREE.CanvasTexture(netC); net.wrapS = net.wrapT = THREE.RepeatWrapping;
   const postGeo = new THREE.CylinderGeometry(0.06, 0.06, 5.2, 8), postMat = new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.5, metalness: 0.6 });
-  [[0, 31, 0, 42], [0, -31, 0, 42], [21, 0, PI / 2, 62], [-21, 0, PI / 2, 62]].forEach(([x, z, ry, len]) => {
+  [[0, hz + 1, 0, hx * 2 + 2], [0, -hz - 1, 0, hx * 2 + 2], [hx + 1, 0, PI / 2, hz * 2 + 2], [-hx - 1, 0, PI / 2, hz * 2 + 2]].forEach(([x, z, ry, len]) => {
     const t = net.clone(); t.needsUpdate = true; t.repeat.set(len / 0.5, 10);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(len, 5), new THREE.MeshBasicMaterial({ map: t, color: 0x222831, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide }));
     m.position.set(x, 2.5, z); m.rotation.y = ry; group.add(m);
     for (let i = -len / 2; i <= len / 2 + 0.01; i += 5) { const p = new THREE.Mesh(postGeo, postMat); p.position.set(x + (ry ? 0 : i), 2.6, z + (ry ? i : 0)); p.castShadow = true; group.add(p); }
   });
-  trees(H, H.hi ? 90 : 45, 36, 76);
-  [[-30, -44, 0.2, 0x2f6fa8], [29, 45, -0.15, 0xb4472b], [-36, 38, 0.5, 0x4d7a4a]].forEach(([x, z, ry, c]) => {
+  trees(H, H.hi ? 130 : 64, 42, 100);
+  [[-46, -66, 0.2, 0x2f6fa8], [44, 68, -0.15, 0xb4472b], [-54, 58, 0.5, 0x4d7a4a], [52, -60, 0.1, 0xc9a43a]].forEach(([x, z, ry, c]) => {
     const cont = new THREE.Mesh(new THREE.BoxGeometry(6.1, 2.6, 2.4), new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, metalness: 0.3 }));
     cont.position.set(x, 1.3, z); cont.rotation.y = ry; H.add(cont);
   });
-  [[-25, -34], [25, -34], [-25, 34], [25, 34]].forEach(([x, z]) => {
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+    const x = sx * (hx + 6), z = sz * (hz + 6);
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 12, 8), postMat); pole.position.set(x, 6, z); pole.castShadow = true; group.add(pole);
     const lamp = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.4, 0.8), new THREE.MeshStandardMaterial({ color: 0xffffee, emissive: 0xffffcc, emissiveIntensity: 0.6 })); lamp.position.set(x, 12.2, z); group.add(lamp);
   });
   H.flush();
   return {
     sky: { top: 0x3b78c8, horizon: 0xcfe0f2, ground: 0x7d8a6a, sunSize: 1 },
-    sun: { color: 0xfff0d8, intensity: 2.6, dir: [28, 48, 18] }, hemi: { sky: 0xcfe0ff, ground: 0x4a5d3a, intensity: 1.0 },
-    fog: { color: 0xbfd2e6, near: 70, far: 260 }, exposure: 1.05, envIntensity: 0.55,
+    sun: { color: 0xfff0d8, intensity: 2.6, dir: [34, 58, 22] }, hemi: { sky: 0xcfe0ff, ground: 0x4a5d3a, intensity: 1.0 },
+    fog: { color: 0xbfd2e6, near: 90, far: 330 }, exposure: 1.05, envIntensity: 0.55,
   };
 }
 
 // ===========================================================================
-// MAPA 2 — GALPÃO ABANDONADO
+// MAPA 2 — GALPÃO ABANDONADO (60 × 90 m)
 // ===========================================================================
 function buildGalpao(ctx) {
-  const H = helpers(ctx), { group, M } = H;
-  H.ground(M('floor', { base: 170, tint: [1, 0.98, 0.94] }, { bump: 0.8 }), 42, 62);
+  const H = helpers(ctx), { group, M } = H, A = ctx.ARENA, hx = A.hx, hz = A.hz, R = hashRand(33);
+  H.ground(M('floor', { base: 170, tint: [1, 0.98, 0.94] }, { bump: 0.8 }), hx * 2 + 2, hz * 2 + 2);
   const wallMat = M('corrugated', { color: [118, 134, 128], rust: 0.46, ridges: 10 }, { bump: 1.6, metal: 0.25 });
-  const wallH = 11;
-  [[0, 31, 42, 0.4], [0, -31, 42, 0.4], [21, 0, 0.4, 62], [-21, 0, 0.4, 62]].forEach(([x, z, w, d]) => {
+  const wallH = 12;
+  [[0, hz + 1, hx * 2 + 2, 0.4], [0, -hz - 1, hx * 2 + 2, 0.4], [hx + 1, 0, 0.4, hz * 2 + 2], [-hx - 1, 0, 0.4, hz * 2 + 2]].forEach(([x, z, w, d]) => {
     const m = new THREE.Mesh(boxGeo(w, wallH, d, 2), wallMat); m.position.set(x, wallH / 2, z); m.receiveShadow = true; group.add(m);
   });
-  // faixa de janelas (luz do dia) e grandes portões
   const sky = new THREE.MeshBasicMaterial({ color: 0xcfe6ff, fog: false });
-  [[0, 30.78, 0], [0, -30.78, PI], [20.78, 0, -PI / 2], [-20.78, 0, PI / 2]].forEach(([x, z, ry]) => {
-    const len = Math.abs(x) > 1 ? 58 : 38;
+  [[0, hz + 0.78, 0], [0, -hz - 0.78, PI], [hx + 0.78, 0, -PI / 2], [-hx - 0.78, 0, PI / 2]].forEach(([x, z, ry]) => {
+    const alongZ = Math.abs(x) > 1, len = alongZ ? hz * 2 - 2 : hx * 2 - 2;
     for (let i = -len / 2 + 4; i < len / 2 - 3; i += 9) {
       const p = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 1.6), sky);
-      p.position.set(x + (Math.abs(x) > 1 ? 0 : i), 9, z + (Math.abs(x) > 1 ? i : 0)); p.rotation.y = ry; p.position.x -= Math.sign(x) * 0.0; group.add(p);
-      H.decal('janela', 2, ry === 0 ? '-z' : ry === PI ? '+z' : ry > 0 ? '+x' : '-x', p.position.x, 9, p.position.z, 6.2, 2.2, { broken: false });
+      p.position.set(x + (alongZ ? 0 : i), 10, z + (alongZ ? i : 0)); p.rotation.y = ry; group.add(p);
+      H.decal('janela', 2, ry === 0 ? '-z' : ry === PI ? '+z' : ry > 0 ? '+x' : '-x', p.position.x, 10, p.position.z, 6.2, 2.2, { broken: false });
     }
   });
-  // telhado + tesouras metálicas
-  const roof = new THREE.Mesh(planeGeo(42, 62, 2), M('corrugated', { color: [100, 112, 108], rust: 0.55 }, { side: THREE.DoubleSide }));
+  const roof = new THREE.Mesh(planeGeo(hx * 2 + 2, hz * 2 + 2, 2), M('corrugated', { color: [100, 112, 108], rust: 0.55 }, { side: THREE.DoubleSide }));
   roof.rotation.x = PI / 2; roof.position.y = wallH; group.add(roof);
-  const steel = M('rust', { color: [60, 66, 70], tile: 1.5 }, { bump: 0.8, metal: 0.4 });
-  for (let z = -27; z <= 27; z += 9) {
-    const b = new THREE.Mesh(boxGeo(42, 0.5, 0.35, 1.5), steel); b.position.set(0, wallH - 0.4, z); group.add(b);
-    for (let i = -18; i <= 18; i += 6) { const d = new THREE.Mesh(boxGeo(0.25, 2.4, 0.25, 1.5), steel); d.position.set(i, wallH - 1.6, z); d.rotation.z = (i % 12 === 0 ? 0.6 : -0.6); group.add(d); }
+  const steel = H.paint('rust', [60, 66, 70], { tile: 1.5 }, { bump: 0.8, metal: 0.4 });
+  for (let z = -(hz - 3); z <= hz - 3; z += 9) {
+    const b = new THREE.Mesh(boxGeo(hx * 2 + 2, 0.5, 0.35, 1.5), steel); b.position.set(0, wallH - 0.4, z); group.add(b);
+    for (let i = -(hx - 3); i <= hx - 3; i += 6) { const d = new THREE.Mesh(boxGeo(0.25, 2.4, 0.25, 1.5), steel); d.position.set(i, wallH - 1.6, z); d.rotation.z = (Math.round(i / 6) % 2 === 0 ? 0.6 : -0.6); group.add(d); }
   }
-  for (let x = -18; x <= 18; x += 9) { const b = new THREE.Mesh(boxGeo(0.4, 0.4, 62, 1.5), steel); b.position.set(x, wallH - 0.2, 0); group.add(b); }
+  for (let x = -(hx - 3); x <= hx - 3; x += 9) { const b = new THREE.Mesh(boxGeo(0.4, 0.4, hz * 2 + 2, 1.5), steel); b.position.set(x, wallH - 0.2, 0); group.add(b); }
   // claraboias + feixes de luz
   const sunDir = new THREE.Vector3(14, 40, 9).normalize();
   const shaftMat = new THREE.MeshBasicMaterial({ map: shaftTexture(), transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false });
   const lightPanel = new THREE.MeshBasicMaterial({ color: 0xfff4d8, fog: false });
-  const skylights = [[-8, 8], [8, -8], [-8, -16], [8, 16], [0, 0], [-8, 24], [8, -24]];
+  const skylights = [];
+  [-18, 0, 18].forEach((x) => [-36, -18, 0, 18, 36].forEach((z) => skylights.push([x + (z % 36 === 0 ? 4 : -2), z])));
   skylights.forEach(([sx, sz]) => {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(4, 7), lightPanel); p.rotation.x = PI / 2; p.position.set(sx, wallH + 0.02, sz); group.add(p);
     const shift = new THREE.Vector3(-sunDir.x, 0, -sunDir.z).multiplyScalar(wallH / sunDir.y);
@@ -322,72 +364,64 @@ function buildGalpao(ctx) {
       group.add(new THREE.Mesh(g, shaftMat));
     });
   });
-  // poeira no ar
-  const dust = []; for (let i = 0; i < 500; i++) dust.push((H.rnd() - 0.5) * 40, H.rnd() * 10, (H.rnd() - 0.5) * 60);
+  const dust = []; for (let i = 0; i < (H.hi ? 1000 : 500); i++) dust.push((H.rnd() - 0.5) * hx * 2, H.rnd() * 11, (H.rnd() - 0.5) * hz * 2);
   const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dust, 3));
   group.add(new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xfff1d0, size: 0.07, transparent: true, opacity: 0.4, depthWrite: false })));
-  // manchas e marcações no piso
   const stain = decalMaterial('mancha', 3);
-  [[-6, 4, 6], [9, -10, 5], [-12, -18, 7], [3, 18, 5]].forEach(([x, z, s]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), stain); m.rotation.x = -PI / 2; m.position.set(x, 0.015, z); group.add(m); });
+  for (let i = 0; i < 9; i++) { const s = 5 + H.rnd() * 4, m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), stain); m.rotation.x = -PI / 2; m.position.set((H.rnd() - 0.5) * (hx * 2 - 10), 0.015, (H.rnd() - 0.5) * (hz * 2 - 10)); group.add(m); }
   const yellow = new THREE.MeshBasicMaterial({ color: 0xd8b21c });
-  [-14, 14].forEach((x) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 54), yellow); l.rotation.x = -PI / 2; l.position.set(x, 0.012, 0); group.add(l); });
+  [-(hx - 5), hx - 5].forEach((x) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.25, hz * 2 - 8), yellow); l.rotation.x = -PI / 2; l.position.set(x, 0.012, 0); group.add(l); });
 
-  // cobertura (simétrica)
   const wood = M('wood', {}, { bump: 1.4 }), woodDark = M('wood', { color: [110, 80, 52] }, { bump: 1.4 });
-  const metal = (c) => M('corrugated', { color: c, rust: 0.52, ridges: 8 }, { bump: 1.8, metal: 0.3 });
+  const metal = (c) => H.paint('corrugated', c, { rust: 0.52, ridges: 8 }, { bump: 1.8, metal: 0.3 });
   const concrete = M('concrete', { base: 150 });
-  H.box({ x: 0, z: 0, w: 5, d: 2.4, h: 2.8, mat: M('rust', { color: [70, 100, 120] }, { metal: 0.35 }) });
+  H.box({ x: 0, z: 0, w: 6, d: 2.6, h: 2.8, mat: H.paint('rust', [70, 100, 120], {}, { metal: 0.35 }) });
   sym((s) => {
-    [[-10, 6], [10, 6], [-10, 18], [10, 18]].forEach(([x, z]) => {
-      H.cyl({ x: x * s, z: z * s, r: 0.4, h: wallH, mat: concrete, seg: 18 });
-      const band = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.9, 18), new THREE.MeshBasicMaterial({ color: 0xd8b21c })); band.position.set(x * s, 0.5, z * s); group.add(band);
-    });
-    // estantes metálicas
-    [[-16, 12], [16, 12]].forEach(([x, z]) => {
-      H.box({ x: x * s, z: z * s, w: 1.1, d: 7, h: 2.9, mat: M('rust', { color: [58, 86, 140], tile: 1.2 }, { bump: 1, metal: 0.45 }) });
-      for (let k = 0; k < 3; k++) H.box({ x: x * s, z: (z + (k - 1) * 2.3) * s, w: 0.9, d: 1.5, h: 0.8, y: 0.6 + k * 0.05, mat: wood, collide: false });
-    });
-    // contêineres
-    H.box({ x: -6 * s, z: 13 * s, w: 6.1, d: 2.5, h: 2.6, mat: metal([170, 70, 50]) });
-    H.box({ x: 7 * s, z: 20 * s, w: 2.5, d: 6.1, h: 2.6, mat: metal([60, 100, 130]) });
-    // caixotes, pallets e empilhadeira
-    H.box({ x: 1.5 * s, z: 8 * s, w: 1.6, d: 1.6, h: 1.6, mat: wood }); H.box({ x: 3.4 * s, z: 8.6 * s, w: 1.6, d: 1.6, h: 3.2, mat: woodDark });
-    H.box({ x: 4 * s, z: 4.5 * s, w: 1.2, d: 1.2, h: 0.55, mat: wood }); H.box({ x: -8 * s, z: 10 * s, w: 1.2, d: 1.2, h: 0.55, mat: wood });
-    H.box({ x: -13 * s, z: 3.5 * s, w: 1.4, d: 2.8, h: 1.5, mat: M('rust', { color: [220, 170, 30] }, { bump: 1.2 }) });
-    H.box({ x: -13 * s, z: 3.5 * s, w: 1.4, d: 0.3, h: 3.0, y: 0, mat: steel, collide: false });
-    barrel(H, 2 * s, 14 * s, [60, 90, 150]); barrel(H, 2.7 * s, 14.4 * s, [150, 50, 40]); barrel(H, 2.2 * s, 15.1 * s, [90, 90, 90]);
-    H.box({ x: -2 * s, z: 21 * s, w: 4, d: 0.6, h: 1.1, mat: concrete });
-    hut(H, { x: -14 * s, z: 21.5 * s, w: 6, d: 5, h: 3, doors: flip(['+x'], s), wallMat: metal([100, 120, 130]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
+    [-21, -7, 7, 21].forEach((x) => [8, 22].forEach((z) => {
+      H.cyl({ x: x * s, z: z * s, r: 0.4, h: wallH, mat: concrete, seg: 16 });
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.9, 16), new THREE.MeshBasicMaterial({ color: 0xd8b21c })); band.position.set(x * s, 0.5, z * s); group.add(band);
+    }));
+    // escritórios (barracos com porta)
+    hut(H, { x: -25 * s, z: 33 * s, w: 7, d: 6, h: 3, doors: flip(['+x'], s), wallMat: metal([100, 120, 130]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
+    hut(H, { x: 25 * s, z: 14 * s, w: 6, d: 5, h: 3, doors: flip(['-x'], s), wallMat: metal([120, 110, 100]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
   });
-  // lâmpadas penduradas (emissivas) + luzes pontuais quentes
+  scatter(H, A, R, { count: H.hi ? 34 : 24, margin: 2.4, zMax: hz - 8, xMax: hx - 3, make: (R) => {
+    const t = R();
+    if (t < 0.22) { const tall = R() < 0.5; return { w: 1.6, d: 1.6, put: (x, z) => H.box({ x, z, w: 1.6, d: 1.6, h: tall ? 3.2 : 1.6, mat: tall ? woodDark : wood }) }; }
+    if (t < 0.34) return { w: 1.2, d: 1.2, put: (x, z) => H.box({ x, z, w: 1.2, d: 1.2, h: 0.55, mat: wood }) };
+    if (t < 0.5) { const ax = R() < 0.5, c = [[170, 70, 50], [60, 100, 130], [90, 130, 80]][Math.floor(R() * 3)]; return { w: ax ? 6.1 : 2.5, d: ax ? 2.5 : 6.1, put: (x, z) => container(H, metal, { x, z, alongX: ax, color: c }) }; }
+    if (t < 0.64) { const ax = R() < 0.5; return { w: ax ? 7 : 1.1, d: ax ? 1.1 : 7, put: (x, z) => H.box({ x, z, w: ax ? 7 : 1.1, d: ax ? 1.1 : 7, h: 2.9, mat: H.paint('rust', [58, 86, 140], { tile: 1.2 }, { bump: 1, metal: 0.45 }) }) }; }
+    if (t < 0.74) return { w: 1.5, d: 2.8, put: (x, z) => { H.box({ x, z, w: 1.4, d: 2.8, h: 1.5, mat: H.paint('rust', [220, 170, 30], {}, { bump: 1.2 }) }); H.box({ x, z: z - 1.2, w: 0.3, d: 0.3, h: 3, mat: steel, collide: false }); } };
+    if (t < 0.82) return { w: 5, d: 2.4, put: (x, z) => H.box({ x, z, w: 5, d: 2.4, h: 2.6, mat: H.paint('rust', [70, 100, 120], {}, { metal: 0.35 }) }) };
+    if (t < 0.92) return { w: 1.6, d: 1.6, put: (x, z) => { barrel(H, x, z, [60, 90, 150]); barrel(H, x + 0.7, z + 0.4, [150, 50, 40]); barrel(H, x + 0.2, z + 1.1, [90, 90, 90]); } };
+    return { w: 4, d: 0.8, put: (x, z) => H.box({ x, z, w: 4, d: 0.6, h: 1.1, mat: concrete }) };
+  } });
   const lamp = new THREE.MeshBasicMaterial({ color: 0xffe3a8, fog: false });
-  [[-14, 0], [14, 0], [0, 20], [0, -20]].forEach(([x, z]) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.2, 0.35, 10), lamp); l.position.set(x, 8.2, z); group.add(l); });
+  const lampPts = [[-20, 10], [20, -10], [0, 28], [0, -28], [-20, -32], [20, 32], [0, 0], [-22, 30], [22, -30]];
+  lampPts.forEach(([x, z]) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.2, 0.35, 10), lamp); l.position.set(x, 8.8, z); group.add(l); });
   H.flush();
   return {
     indoor: true,
     sky: { top: 0x2a3138, horizon: 0x3a4148, ground: 0x15181b, sunSize: 3 },
     sun: { color: 0xfff0d0, intensity: 3.4, dir: [14, 40, 9] }, hemi: { sky: 0x8fa0b2, ground: 0x2a2724, intensity: 0.55 },
-    fog: { color: 0x2a2f35, near: 25, far: 120 }, exposure: 1.2, envIntensity: 0.3,
-    lights: [{ color: 0xffd9a0, intensity: 14, distance: 26, pos: [-14, 7.5, 0] }, { color: 0xffd9a0, intensity: 14, distance: 26, pos: [14, 7.5, 0] }, { color: 0xffd9a0, intensity: 12, distance: 24, pos: [0, 7.5, 20] }, { color: 0xffd9a0, intensity: 12, distance: 24, pos: [0, 7.5, -20] }],
+    fog: { color: 0x2a2f35, near: 30, far: 150 }, exposure: 1.2, envIntensity: 0.3,
+    lights: [[-20, 10], [20, -10], [0, 28], [0, -28], [-20, -32], [20, 32]].map(([x, z]) => ({ color: 0xffd9a0, intensity: 13, distance: 28, pos: [x, 8, z] })),
   };
 }
 
 // ===========================================================================
-// MAPA 3 — FAVELA / COMUNIDADE ("Morro Vivo")
+// MAPA 3 — FAVELA / COMUNIDADE ("Morro Vivo", 60 × 90 m)
 // ===========================================================================
 function buildFavela(ctx) {
-  const H = helpers(ctx), { group, M } = H;
-  H.ground(M('pavers', { color: [132, 128, 120] }, { bump: 1.4 }), 42, 62);
-  const dirt = new THREE.Mesh(planeGeo(42, 62, 6), M('dirt', {}, { bump: 1 })); // manchas de terra nas bordas
-  [[-17, 0, 6, 50], [17, 0, 6, 50]].forEach(([x, z, w, d]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), M('dirt', {})); m.rotation.x = -PI / 2; m.position.set(x, 0.01, z); m.receiveShadow = true; group.add(m); });
+  const H = helpers(ctx), { group, M } = H, A = ctx.ARENA, hx = A.hx, hz = A.hz, R = hashRand(55);
+  H.ground(M('pavers', { color: [132, 128, 120] }, { bump: 1.4 }), hx * 2 + 2, hz * 2 + 2);
+  [[-(hx - 3), 0, 6, hz * 2 - 8], [hx - 3, 0, 6, hz * 2 - 8]].forEach(([x, z, w, d]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), M('dirt', {})); m.rotation.x = -PI / 2; m.position.set(x, 0.01, z); m.receiveShadow = true; group.add(m); });
   const COLORS = [[236, 168, 64], [214, 92, 84], [70, 168, 188], [128, 184, 100], [238, 228, 204], [190, 146, 222], [246, 204, 90], [96, 136, 206]];
   const roofPts = [];
-  function house({ x, z, w, d, h, style = 'plaster', c = 0, rot = false, tank = 0 }) {
-    const mat = style === 'brick' ? H.M('brick', {}, { bump: 1.6 }) : H.M('plaster', { color: COLORS[c % COLORS.length] }, { bump: 0.9 });
+  function house({ x, z, w, d, h, style = 'plaster', c = 0, tank = 0 }) {
+    const mat = style === 'brick' ? H.M('brick', {}, { bump: 1.6 }) : H.paint('plaster', COLORS[c % COLORS.length], {}, { bump: 0.9 });
     H.box({ x, z, w, d, h, mat });
-    if (style === 'brick') { // parte da fachada rebocada e pintada
-      H.box({ x, z, w: w + 0.02, d: d + 0.02, h: Math.min(2.2, h), mat: H.M('plaster', { color: COLORS[(c + 3) % COLORS.length] }, { bump: 0.9 }), collide: false });
-    }
+    if (style === 'brick') H.box({ x, z, w: w + 0.02, d: d + 0.02, h: Math.min(2.2, h), mat: H.paint('plaster', COLORS[(c + 3) % COLORS.length], {}, { bump: 0.9 }), collide: false });
     H.box({ x, z, w: w + 0.5, d: d + 0.5, h: 0.25, y: h, mat: H.M('concrete', { base: 160 }), collide: false });
     const faces = [['+z', x, z + d / 2 + 0.03, w, 0], ['-z', x, z - d / 2 - 0.03, w, 0], ['+x', x + w / 2 + 0.03, z, d, 1], ['-x', x - w / 2 - 0.03, z, d, 1]];
     const floors = Math.max(1, Math.floor(h / 3));
@@ -402,145 +436,150 @@ function buildFavela(ctx) {
       }
       if (H.rnd() < 0.3) { alongZ ? H.decal('grafite', 1 + fi, f, fx, 1.9, fz + (H.rnd() - 0.5) * span * 0.4, 2.6, 2.6) : H.decal('grafite', 1 + fi, f, fx + (H.rnd() - 0.5) * span * 0.4, 1.9, fz, 2.6, 2.6); }
     });
-    // laje: caixa d'água, antena, vergalhões
-    if (tank) { H.cyl({ x: x + w * 0.2, z: z - d * 0.15, r: 0.62, h: 1.0, y: h + 0.25, mat: new THREE.MeshStandardMaterial({ color: 0x2c78c2, roughness: 0.45 }), collide: false, seg: 18 }); }
-    if (H.rnd() < 0.55) { H.cyl({ x: x - w * 0.3, z: z + d * 0.25, r: 0.03, h: 2.2, y: h + 0.25, mat: new THREE.MeshStandardMaterial({ color: 0x777b80, metalness: 0.7, roughness: 0.4 }), collide: false, seg: 6 }); }
+    if (tank) H.cyl({ x: x + w * 0.2, z: z - d * 0.15, r: 0.62, h: 1.0, y: h + 0.25, mat: new THREE.MeshStandardMaterial({ color: 0x2c78c2, roughness: 0.45 }), collide: false, seg: 16 });
+    if (H.rnd() < 0.55) H.cyl({ x: x - w * 0.3, z: z + d * 0.25, r: 0.03, h: 2.2, y: h + 0.25, mat: new THREE.MeshStandardMaterial({ color: 0x777b80, metalness: 0.7, roughness: 0.4 }), collide: false, seg: 6 });
     if (style === 'brick') [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => H.cyl({ x: x + sx * (w / 2 - 0.2), z: z + sz * (d / 2 - 0.2), r: 0.05, h: 1.0, y: h + 0.25, mat: H.M('rust', {}), collide: false, seg: 6, shadow: false }));
     roofPts.push([x - w / 2, h + 0.3, z - d / 2], [x + w / 2, h + 0.3, z + d / 2], [x - w / 2, h + 0.3, z + d / 2], [x + w / 2, h + 0.3, z - d / 2]);
   }
-  // centro: bar da comunidade
-  hut(H, { x: 0, z: 0, w: 6, d: 5, h: 3.4, doors: ['+z', '-z'], wallMat: H.M('plaster', { color: COLORS[6] }, { bump: 0.9 }), floorMat: H.M('concrete', { base: 150 }), roofMat: H.M('concrete', { base: 160 }) });
+  // praça central: bar da comunidade (barraco enterável)
+  hut(H, { x: 0, z: 0, w: 6, d: 5, h: 3.4, doors: ['+z', '-z'], wallMat: H.paint('plaster', COLORS[6], {}, { bump: 0.9 }), floorMat: H.M('concrete', { base: 150 }), roofMat: H.M('concrete', { base: 160 }) });
   H.decal('grafite', 31, '+z', 2.1, 2.1, 2.55, 2.6, 2.6, { word: 'BAR' });
   const awning = new THREE.Mesh(boxGeo(4.6, 0.12, 1.4, 2), new THREE.MeshStandardMaterial({ color: 0xd9433a, roughness: 0.6 })); awning.position.set(0, 2.7, 3.0); group.add(awning);
-  const HOUSES = [
-    [-12.5, 7, 6, 8, 6.5, 'plaster', 0, 1], [13, 9, 5, 7, 5, 'brick', 0, 0], [-4.5, 12.5, 3.6, 5, 4, 'plaster', 2, 0], [6.5, 15.5, 4.5, 4, 7.5, 'plaster', 3, 1],
-    [-14.5, 17, 5, 5, 6.5, 'brick', 0, 0], [15.5, 22.5, 5, 6, 5.5, 'plaster', 4, 1], [-15.5, 23.5, 4.5, 5, 4.5, 'plaster', 1, 0], [3, 5.5, 3.5, 3.5, 3.2, 'plaster', 5, 0],
-  ];
+  // quarteirões: grade de casas com becos de ~3 m (metade z>0; o resto é espelhado)
+  const HUT_CELLS = new Set(['-16.5,20', '27.5,9', '-27.5,41', '16.5,41', '5.5,31']);
+  const xs = [-27.5, -16.5, -5.5, 5.5, 16.5, 27.5], zs = [9, 20, 31, 41];
+  const wallPal = H.M('brick', {}, { bump: 1.6 });
   sym((s) => {
-    HOUSES.forEach(([x, z, w, d, h, st, c, tk]) => house({ x: x * s, z: z * s, w, d, h, style: st, c: c + (s < 0 ? 2 : 0), tank: tk }));
-    // muretas e caixotes de cobertura
-    H.box({ x: -8 * s, z: 2.5 * s, w: 2.4, d: 0.5, h: 1.1, mat: H.M('concrete', { base: 190 }) });
-    hut(H, { x: -8.5 * s, z: 20.5 * s, w: 4.5, d: 4, h: 3.2, doors: flip(['+x'], s), wallMat: H.M('brick', {}, { bump: 1.6 }), floorMat: H.M('concrete', { base: 140 }), roofMat: H.M('concrete', { base: 150 }) });
-    H.box({ x: 9 * s, z: 18 * s, w: 1.2, d: 1.2, h: 1.1, mat: H.M('wood', {}) });
-    barrel(H, -1.6 * s, 18 * s, [40, 100, 170]); barrel(H, 9.4 * s, 12.4 * s, [190, 70, 50]);
-  });
-  // quadra/praça: faixas no chão
-  const white = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.65 });
-  const circle = new THREE.Mesh(new THREE.RingGeometry(3.6, 3.75, 40), white); circle.rotation.x = -PI / 2; circle.position.set(0, 0.012, 0); group.add(circle);
-  // fios e bandeirinhas
-  for (let i = 0; i < roofPts.length; i++) for (let j = i + 1; j < roofPts.length; j++) {
-    const a = roofPts[i], b = roofPts[j], d = Math.hypot(a[0] - b[0], a[2] - b[2]);
-    if (d > 3 && d < 9.5 && H.rnd() < 0.14) (H.rnd() < 0.45 ? H.bunting(a, b, 0.7) : H.wire(a, b, 0.6 + H.rnd() * 0.5));
-  }
-  // muro de contorno com murais
-  const wallMat = H.M('concrete', { base: 200, tint: [1, 0.98, 0.92] }, { bump: 0.8 });
-  [[0, 31, 42.8, 0.6, '-z'], [0, -31, 42.8, 0.6, '+z'], [21, 0, 0.6, 62.8, '-x'], [-21, 0, 0.6, 62.8, '+x']].forEach(([x, z, w, d, face], i) => {
-    H.box({ x, z, w, d, h: 4.2, mat: wallMat, collide: false });
-    for (let k = -2; k <= 2; k++) {
-      const off = k * 8, offz = k * 11;
-      const fx = w > 1 ? x + off : x - Math.sign(x) * 0.34, fz = w > 1 ? z - Math.sign(z) * 0.34 : z + offz;
-      H.decal('grafite', i * 5 + k + 12, face, fx, 2.0, fz, 5, 3.5, { word: ['PAZ', 'AMOR', 'ARTE', 'VIDA', 'SAMBA'][(k + 2 + i) % 5] });
+    for (const cx of xs) for (const cz of zs) {
+      const key = `${cx},${cz}`;
+      if (Math.abs(cx) <= 6 && cz <= 9) continue;                        // alameda central
+      if (cz >= 41 && Math.abs(cx) <= 17 && !HUT_CELLS.has(key)) continue; // largada livre
+      const r = H.rnd();
+      const jx = (H.rnd() - 0.5) * 2, jz = (H.rnd() - 0.5) * 2;
+      if (HUT_CELLS.has(key)) {
+        hut(H, { x: (cx + jx * 0.5) * s, z: (cz - 1 + jz * 0.5) * s, w: 4.6, d: 4, h: 3.2, doors: flip([cx < 0 ? '+x' : '-x'], s), wallMat: wallPal, floorMat: H.M('concrete', { base: 140 }), roofMat: H.M('concrete', { base: 150 }) });
+        continue;
+      }
+      if (r < 0.9) {
+        const w = 4.8 + H.rnd() * 1.8, d = 4.8 + H.rnd() * 1.8, h = [3.2, 4.5, 6.5, 7.8][Math.floor(H.rnd() * 4)];
+        if (cz + d / 2 + jz > hz - 7 && Math.abs(cx) < 14) continue;
+        house({ x: (cx + jx) * s, z: (cz + jz) * s, w, d, h, style: H.rnd() < 0.35 ? 'brick' : 'plaster', c: Math.floor(H.rnd() * 8) + (s < 0 ? 2 : 0), tank: H.rnd() < 0.5 ? 1 : 0 });
+      } else {
+        H.box({ x: (cx + jx) * s, z: cz * s, w: 2.4, d: 0.5, h: 1.1, mat: H.M('concrete', { base: 190 }) });
+        barrel(H, (cx - 1.4) * s, (cz + 1.2) * s, [40, 100, 170]);
+      }
     }
   });
-  // morro ao fundo: bacia de terra + casinhas
-  const prof = [[44, -0.05], [60, 7], [100, 28], [210, 82]].map((p) => new THREE.Vector2(p[0], p[1]));
+  // detalhes entre as casas
+  const brickMat = H.M('brick', {}), concMat = H.M('concrete', { base: 190 }), woodMat = H.M('wood', {});
+  scatter(H, A, R, { count: H.hi ? 40 : 24, margin: 1.7, zMax: hz - 8, xMax: hx - 3, make: (R) => {
+    const t = R();
+    if (t < 0.34) return { w: 2.4, d: 0.5, put: (x, z) => H.box({ x, z, w: 2.4, d: 0.5, h: 1.1, mat: R() < 0.5 ? concMat : brickMat }) };
+    if (t < 0.6) return { w: 1.2, d: 1.2, put: (x, z) => H.box({ x, z, w: 1.2, d: 1.2, h: 1.1, mat: woodMat }) };
+    if (t < 0.85) return { w: 1.4, d: 1.4, put: (x, z) => { barrel(H, x, z, [40, 100, 170]); barrel(H, x + 0.65, z + 0.3, [190, 70, 50]); } };
+    return { w: 3, d: 0.6, put: (x, z) => H.box({ x, z, w: 3, d: 0.6, h: 1.1, mat: concMat }) };
+  } });
+  const white = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.65 });
+  const circle = new THREE.Mesh(new THREE.RingGeometry(3.6, 3.75, 40), white); circle.rotation.x = -PI / 2; circle.position.set(0, 0.012, 0); group.add(circle);
+  for (let i = 0; i < roofPts.length; i++) for (let j = i + 1; j < roofPts.length; j++) {
+    const a = roofPts[i], b = roofPts[j], d = Math.hypot(a[0] - b[0], a[2] - b[2]);
+    if (d > 3 && d < 9.5 && H.rnd() < 0.1) (H.rnd() < 0.45 ? H.bunting(a, b, 0.7) : H.wire(a, b, 0.6 + H.rnd() * 0.5));
+  }
+  const wallMat2 = H.M('concrete', { base: 200, tint: [1, 0.98, 0.92] }, { bump: 0.8 });
+  [[0, hz + 1, hx * 2 + 2.8, 0.6, '-z'], [0, -hz - 1, hx * 2 + 2.8, 0.6, '+z'], [hx + 1, 0, 0.6, hz * 2 + 2.8, '-x'], [-hx - 1, 0, 0.6, hz * 2 + 2.8, '+x']].forEach(([x, z, w, d, face], i) => {
+    H.box({ x, z, w, d, h: 4.2, mat: wallMat2, collide: false });
+    const along = w > 1, len = along ? w : d, n = Math.floor(len / 9);
+    for (let k = 0; k < n; k++) {
+      const off = -len / 2 + 6 + k * ((len - 12) / Math.max(1, n - 1));
+      const fx = along ? x + off : x - Math.sign(x) * 0.34, fz = along ? z - Math.sign(z) * 0.34 : z + off;
+      H.decal('grafite', i * 9 + k + 12, face, fx, 2.0, fz, 5, 3.5, { word: ['PAZ', 'AMOR', 'ARTE', 'VIDA', 'SAMBA', 'FÉ', 'LUZ'][(k + i) % 7] });
+    }
+  });
+  const prof = [[56, -0.05], [74, 7], [112, 28], [230, 82]].map((p) => new THREE.Vector2(p[0], p[1]));
   const hg = new THREE.LatheGeometry(prof, 64), huv = hg.attributes.uv;
   for (let i = 0; i < huv.count; i++) huv.setXY(i, huv.getX(i) * 90, huv.getY(i) * 26);
   const hillMat = M('dirt', { color: [112, 92, 62], tile: 8 }).clone(); hillMat.side = THREE.DoubleSide;
   const hill = new THREE.Mesh(hg, hillMat); hill.scale.set(1, 1, 1.25); hill.receiveShadow = true; group.add(hill);
-  const hillY = (r) => (r <= 60 ? (r - 44) * 0.44 : r <= 100 ? 7 + (r - 60) * 0.525 : 28 + (r - 100) * 0.49);
+  const hillY = (r) => (r <= 74 ? (r - 56) * 0.39 : r <= 112 ? 7 + (r - 74) * 0.55 : 28 + (r - 112) * 0.46);
   const bk = [], cols = [0xe8a840, 0xd65a50, 0x46a8bc, 0x80b864, 0xeee4cc, 0xbe92de, 0xf6cc5a, 0x6088ce, 0xb5603c];
-  for (let i = 0; i < (H.hi ? 220 : 110); i++) {
-    const a = H.rnd() * PI * 2, r = 47 + H.rnd() * 75, y = hillY(r) - 0.4, w = 3 + H.rnd() * 4, d = 3 + H.rnd() * 4, h = 2.6 + H.rnd() * 4;
+  for (let i = 0; i < (H.hi ? 300 : 150); i++) {
+    const a = H.rnd() * PI * 2, r = 60 + H.rnd() * 80, y = hillY(r) - 0.4, w = 3 + H.rnd() * 4, d = 3 + H.rnd() * 4, h = 2.6 + H.rnd() * 4;
     bk.push({ x: Math.cos(a) * r, z: Math.sin(a) * r * 1.25, y, w, d, h, ry: -a + 1.57 + (H.rnd() - 0.5) * 0.4, color: cols[Math.floor(H.rnd() * cols.length)] });
   }
   H.backdrop(bk, H.M('plaster', {}, { bump: 0.5 }));
   H.flush();
   return {
     sky: { top: 0x4a78b8, horizon: 0xf4cf9c, ground: 0x8a6a4a, sunSize: 2.2 },
-    sun: { color: 0xffc67e, intensity: 3.0, dir: [-30, 24, 18] }, hemi: { sky: 0xffd9b8, ground: 0x7a5a45, intensity: 0.95 },
-    fog: { color: 0xeccaa0, near: 45, far: 210 }, exposure: 1.05, envIntensity: 0.6,
+    sun: { color: 0xffc67e, intensity: 3.0, dir: [-40, 32, 24] }, hemi: { sky: 0xffd9b8, ground: 0x7a5a45, intensity: 0.95 },
+    fog: { color: 0xeccaa0, near: 60, far: 260 }, exposure: 1.05, envIntensity: 0.6,
   };
 }
 
 // ===========================================================================
-// MAPA 4 — FERRO-VELHO
+// MAPA 4 — FERRO-VELHO (60 × 90 m)
 // ===========================================================================
 function buildFerro(ctx) {
-  const H = helpers(ctx), { group, M } = H;
-  H.ground(M('dirt', { color: [118, 90, 62], tile: 5 }, { bump: 1.6 }), 42, 62);
-  const outer = M('dirt', { color: [104, 86, 62], tile: 7 }); H.ground(outer, 700, 700, -0.02);
-  // trilhas de pneu e óleo no chão
+  const H = helpers(ctx), { group, M } = H, A = ctx.ARENA, hx = A.hx, hz = A.hz, R = hashRand(66);
+  H.ground(M('dirt', { color: [118, 90, 62], tile: 5 }, { bump: 1.6 }), hx * 2 + 2, hz * 2 + 2);
+  H.ground(M('dirt', { color: [104, 86, 62], tile: 7 }), 900, 900, -0.02);
   const oil = decalMaterial('mancha', 5);
-  [[-5, 6, 8], [7, -8, 7], [-12, -14, 9], [10, 18, 6], [0, 0, 8]].forEach(([x, z, s]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), oil); m.rotation.x = -PI / 2; m.position.set(x, 0.015, z); group.add(m); });
-  const metal = (c, r = 0.5) => M('corrugated', { color: c, rust: r, ridges: 8 }, { bump: 1.8, metal: 0.3 });
+  for (let i = 0; i < 12; i++) { const s = 6 + H.rnd() * 5, m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), oil); m.rotation.x = -PI / 2; m.position.set((H.rnd() - 0.5) * (hx * 2 - 8), 0.015, (H.rnd() - 0.5) * (hz * 2 - 8)); group.add(m); }
+  const metal = (c, r = 0.5) => H.paint('corrugated', c, { rust: r < 0.65 ? 0.52 : 0.72, ridges: 8 }, { bump: 1.8, metal: 0.3 });
   const tireMat = M('concrete', { base: 44 }, { bump: 2 });
-  sym((s) => {
-    car(H, { x: -9 * s, z: 6 * s, alongX: false, color: [160, 66, 52] });
-    car(H, { x: -9 * s, z: 6 * s, alongX: false, color: [70, 100, 140], y: 1.5, stack: 1.4, tilt: 0.06, collide: false }); // 2º carro empilhado
-    H.obstacles[H.obstacles.length - 1].h = 2.9;
-    car(H, { x: 8 * s, z: 12 * s, alongX: true, color: [190, 170, 60] });
-    car(H, { x: -3 * s, z: 18 * s, alongX: true, color: [80, 120, 90], burnt: false });
-    car(H, { x: 13 * s, z: 4 * s, alongX: false, color: [140, 140, 150] });
-    car(H, { x: 13 * s, z: 4 * s, alongX: false, color: [180, 60, 60], y: 1.5, stack: 1.4, tilt: -0.08, collide: false }); H.obstacles[H.obstacles.length - 1].h = 2.9;
-    H.box({ x: -14 * s, z: 14 * s, w: 6.1, d: 2.5, h: 2.6, mat: metal([180, 90, 50]) });
-    H.box({ x: -14 * s, z: 14 * s, w: 6.1, d: 2.5, h: 2.6, y: 2.6, mat: metal([60, 110, 130]), collide: false }); H.obstacles[H.obstacles.length - 1].h = 5.2;
-    H.box({ x: 3 * s, z: 21.5 * s, w: 2.5, d: 6.1, h: 2.6, mat: metal([90, 130, 80], 0.6) });
-    // pilhas de pneus
-    H.cyl({ x: 0 * s, z: 6 * s, r: 1.0, h: 1.3, mat: tireMat, seg: 18 }); H.cyl({ x: -5.5 * s, z: 15 * s, r: 1.0, h: 1.0, mat: tireMat, seg: 18 });
-    const t2 = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.3, 10, 22), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 })); t2.rotation.x = PI / 2; t2.position.set(0 * s, 1.5, 6 * s); H.add(t2);
-    // montes de sucata
-    const heap = H.cyl({ x: 5.5 * s, z: 2.5 * s, r: 1.7, h: 1.8, rt: 0.7, mat: M('rust', {}, { bump: 2 }), seg: 9 });
-    heap.scale.set(1, 1, 1.15);
-    for (let k = 0; k < 6; k++) { const sl = new THREE.Mesh(boxGeo(0.2 + H.rnd() * 0.5, 0.15, 1.4, 1), M('rust', { color: [90 + H.rnd() * 60, 70, 60] })); sl.position.set((5.5 + (H.rnd() - 0.5) * 2.2) * s, 1.4 + H.rnd() * 0.6, (2.5 + (H.rnd() - 0.5) * 2) * s); sl.rotation.set(H.rnd(), H.rnd() * 3, H.rnd()); H.add(sl); }
-    // barris, muretas de concreto, caixote
-    barrel(H, -2 * s, 11 * s, [170, 60, 40]); barrel(H, -2.7 * s, 11.5 * s, [60, 90, 130]); barrel(H, -1.9 * s, 12.2 * s, [100, 100, 100]);
-    H.box({ x: 11 * s, z: 21 * s, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 160 }) });
-    H.box({ x: -7 * s, z: 22 * s, w: 1.5, d: 1.5, h: 1.5, mat: M('wood', {}) });
-  });
-  // ônibus velho no centro
-  H.box({ x: 0, z: 0, w: 2.6, d: 9, h: 3, mat: M('rust', { color: [228, 178, 38] }, { bump: 1.4 }) });
+  const rustHeap = M('rust', {}, { bump: 2 });
+  H.box({ x: 0, z: 0, w: 2.6, d: 9, h: 3, mat: H.paint('rust', [228, 178, 38], {}, { bump: 1.4 }) });
   for (let i = -3; i <= 3; i++) { H.decal('janela', 3, '+x', 1.33, 2.0, i * 1.2, 1, 0.9, { broken: true }); H.decal('janela', 3, '-x', -1.33, 2.0, i * 1.2, 1, 0.9, { broken: true }); }
-  // barraco / escritório
-  sym((s) => hut(H, { x: -16.5 * s, z: 3.5 * s, w: 4.6, d: 4, h: 2.8, doors: flip(['+x'], s), wallMat: metal([140, 130, 110], 0.7), floorMat: M('dirt', { color: [96, 80, 60] }), roofMat: metal([120, 110, 95], 0.8) }));
-  // cerca de chapas + cenário
+  sym((s) => {
+    hut(H, { x: -26 * s, z: 11 * s, w: 4.6, d: 4, h: 2.8, doors: flip(['+x'], s), wallMat: metal([140, 130, 110], 0.7), floorMat: M('dirt', { color: [96, 80, 60] }), roofMat: metal([120, 110, 95], 0.8) });
+    hut(H, { x: -24 * s, z: 34 * s, w: 5, d: 4.4, h: 2.8, doors: flip(['+x'], s), wallMat: metal([120, 118, 108], 0.75), floorMat: M('dirt', { color: [96, 80, 60] }), roofMat: metal([110, 104, 92], 0.8) });
+  });
+  const CAR_COLORS = [[160, 66, 52], [70, 100, 140], [190, 170, 60], [80, 120, 90], [140, 140, 150], [180, 60, 60], [200, 120, 40]];
+  scatter(H, A, R, { count: H.hi ? 46 : 30, margin: 2.5, zMax: hz - 8, xMax: hx - 3, make: (R) => {
+    const t = R();
+    if (t < 0.34) { const ax = R() < 0.5, st = R() < 0.35, c = CAR_COLORS[Math.floor(R() * 7)], c2 = CAR_COLORS[Math.floor(R() * 7)]; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => carStack(H, { x, z, alongX: ax, color: c, color2: c2, stacked: st, tilt: (R() - 0.5) * 0.16 }) }; }
+    if (t < 0.55) { const ax = R() < 0.5, st = R() < 0.4, c = [[180, 90, 50], [60, 110, 130], [90, 130, 80], [140, 60, 50]][Math.floor(R() * 4)], c2 = [[60, 110, 130], [180, 90, 50]][Math.floor(R() * 2)]; return { w: ax ? 6.1 : 2.5, d: ax ? 2.5 : 6.1, put: (x, z) => container(H, metal, { x, z, alongX: ax, color: c, color2: c2, stack: st }) }; }
+    if (t < 0.68) { const tall = R() < 0.4; return { w: 2.1, d: 2.1, put: (x, z) => { H.cyl({ x, z, r: 1.0, h: tall ? 1.3 : 1.0, mat: tireMat, seg: 16 }); if (tall) { const t2 = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.3, 10, 20), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 })); t2.rotation.x = PI / 2; t2.position.set(x, 1.5, z); H.add(t2); } } }; }
+    if (t < 0.8) return { w: 3.4, d: 3.8, put: (x, z) => { H.cyl({ x, z, r: 1.7, h: 1.8, rt: 0.7, mat: rustHeap, seg: 9 }); for (let k = 0; k < 5; k++) { const sl = new THREE.Mesh(boxGeo(0.2 + H.rnd() * 0.5, 0.15, 1.4, 1), H.paint('rust', [90 + H.rnd() * 60, 70, 60], {})); sl.position.set(x + (H.rnd() - 0.5) * 2.2, 1.4 + H.rnd() * 0.6, z + (H.rnd() - 0.5) * 2); sl.rotation.set(H.rnd(), H.rnd() * 3, H.rnd()); H.add(sl); } } };
+    if (t < 0.9) return { w: 1.8, d: 1.8, put: (x, z) => { barrel(H, x, z, [170, 60, 40]); barrel(H, x + 0.7, z + 0.5, [60, 90, 130]); barrel(H, x - 0.1, z + 1.2, [100, 100, 100]); } };
+    if (t < 0.96) return { w: 1.5, d: 1.5, put: (x, z) => H.box({ x, z, w: 1.5, d: 1.5, h: 1.5, mat: M('wood', {}) }) };
+    return { w: 3.2, d: 0.7, put: (x, z) => H.box({ x, z, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 160 }) }) };
+  } });
   const fence = metal([150, 130, 100], 0.75);
-  [[0, 31, 42.8, 0.3, 0], [0, -31, 42.8, 0.3, 0], [21, 0, 0.3, 62.8, 0], [-21, 0, 0.3, 62.8, 0]].forEach(([x, z, w, d]) => { H.box({ x, z, w, d, h: 3.6, mat: fence, collide: false }); });
-  for (let i = 0; i < 14; i++) { const a = H.rnd() * PI * 2, r = 30 + H.rnd() * 20; const mound = new THREE.Mesh(new THREE.ConeGeometry(4 + H.rnd() * 5, 6 + H.rnd() * 7, 8), M('rust', { color: [78, 72, 66] }, { bump: 2 })); mound.position.set(Math.cos(a) * r * 0.9, 3, Math.sin(a) * r * 1.2); mound.castShadow = true; group.add(mound); }
-  // guindaste ao fundo
-  const crane = M('rust', { color: [200, 150, 30], tile: 1.5 }, { bump: 1.2, metal: 0.3 });
-  const mast = new THREE.Mesh(boxGeo(1.2, 24, 1.2, 1.5), crane); mast.position.set(-27, 12, -30); mast.castShadow = true; group.add(mast);
-  const arm = new THREE.Mesh(boxGeo(1, 1, 22, 1.5), crane); arm.position.set(-27, 24, -20); group.add(arm);
-  const mag = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.5, 14), new THREE.MeshStandardMaterial({ color: 0x222 })); mag.position.set(-27, 14, -12); group.add(mag);
-  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 10, 6), new THREE.MeshStandardMaterial({ color: 0x222222 })); cable.position.set(-27, 19.2, -12); group.add(cable);
-  trees(H, 30, 52, 90, [0.2, 0.28], 0.3);
+  [[0, hz + 1, hx * 2 + 2.8, 0.3], [0, -hz - 1, hx * 2 + 2.8, 0.3], [hx + 1, 0, 0.3, hz * 2 + 2.8], [-hx - 1, 0, 0.3, hz * 2 + 2.8]].forEach(([x, z, w, d]) => { H.box({ x, z, w, d, h: 3.6, mat: fence, collide: false }); });
+  for (let i = 0; i < 18; i++) { const a = H.rnd() * PI * 2, r = 56 + H.rnd() * 26; const mound = new THREE.Mesh(new THREE.ConeGeometry(4 + H.rnd() * 5, 6 + H.rnd() * 7, 8), H.paint('rust', [78, 72, 66], {}, { bump: 2 })); mound.position.set(Math.cos(a) * r * 0.9, 3, Math.sin(a) * r * 1.2); mound.castShadow = true; group.add(mound); }
+  const crane = H.paint('rust', [200, 150, 30], { tile: 1.5 }, { bump: 1.2, metal: 0.3 });
+  const mast = new THREE.Mesh(boxGeo(1.2, 26, 1.2, 1.5), crane); mast.position.set(-(hx + 9), 13, -(hz + 2)); mast.castShadow = true; group.add(mast);
+  const arm = new THREE.Mesh(boxGeo(1, 1, 24, 1.5), crane); arm.position.set(-(hx + 9), 26, -(hz - 9)); group.add(arm);
+  const mag = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.5, 14), new THREE.MeshStandardMaterial({ color: 0x222 })); mag.position.set(-(hx + 9), 16, -(hz - 17)); group.add(mag);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 10, 6), new THREE.MeshStandardMaterial({ color: 0x222222 })); cable.position.set(-(hx + 9), 21.2, -(hz - 17)); group.add(cable);
+  trees(H, H.hi ? 44 : 22, 56, 100, [0.2, 0.28], 0.3);
   H.flush();
   return {
     sky: { top: 0x5f88b8, horizon: 0xe4d6bd, ground: 0x7a6a50, sunSize: 1.8 },
-    sun: { color: 0xffe2b8, intensity: 2.7, dir: [20, 38, -24] }, hemi: { sky: 0xd0d8e6, ground: 0x6b5a45, intensity: 0.95 },
-    fog: { color: 0xcfc2aa, near: 55, far: 230 }, exposure: 1.05, envIntensity: 0.6,
+    sun: { color: 0xffe2b8, intensity: 2.7, dir: [26, 46, -30] }, hemi: { sky: 0xd0d8e6, ground: 0x6b5a45, intensity: 0.95 },
+    fog: { color: 0xcfc2aa, near: 70, far: 290 }, exposure: 1.05, envIntensity: 0.6,
   };
 }
 
 // ===========================================================================
-// MAPA 5 — CIDADE ABANDONADA
+// MAPA 5 — CIDADE ABANDONADA (60 × 90 m)
 // ===========================================================================
 function buildCidade(ctx) {
-  const H = helpers(ctx), { group, M } = H;
-  H.ground(M('asphalt', { tile: 5 }, { bump: 1.2 }), 44, 64);
-  H.ground(M('concrete', { base: 120, tile: 6 }, { bump: 1 }), 700, 700, -0.02);
+  const H = helpers(ctx), { group, M } = H, A = ctx.ARENA, hx = A.hx, hz = A.hz, R = hashRand(77);
+  H.ground(M('asphalt', { tile: 5 }, { bump: 1.2 }), hx * 2 + 2, hz * 2 + 2);
+  H.ground(M('concrete', { base: 120, tile: 6 }, { bump: 1 }), 900, 900, -0.02);
   const yellow = new THREE.MeshBasicMaterial({ color: 0xd6b52a }), white = new THREE.MeshBasicMaterial({ color: 0xdddddd });
-  for (let z = -29; z < 29; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 2), yellow); l.rotation.x = -PI / 2; l.position.set(0, 0.012, z); group.add(l); }
-  for (let z = -28; z < 28; z += 6) [-10, 10].forEach((x) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 3), white); l.rotation.x = -PI / 2; l.position.set(x, 0.012, z); group.add(l); });
-  const cross = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.5), white); cross.rotation.x = -PI / 2; cross.position.set(0, 0.012, 6); group.add(cross);
+  for (let z = -(hz - 1); z < hz - 1; z += 4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 2), yellow); l.rotation.x = -PI / 2; l.position.set(0, 0.012, z); group.add(l); }
+  for (let z = -(hz - 2); z < hz - 2; z += 6) [-10, 10].forEach((x) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 3), white); l.rotation.x = -PI / 2; l.position.set(x, 0.012, z); group.add(l); });
+  [-1, 1].forEach((s) => { const cross = new THREE.Mesh(new THREE.PlaneGeometry(8, 0.5), white); cross.rotation.x = -PI / 2; cross.position.set(0, 0.012, s * 8); group.add(cross); });
   const stain = decalMaterial('mancha', 7);
-  [[-4, 3, 6], [7, -9, 6], [-8, -15, 7]].forEach(([x, z, s]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), stain); m.rotation.x = -PI / 2; m.position.set(x, 0.015, z); group.add(m); });
-  function building({ x, z, w, d, h, c = 0, collide = true, floors }) {
+  for (let i = 0; i < 10; i++) { const s = 5 + H.rnd() * 3, m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), stain); m.rotation.x = -PI / 2; m.position.set((H.rnd() - 0.5) * (hx * 2 - 10), 0.015, (H.rnd() - 0.5) * (hz * 2 - 10)); group.add(m); }
+  function building({ x, z, w, d, h, c = 0, collide = true }) {
     const tones = [[196, 190, 178], [168, 172, 170], [190, 176, 150], [150, 150, 146]];
-    const mat = M('plaster', { color: tones[c % tones.length] }, { bump: 1.0 });
+    const mat = H.paint('plaster', tones[c % tones.length], {}, { bump: 1.0 });
     H.box({ x, z, w, d, h, mat, collide });
     H.box({ x, z, w: w + 0.4, d: d + 0.4, h: 0.5, y: h, mat: M('concrete', { base: 140 }), collide: false });
-    const nf = floors ?? Math.floor(h / 3.4);
+    const nf = Math.floor(h / 3.4);
     [['+z', x, z + d / 2 + 0.03, w, 0], ['-z', x, z - d / 2 - 0.03, w, 0], ['+x', x + w / 2 + 0.03, z, d, 1], ['-x', x - w / 2 - 0.03, z, d, 1]].forEach(([f, fx, fz, span, al]) => {
       const n = Math.max(1, Math.floor(span / 2.6));
       for (let fl = 0; fl < nf; fl++) for (let i = 0; i < n; i++) {
@@ -548,44 +587,51 @@ function buildCidade(ctx) {
         const off = ((i + 0.5) / n - 0.5) * span, yy = fl * 3.4 + 2.2, v = Math.floor(H.rnd() * 3);
         al ? H.decal('janela', v, f, fx, yy, fz + off, 1.5, 1.7, { broken: true }) : H.decal('janela', v, f, fx + off, yy, fz, 1.5, 1.7, { broken: true });
       }
-      if (H.rnd() < 0.5) { al ? H.decal('mancha', 1, f, fx, h * 0.55, fz, span, h * 0.8) : H.decal('mancha', 1, f, fx, h * 0.55, fz, span, h * 0.8); }
+      if (H.rnd() < 0.5) H.decal('mancha', 1, f, fx, h * 0.55, fz, span, h * 0.8);
     });
   }
+  // quarteirões de prédios dos dois lados da avenida central + ruas transversais
   sym((s) => {
-    [[-13.5, 8, 9, 9, 10, 0], [13, 10, 8, 10, 12, 1], [-13, 21.5, 8, 6, 8, 2], [12.5, 22, 7, 6, 9, 3]].forEach(([x, z, w, d, h, c]) => building({ x: x * s, z: z * s, w, d, h, c: c + (s < 0 ? 1 : 0) }));
-    car(H, { x: -2.5 * s, z: 10 * s, alongX: false, color: [120, 120, 125], burnt: true });
-    car(H, { x: 6 * s, z: 17 * s, alongX: false, color: [140, 60, 50] });
-    H.box({ x: 3.5 * s, z: 14.5 * s, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 175 }) });
-    H.box({ x: -4 * s, z: 17.5 * s, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 175 }) });
-    H.box({ x: -6 * s, z: 3 * s, w: 3, d: 2.5, h: 1.0, mat: M('rust', { color: [110, 100, 92] }, { bump: 2 }) });
-    hut(H, { x: -6 * s, z: 21.5 * s, w: 5, d: 4, h: 3.2, doors: flip(['+z'], s), wallMat: M('plaster', { color: [176, 170, 156] }, { bump: 1.0 }), floorMat: M('concrete', { base: 120 }), roofMat: M('concrete', { base: 130 }) });
-    H.box({ x: 9 * s, z: 4 * s, w: 2.6, d: 8.6, h: 3.1, mat: M('rust', { color: [60, 100, 140] }, { bump: 1.2 }) }); // ônibus
-    for (let i = -3; i <= 3; i++) { H.decal('janela', 4, '+x', (9 + 1.31) * s * (s > 0 ? 1 : 1), 2.1, (4 + i * 1.1) * s, 0.9, 0.9, { broken: true }); }
-    // postes e árvores brotando do asfalto
-    [[-8, 12], [8, 8]].forEach(([x, z]) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 7, 8), new THREE.MeshStandardMaterial({ color: 0x3b3f44, metalness: 0.6, roughness: 0.5 })); p.position.set(x * s, 3.5, z * s); p.rotation.z = 0.05 * s; p.castShadow = true; group.add(p); });
+    [[-21, 10], [-21, 28], [21, 10], [21, 28], [-21, 39.5, 6], [21, 39.5, 6], [-9.5, 24, 4.5, 7], [9.5, 22, 4.5, 7]].forEach(([x, z, dd, ww], i) => {
+      const w = ww ?? (11 + H.rnd() * 4), d = dd ?? (11 + H.rnd() * 4), h = ww ? 5 + H.rnd() * 3 : 9 + H.rnd() * 9;
+      building({ x: (x + (H.rnd() - 0.5) * 2) * s, z: z * s, w, d, h, c: i + (s < 0 ? 1 : 0) });
+    });
+    hut(H, { x: -17 * s, z: 39.5 * s, w: 5, d: 4, h: 3.2, doors: flip(['+z'], s), wallMat: H.paint('plaster', [176, 170, 156], {}, { bump: 1.0 }), floorMat: M('concrete', { base: 120 }), roofMat: M('concrete', { base: 130 }) });
+    hut(H, { x: 12 * s, z: 18 * s, w: 5.5, d: 4.4, h: 3.2, doors: flip(['-x'], s), wallMat: H.paint('plaster', [160, 156, 148], {}, { bump: 1.0 }), floorMat: M('concrete', { base: 120 }), roofMat: M('concrete', { base: 130 }) });
+    [[-8, 12], [8, 8], [-8, 30], [8, 34]].forEach(([x, z]) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 7, 8), new THREE.MeshStandardMaterial({ color: 0x3b3f44, metalness: 0.6, roughness: 0.5 })); p.position.set(x * s, 3.5, z * s); p.rotation.z = 0.05 * s; p.castShadow = true; group.add(p); });
   });
   H.box({ x: 0, z: 0, w: 6.1, d: 2.5, h: 2.6, mat: M('corrugated', { color: [70, 110, 90], rust: 0.55, ridges: 8 }, { bump: 1.8 }) });
-  // prédios arruinados ao redor (altos, sem colisão) + vegetação
+  const concS = M('concrete', { base: 175 }), rustS = H.paint('rust', [110, 100, 92], {}, { bump: 2 });
+  scatter(H, A, R, { count: H.hi ? 66 : 42, margin: 2.2, zMax: hz - 8, xMax: hx - 3, make: (R) => {
+    const t = R();
+    if (t < 0.36) { const ax = R() < 0.3, bt = R() < 0.5; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => car(H, { x, z, alongX: ax, color: [[120, 120, 125], [140, 60, 50], [90, 100, 110]][Math.floor(R() * 3)], burnt: bt }) }; }
+    if (t < 0.58) { const ax = R() < 0.5; return { w: ax ? 3.2 : 0.7, d: ax ? 0.7 : 3.2, put: (x, z) => H.box({ x, z, w: ax ? 3.2 : 0.7, d: ax ? 0.7 : 3.2, h: 1.1, mat: concS }) }; }
+    if (t < 0.74) return { w: 3, d: 2.5, put: (x, z) => H.box({ x, z, w: 3, d: 2.5, h: 1.0, mat: rustS }) };
+    if (t < 0.84) return { w: 2.6, d: 8.6, put: (x, z) => H.box({ x, z, w: 2.6, d: 8.6, h: 3.1, mat: H.paint('rust', [60, 100, 140], {}, { bump: 1.2 }) }) };
+    if (t < 0.93) { const ax = R() < 0.5; return { w: ax ? 6.1 : 2.5, d: ax ? 2.5 : 6.1, put: (x, z) => container(H, (c) => H.paint('corrugated', c, { rust: 0.52, ridges: 8 }, { bump: 1.8 }), { x, z, alongX: ax, color: [70, 110, 90] }) }; }
+    return { w: 1.2, d: 1.2, put: (x, z) => H.box({ x, z, w: 1.2, d: 1.2, h: 1.1, mat: M('wood', {}) }) };
+  } });
   const ring = [];
-  for (let i = 0; i < 26; i++) {
-    const a = (i / 26) * PI * 2, r = 36 + H.rnd() * 12, w = 8 + H.rnd() * 8, d = 8 + H.rnd() * 8, h = 12 + H.rnd() * 26;
+  for (let i = 0; i < 40; i++) {
+    const a = (i / 40) * PI * 2, r = 54 + H.rnd() * 14, w = 8 + H.rnd() * 8, d = 8 + H.rnd() * 8, h = 12 + H.rnd() * 26;
     ring.push({ x: Math.cos(a) * r * 0.95, z: Math.sin(a) * r * 1.35, y: 0, w, d, h, ry: a, color: [0xb4b0a4, 0x9fa3a4, 0xb8a98c, 0x8c9094][i % 4] });
   }
   H.backdrop(ring, H.M('concrete', { base: 190 }, { bump: 0.6 }));
-  trees(H, H.hi ? 60 : 30, 30, 50, [0.2, 0.3], 0.35, 0.9, 1.3);
+  trees(H, H.hi ? 70 : 34, 50, 72, [0.2, 0.3], 0.35, 0.9, 1.3);
   H.flush();
   return {
     sky: { top: 0x6f7f90, horizon: 0xc6ccd2, ground: 0x6a6e70, sunSize: 0.6 },
-    sun: { color: 0xdde6f2, intensity: 1.5, dir: [10, 45, 12] }, hemi: { sky: 0xc4ccd6, ground: 0x5a5f55, intensity: 1.35 },
-    fog: { color: 0xaab4be, near: 28, far: 150 }, exposure: 1.0, envIntensity: 0.75,
+    sun: { color: 0xdde6f2, intensity: 1.5, dir: [14, 52, 16] }, hemi: { sky: 0xc4ccd6, ground: 0x5a5f55, intensity: 1.35 },
+    fog: { color: 0xaab4be, near: 36, far: 190 }, exposure: 1.0, envIntensity: 0.75,
   };
 }
 
+const SIZE = { hx: 30, hz: 45 };
 export const MAPS = {
-  arena: { name: 'Arena Speedball', tag: 'Torneio', blurb: 'Campo simétrico com bunkers infláveis. O clássico competitivo.', menu: { r: 36, h: 9, rz: 1.3, look: [0, 1.4, 0] }, build: buildArena },
-  galpao: { name: 'Galpão Abandonado', tag: 'Interior', blurb: 'Estantes, contêineres e colunas sob feixes de luz do telhado.', menu: { r: 13, h: 3.8, rz: 1.5, look: [0, 1.6, 0] }, build: buildGalpao },
-  favela: { name: 'Morro Vivo', tag: 'Comunidade', blurb: 'Becos, lajes e muita cor. Combate vertical e curto.', menu: { r: 24, h: 12, rz: 1.35, look: [0, 1.6, 0] }, build: buildFavela },
-  ferro: { name: 'Ferro-Velho', tag: 'Industrial', blurb: 'Carcaças empilhadas, pneus e contêineres enferrujados.', menu: { r: 28, h: 9, rz: 1.3, look: [0, 1.4, 0] }, build: buildFerro },
-  cidade: { name: 'Cidade Abandonada', tag: 'Urbano', blurb: 'Ruas vazias, prédios em ruínas e ônibus tombado.', menu: { r: 26, h: 10, rz: 1.35, look: [0, 1.6, 0] }, build: buildCidade },
+  arena: { name: 'Arena Speedball', tag: 'Torneio', blurb: 'Campo amplo com dezenas de bunkers infláveis. O clássico competitivo.', size: SIZE, menu: { r: 56, h: 16, rz: 1.3, look: [0, 1.4, 0] }, build: buildArena },
+  galpao: { name: 'Galpão Abandonado', tag: 'Interior', blurb: 'Hall enorme com colunas, estantes, contêineres e escritórios.', size: SIZE, menu: { r: 22, h: 5, rz: 1.7, look: [0, 1.6, 0] }, build: buildGalpao },
+  favela: { name: 'Morro Vivo', tag: 'Comunidade', blurb: 'Labirinto de becos, lajes e muita cor. Combate vertical e curto.', size: SIZE, menu: { r: 34, h: 17, rz: 1.4, look: [0, 1.6, 0] }, build: buildFavela },
+  ferro: { name: 'Ferro-Velho', tag: 'Industrial', blurb: 'Pátio gigante de carcaças empilhadas, pneus e contêineres.', size: SIZE, menu: { r: 44, h: 14, rz: 1.3, look: [0, 1.4, 0] }, build: buildFerro },
+  cidade: { name: 'Cidade Abandonada', tag: 'Urbano', blurb: 'Avenidas, quarteirões em ruínas e ônibus tombado.', size: SIZE, menu: { r: 40, h: 16, rz: 1.35, look: [0, 1.6, 0] }, build: buildCidade },
 };
 export const MAP_LIST = Object.keys(MAPS);
