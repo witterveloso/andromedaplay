@@ -100,6 +100,7 @@ export function createScreens(game) {
       range('sens', 'Sensibilidade', 'Velocidade de mira', 0.3, 2.5, 0.05),
       toggle('invertY', 'Inverter eixo vertical', 'Para cima/para baixo invertidos'),
       range('fov', 'Campo de visão', 'Maior = vê mais dos lados', 60, 100, 1),
+      range('aimAssist', 'Assistência de mira', 'Enquanto atira, puxa a mira para o inimigo mais próximo. 0 = desligada', 0, 1, 0.05),
     ] },
     { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos sonoros', 0, 1, 0.05)] },
     { id: 'gfx', label: 'Gráficos', rows: () => [

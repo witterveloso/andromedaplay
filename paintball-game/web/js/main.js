@@ -321,6 +321,7 @@ const game = {
     const s = 0.0022 * settings.get('sens');
     p.yaw -= look.x * s;
     p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch - look.y * s * (settings.get('invertY') ? -1 : 1)));
+    if (p.alive && this.state === 'playing' && input.fire) this.assistAim(dt, look);
     const active = this.state === 'playing' || this.state === 'countdown';
     if (!p.alive || !active) { p.vel.multiplyScalar(0.8); return; }
     if (this.state === 'countdown') return;
@@ -335,6 +336,31 @@ const game = {
     world.collide(p.pos, 0.35);
     p.tick(dt);
     p.wantShoot = input.fire;
+  },
+
+  // assistência de mira: enquanto atira, puxa suavemente a câmera para o inimigo visível mais próximo da mira
+  assistAim(dt, look) {
+    const strength = settings.get('aimAssist');
+    if (!strength) return;
+    const p = this.player, eye = V(p.pos.x, p.eyeY, p.pos.z), pt = V();
+    let best = null, bestAng = 0.38; // cone de ~22°
+    for (const c of this.combatants) {
+      if (c.team === p.team || !c.alive) continue;
+      c.chestCenter(pt);
+      const dx = pt.x - eye.x, dz = pt.z - eye.z, dy = pt.y - eye.y, hd = Math.hypot(dx, dz);
+      if (hd > 45 || hd < 1) continue;
+      const wy = Math.atan2(-dx, -dz), wp = Math.atan2(dy, hd);
+      const dyaw = Math.atan2(Math.sin(wy - p.yaw), Math.cos(wy - p.yaw)), dpit = wp - p.pitch;
+      const ang = Math.hypot(dyaw, dpit);
+      if (ang >= bestAng) continue;
+      const hit = world.segHit(eye, pt.clone(), false);
+      if (hit && hit.t < 0.97) continue;
+      bestAng = ang; best = { dyaw, dpit };
+    }
+    if (!best) return;
+    const manual = Math.min(1, Math.hypot(look.x, look.y) / 30);   // quanto o jogador está mexendo: cede o controle
+    const k = Math.min(1, dt * 5 * strength) * (1 - 0.8 * manual);
+    p.yaw += best.dyaw * k; p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch + best.dpit * k));
   },
 
   menuCamera() {

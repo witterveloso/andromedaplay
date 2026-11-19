@@ -8,6 +8,7 @@ export const PALETTES = [
 const DEFAULTS = {
   map: 'arena', cam: 'fpp', diff: 'normal', palette: 0,
   sens: 1, invertY: false, fov: 72,
+  aimAssist: (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) ? 0.5 : 0,
   volume: 0.7, quality: 'auto',
   reduceFx: false, hudScale: 1, crossColor: '#ffffff', crossStyle: 'cross',
   touchScale: 1, lefty: false, haptics: true, coach: false,
