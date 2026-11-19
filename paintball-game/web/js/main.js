@@ -12,6 +12,7 @@ import { settings, PALETTES } from './settings.js';
 import { createScreens } from './screens.js';
 import { createRadar } from './radar.js';
 import { createOnline } from './online.js';
+import { tickTextures, pendingTextures } from './textures.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -37,7 +38,8 @@ paletteApply(settings.get('palette'));
 // ---------- cena ----------
 const canvas = $('game');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !LOW, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, LOW ? 1.5 : 2));
+const basePR = () => Math.min(window.devicePixelRatio || 1, LOW ? 1.25 : 2) * (parseFloat(settings.get('resScale')) || 1);
+renderer.setPixelRatio(basePR());
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -105,6 +107,23 @@ const balls = Array.from({ length: 220 }, () => {
   scene.add(mesh);
   return { mesh, pos: new THREE.Vector3(), vel: new THREE.Vector3(), life: 0, owner: null };
 });
+
+// sombra "de mancha" sob cada jogador quando as sombras em tempo real estão desligadas (celular)
+const blobGeo = new THREE.CircleGeometry(0.5, 14); blobGeo.rotateX(-Math.PI / 2);
+const blobs = new THREE.InstancedMesh(blobGeo, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.38, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), 40);
+blobs.frustumCulled = false; blobs.count = 0; scene.add(blobs);
+const _bm = new THREE.Matrix4(), _bq = new THREE.Quaternion(), _bs = new THREE.Vector3(), _bp = new THREE.Vector3();
+function updateBlobs(list) {
+  if (world.shadowsOn) { blobs.count = 0; return; }
+  let n = 0;
+  for (const c of list) {
+    if (n >= 40) break;
+    if (!c.model.root.visible) continue;
+    const k = c.alive ? 1.0 : 1.2;
+    _bm.compose(_bp.set(c.pos.x, c.pos.y + 0.03, c.pos.z), _bq, _bs.set(k, 1, k)); blobs.setMatrixAt(n++, _bm);
+  }
+  blobs.count = n; blobs.instanceMatrix.needsUpdate = true;
+}
 
 // ---------- jogo ----------
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -293,6 +312,7 @@ const game = {
       if (c.stepT > 0.5) { c.stepT = 0; sfx.step(c.isPlayer ? (c.crouch ? 0.35 : 0.8) : Math.min(1, 7 / Math.max(7, this.distToListener(c.pos))) * (c.crouch ? 0.3 : 0.7)); }
     }
     for (const c of this.combatants) c.syncModel(dt);
+    updateBlobs(this.combatants);
     this.stepBallsClient(dt);
     particles.update(dt);
     this.updateCamera(dt);
@@ -635,6 +655,7 @@ const game = {
       if (c.stepT > 0.5) { c.stepT = 0; sfx.step(c.isPlayer ? (c.crouch ? 0.35 : 0.8) : Math.min(1, 7 / Math.max(7, this.distToListener(c.pos))) * (c.crouch ? 0.3 : 0.7)); }
     }
     for (const c of cs) c.syncModel(dt);
+    updateBlobs(cs);
     this.stepBalls(dt);
     particles.update(dt);
     this.updateCamera(dt);
@@ -931,6 +952,7 @@ window.__sim = (n, dt = 1 / 30) => { for (let i = 0; i < n; i++) game.update(dt)
 let last = performance.now();
 // governador de desempenho: se o aparelho não sustenta ~30 fps, baixa a qualidade sozinho (resolução -> sombras -> resolução menor)
 let govAvg = 0.016, govSlow = 0, govTier = 0, govPR = renderer.getPixelRatio();
+settings.onChange((k) => { if (k === 'resScale') { govTier = 0; govSlow = 0; govAvg = 0.016; govPR = basePR(); renderer.setPixelRatio(govPR); resize(); } });
 function govDegrade() {
   govTier++;
   if (govTier === 1) govPR = Math.min(govPR, 1);
@@ -951,6 +973,7 @@ function frame(now) {
   }
   const dt = Math.min(0.05, raw);
   last = now;
+  tickTextures(game.state === 'playing' ? (pendingTextures() > 8 ? 6 : 3) : 14);       // menu/contagem: pinta rápido; em jogo: só uma fatia por quadro
   if (!game.paused || (game.online && game.online.active)) game.update(dt);
   renderer.render(scene, camera);
 }

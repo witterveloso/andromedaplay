@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import { MAPS } from './maps.js';
-import { setTextureQuality } from './textures.js';
+import { setTextureQuality, purgeTextures } from './textures.js';
 import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 
 export const ARENA = { hx: 20, hz: 30 };
@@ -101,14 +101,14 @@ function skyMaterial(cfg) {
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
         return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y); }
-      float fbm(vec2 p){ float a = 0.5, s = 0.0; for(int i=0;i<4;i++){ s += a*vn(p); p = p*2.03 + 7.1; a *= 0.5; } return s; }
+      float fbm(vec2 p){ float a = 0.5, s = 0.0; for(int i=0;i<3;i++){ s += a*vn(p); p = p*2.03 + 7.1; a *= 0.5; } return s; }
       void main(){ vec3 d = normalize(vP); float h = d.y;
         vec3 c = mix(horizon, top, pow(clamp(h,0.0,1.0),0.5));
         if (cloud > 0.0 && h > 0.02) {
           vec2 q = d.xz / (h + 0.22) * 0.9;
           float n = fbm(q * 1.15 + vec2(3.0, 1.0));
           float cov = smoothstep(0.55 - cloud * 0.28, 0.82 - cloud * 0.18, n);
-          float lit = clamp(fbm(q * 1.15 + vec2(3.0, 1.0) + normalize(sunDir.xz + 0.001) * 0.07) , 0.0, 1.0);
+          float lit = vn(q * 2.3 + normalize(sunDir.xz + 0.001) * 0.2);
           vec3 cc = mix(vec3(0.55, 0.58, 0.64), vec3(1.0, 0.98, 0.95), clamp((n - lit) * 5.0 + 0.55, 0.0, 1.0));
           cc = mix(cc, horizon * 1.15 + sunColor * 0.12, 0.28);
           c = mix(c, cc, cov * smoothstep(0.02, 0.28, h) * 0.9);
@@ -214,11 +214,12 @@ export function createWorld(scene, renderer, quality = 'high') {
       m.scale.setScalar(size);
       m.visible = true;
     },
-    shadowsOn: true,
+    shadowsOn: hi,                                   // celular (qualidade baixa): sem sombras em tempo real
     setShadows(on) { this.shadowsOn = on; if (this.sun) this.sun.castShadow = on; },
     clearSplats() { splats.forEach((m) => { m.visible = false; }); },
 
     loadMap(id) {
+      purgeTextures();
       const def = MAPS[id] || MAPS.arena;
       const size = def.size || { hx: 20, hz: 30 };
       ARENA.hx = size.hx; ARENA.hz = size.hz;                 // cada campo define o seu tamanho
@@ -254,12 +255,12 @@ export function createWorld(scene, renderer, quality = 'high') {
       ss.camera.left = -SR; ss.camera.right = SR; ss.camera.top = SR; ss.camera.bottom = -SR;
       ss.camera.near = 5; ss.camera.far = 220; ss.bias = -0.0004; ss.normalBias = 0.04;
       group.add(sun);
-      (cfg.lights || []).forEach((l) => {
+      (cfg.lights || []).slice(0, hi ? 8 : 3).forEach((l) => {
         const p = new THREE.PointLight(l.color, l.intensity, l.distance, 1.6);
         p.position.set(...l.pos); group.add(p);
       });
       // céu + reflexos de ambiente (PMREM)
-      const sky = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), skyMaterial({ ...cfg.sky, sunDir: cfg.sun.dir, sunColor: cfg.sun.color }));
+      const sky = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), skyMaterial({ ...cfg.sky, clouds: hi ? cfg.sky.clouds : 0, sunDir: cfg.sun.dir, sunColor: cfg.sun.color }));
       group.add(sky);
       const envScene = new THREE.Scene();
       envScene.add(new THREE.Mesh(new THREE.SphereGeometry(50, 24, 12), skyMaterial({ ...cfg.sky, sunDir: cfg.sun.dir, sunColor: cfg.sun.color })));

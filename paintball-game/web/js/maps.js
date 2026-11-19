@@ -119,10 +119,10 @@ function helpers({ group, obstacles, quality, interiors = [], spots = [], ramps 
 const sym = (fn) => { fn(1); fn(-1); };
 
 // copa feita de várias esferas irregulares fundidas (1 geometria): bem mais natural que um icosaedro liso
-function leafCluster() {
-  const parts = [[0, 0, 0, 3.2], [2.1, -0.7, 0.8, 2.3], [-2.0, -0.5, -0.9, 2.4], [0.6, 1.9, -0.6, 2.2], [-0.4, -0.9, 2.2, 2.1], [0.3, 1.2, 1.7, 1.8]];
+function leafCluster(hi = true) {
+  const parts = [[0, 0, 0, 3.2], [2.1, -0.7, 0.8, 2.3], [-2.0, -0.5, -0.9, 2.4], [0.6, 1.9, -0.6, 2.2], [-0.4, -0.9, 2.2, 2.1], [0.3, 1.2, 1.7, 1.8]].slice(0, hi ? 6 : 4);
   const geos = parts.map(([x, y, z, r], k) => {
-    let g = new THREE.IcosahedronGeometry(r, 2); g.deleteAttribute('uv'); g.deleteAttribute('normal'); g = mergeVertices(g); const p = g.attributes.position, n = p.count, col = new Float32Array(n * 3);
+    let g = new THREE.IcosahedronGeometry(r, hi ? 2 : 1); g.deleteAttribute('uv'); g.deleteAttribute('normal'); g = mergeVertices(g); const p = g.attributes.position, n = p.count, col = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       const px = p.getX(i), py = p.getY(i), pz = p.getZ(i), L = Math.hypot(px, py, pz) || 1;
       const j = 1 + 0.16 * Math.sin(px * 2.3 + k) * Math.cos(pz * 2.7 - k) + 0.09 * Math.sin(py * 4.1 + px * 1.7);
@@ -137,7 +137,7 @@ function leafCluster() {
   return merged;
 }
 function trees(H, count, rMin, rMax, hue = [0.24, 0.32], sat = 0.45, rx = 1, rz = 1.35) {
-  const trunkGeo = new THREE.CylinderGeometry(0.22, 0.42, 5.4, 8), leafGeo = leafCluster();
+  const trunkGeo = new THREE.CylinderGeometry(0.22, 0.42, 5.4, 8), leafGeo = leafCluster(H.hi);
   const trunks = new THREE.InstancedMesh(trunkGeo, new THREE.MeshStandardMaterial({ color: 0x5a4332, roughness: 1 }), count);
   const leaves = new THREE.InstancedMesh(leafGeo, new THREE.MeshStandardMaterial({ roughness: 0.95, vertexColors: true }), count);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3(), col = new THREE.Color(), e = new THREE.Euler();

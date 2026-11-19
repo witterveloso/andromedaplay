@@ -584,3 +584,6 @@ body.online #netinfo { display: block; } body.online #netinfo.bad { color: #ff8a
   .cta { min-height: 64px; justify-content: center; }
   .loadout .field { flex-wrap: wrap; row-gap: 8px; }
 }
+
+/* desempenho: durante a partida nada de blur de fundo (força o navegador a re-borrar o canvas WebGL a cada quadro) */
+body.ingame *, body.ingame *::before, body.ingame *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }

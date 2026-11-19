@@ -139,27 +139,60 @@ export function setTextureQuality(q) { QUALITY = q === 'low' ? 256 : 512; }
 
 function canvas(S) { const c = document.createElement('canvas'); c.width = c.height = S; return c; }
 
+// Geração PROGRESSIVA: a textura nasce como um quadradinho cinza e é pintada aos poucos (alguns ms por quadro),
+// então trocar de campo não congela o navegador. tickTextures() é chamado a cada quadro pelo loop principal.
+const jobs = [];
+const solid = (v) => { const c = canvas(2), g = c.getContext('2d'); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(0, 0, 2, 2); return c; };
+export function tickTextures(budgetMs = 5) {
+  if (!jobs.length) return;
+  const t0 = performance.now();
+  while (jobs.length && performance.now() - t0 < budgetMs) {
+    const j = jobs[0], S = j.S;
+    const rows = Math.min(S - j.y, 8);
+    for (let y = j.y; y < j.y + rows; y++) for (let x = 0; x < S; x++) {
+      const o = j.gen.call(GEN, x / S, y / S, j.params), i = (y * S + x) * 4;
+      j.ic.data[i] = clamp(o.c[0], 0, 255); j.ic.data[i + 1] = clamp(o.c[1], 0, 255); j.ic.data[i + 2] = clamp(o.c[2], 0, 255); j.ic.data[i + 3] = 255;
+      const hv = clamp(o.h) * 255; j.ih.data[i] = j.ih.data[i + 1] = j.ih.data[i + 2] = hv; j.ih.data[i + 3] = 255;
+      const rv = clamp(o.r) * 255; j.ir.data[i] = j.ir.data[i + 1] = j.ir.data[i + 2] = rv; j.ir.data[i + 3] = 255;
+    }
+    j.y += rows;
+    if (j.y >= S) {
+      jobs.shift();
+      j.gc.putImageData(j.ic, 0, 0); j.gh.putImageData(j.ih, 0, 0); j.gr.putImageData(j.ir, 0, 0);
+      [[j.res.map, j.cc], [j.res.bump, j.ch], [j.res.rough, j.cr]].forEach(([t, c]) => { t.dispose(); t.image = c; t.needsUpdate = true; });
+      j.done = true;
+    }
+  }
+}
+export const pendingTextures = () => jobs.length;
+// ao trocar de campo: descarta o que ainda não foi pintado (vai ser pedido de novo se voltarem a esse campo)
+export function cancelTextureJobs() {
+  for (const j of jobs) cache.delete(j.key);
+  jobs.length = 0;
+}
+// ao trocar de campo: libera da placa de vídeo TODAS as texturas do campo anterior (sem isso a memória só cresce a cada troca)
+export function purgeTextures() {
+  jobs.length = 0;
+  for (const r of cache.values()) { r.map.dispose(); r.bump.dispose(); r.rough.dispose(); }
+  cache.clear();
+  for (const v of decalCache.values()) { if (v.map) v.map.dispose(); if (v.dispose) v.dispose(); }
+  decalCache.clear();
+}
+
 export function pbr(kind, params = {}) {
   const key = kind + JSON.stringify(params) + QUALITY;
   if (cache.has(key)) return cache.get(key);
   const S = params.small ? Math.min(QUALITY, 256) : QUALITY, gen = GEN[kind];
-  const cc = canvas(S), ch = canvas(S), cr = canvas(S);
-  const gc = cc.getContext('2d'), gh = ch.getContext('2d'), gr = cr.getContext('2d');
-  const ic = gc.createImageData(S, S), ih = gh.createImageData(S, S), ir = gr.createImageData(S, S);
-  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-    const o = gen.call(GEN, x / S, y / S, params), i = (y * S + x) * 4;
-    ic.data[i] = clamp(o.c[0], 0, 255); ic.data[i + 1] = clamp(o.c[1], 0, 255); ic.data[i + 2] = clamp(o.c[2], 0, 255); ic.data[i + 3] = 255;
-    const hv = clamp(o.h) * 255; ih.data[i] = ih.data[i + 1] = ih.data[i + 2] = hv; ih.data[i + 3] = 255;
-    const rv = clamp(o.r) * 255; ir.data[i] = ir.data[i + 1] = ir.data[i + 2] = rv; ir.data[i + 3] = 255;
-  }
-  gc.putImageData(ic, 0, 0); gh.putImageData(ih, 0, 0); gr.putImageData(ir, 0, 0);
   const mk = (c, srgb) => {
     const t = new THREE.CanvasTexture(c);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = QUALITY > 256 ? 8 : 2;
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     return t;
   };
-  const res = { map: mk(cc, true), bump: mk(ch, false), rough: mk(cr, false), tile: params.tile || TILE[kind] || 2 };
+  const res = { map: mk(solid(135), true), bump: mk(solid(128), false), rough: mk(solid(255), false), tile: params.tile || TILE[kind] || 2 };
+  const cc = canvas(S), ch = canvas(S), cr = canvas(S);
+  const gc = cc.getContext('2d'), gh = ch.getContext('2d'), gr = cr.getContext('2d');
+  jobs.push({ key, S, gen, params, res, y: 0, cc, ch, cr, gc, gh, gr, ic: gc.createImageData(S, S), ih: gh.createImageData(S, S), ir: gr.createImageData(S, S) });
   cache.set(key, res);
   return res;
 }
@@ -203,7 +236,8 @@ function tex(c) { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRG
 export function decalMaterial(kind, seed = 0, extra = {}) {
   const key = kind + seed + JSON.stringify(extra);
   if (decalCache.has(key)) return decalCache.get(key);
-  const c = canvas(512), g = c.getContext('2d');
+  const DS = QUALITY > 256 ? 512 : 256, c = canvas(DS), g = c.getContext('2d');
+  g.scale(DS / 512, DS / 512);
   let s = seed * 9301 + 49297;
   const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
   if (kind === 'grafite') drawGraffiti(g, r, extra);

@@ -117,6 +117,7 @@ export function createScreens(game) {
     ] },
     { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos e música', 0, 1, 0.05), range('music', 'Música', 'Trilha de fundo. 0 = só efeitos', 0, 1, 0.05), range('ambient', 'Som ambiente', 'Vento, pássaros, pingos, cidade… 0 = desligado', 0, 1, 0.05), soundTest()] },
     { id: 'gfx', label: 'Gráficos', rows: () => [
+      select('resScale', 'Resolução', 'Menor = mais leve e rápido. Use se o jogo estiver travando.', [['1', '100% (nítida)'], ['0.75', '75%'], ['0.5', '50% (bem leve)']]),
       select('quality', 'Qualidade', 'Troque para Baixa se o jogo estiver pesado. Recarrega a página.', [['auto', 'Automática'], ['high', 'Alta'], ['low', 'Baixa']]),
     ] },
     { id: 'acc', label: 'Acessibilidade', rows: () => [
