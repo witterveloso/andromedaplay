@@ -55,6 +55,11 @@ const sfx = new Sfx();
 const hud = new HUD();
 const overlay = new MaskOverlay($('mask'));
 const input = new Input(canvas);
+const AMB = { arena: 'outdoor', ferro: 'outdoor', favela: 'outdoor', galpao: 'indoor', cidade: 'city' };
+// o navegador só libera o áudio depois de um gesto: primeiro toque/clique/tecla em qualquer lugar
+const unlockAudio = () => { sfx.setVolume(settings.get('volume')); sfx.setMusic(settings.get('music')); sfx.unlock(); sfx.setAmbient(AMB[world.map.id] || 'outdoor'); };
+['pointerdown', 'touchend', 'click', 'keydown'].forEach((ev) => addEventListener(ev, unlockAudio, { capture: true, once: true }));
+addEventListener('click', (e) => { if (e.target.closest && e.target.closest('button')) sfx.ui(); }, true);
 
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
@@ -321,7 +326,10 @@ const game = {
     const s = 0.0022 * settings.get('sens');
     p.yaw -= look.x * s;
     p.pitch = Math.max(-1.3, Math.min(1.4, p.pitch - look.y * s * (settings.get('invertY') ? -1 : 1)));
-    if (p.alive && this.state === 'playing' && input.fire) this.assistAim(dt, look);
+    // tiro automático: dispara quando a mira cruza um inimigo visível (~3°)
+    const live = p.alive && this.state === 'playing';
+    input.auto = !!(live && settings.get('autoFire') && this.aimTarget(0.055));
+    if (live && input.fire) this.assistAim(dt, look);
     const active = this.state === 'playing' || this.state === 'countdown';
     if (!p.alive || !active) { p.vel.multiplyScalar(0.8); return; }
     if (this.state === 'countdown') return;
@@ -338,12 +346,10 @@ const game = {
     p.wantShoot = input.fire;
   },
 
-  // assistência de mira: enquanto atira, puxa suavemente a câmera para o inimigo visível mais próximo da mira
-  assistAim(dt, look) {
-    const strength = settings.get('aimAssist');
-    if (!strength) return;
+  // inimigo visível mais próximo da mira (dentro de um cone) — usado pela assistência e pelo tiro automático
+  aimTarget(cone) {
     const p = this.player, eye = V(p.pos.x, p.eyeY, p.pos.z), pt = V();
-    let best = null, bestAng = 0.38; // cone de ~22°
+    let best = null, bestAng = cone;
     for (const c of this.combatants) {
       if (c.team === p.team || !c.alive) continue;
       c.chestCenter(pt);
@@ -355,8 +361,16 @@ const game = {
       if (ang >= bestAng) continue;
       const hit = world.segHit(eye, pt.clone(), false);
       if (hit && hit.t < 0.97) continue;
-      bestAng = ang; best = { dyaw, dpit };
+      bestAng = ang; best = { dyaw, dpit, ang };
     }
+    return best;
+  },
+
+  // assistência de mira: enquanto atira, puxa suavemente a câmera para o inimigo
+  assistAim(dt, look) {
+    const strength = settings.get('aimAssist');
+    if (!strength) return;
+    const best = this.aimTarget(0.38), p = this.player;
     if (!best) return;
     const manual = Math.min(1, Math.hypot(look.x, look.y) / 30);   // quanto o jogador está mexendo: cede o controle
     const k = Math.min(1, dt * 5 * strength) * (1 - 0.8 * manual);
@@ -466,6 +480,7 @@ const game = {
   setMap(id) {
     settings.set('map', id);
     world.loadMap(id);
+    sfx.setAmbient(AMB[id] || 'outdoor');
     this.layout();
     $('map-label').textContent = `${MAPS[id].name} · Eliminação`;
   },
@@ -480,8 +495,7 @@ const game = {
     this.updateAlive();
   },
   begin(restart) {
-    sfx.init();
-    sfx.setVolume(settings.get('volume'));
+    unlockAudio(); sfx.setMusicScale(0.55);
     if (IS_TOUCH) {
       try { document.documentElement.requestFullscreen?.(); screen.orientation?.lock?.('landscape').catch(() => {}); } catch (e) { /* ignora */ }
     }
@@ -507,7 +521,7 @@ const game = {
     this.paused = false; this.state = 'menu'; this.matchOver = false;
     hud.hideBanner(); overlay.clear(false); this.cine = null;
     balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
-    this.layout(); ui.showHome();
+    sfx.setMusicScale(1); this.layout(); ui.showHome();
     if (document.pointerLockElement) document.exitPointerLock();
   },
 };
@@ -522,7 +536,8 @@ game.ui = ui;
 hud.camLabel(game.camPref);
 $('map-label').textContent = `${MAPS[startMap].name} · Eliminação`;
 sfx.setVolume(settings.get('volume'));
-settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); });
+settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); if (k === 'music') sfx.setMusic(v); });
+sfx.setMusic(settings.get('music')); sfx.ambKind = AMB[startMap] || 'outdoor';
 input.on.reload = () => { if (game.state === 'playing' && !game.paused) game.player.startReload(); };
 input.on.cam = () => { if (!game.paused && game.state !== 'menu') game.toggleCam(); };
 input.on.pause = () => {
@@ -532,7 +547,7 @@ input.on.pause = () => {
 };
 input.on.lockChange = (locked) => { if (!locked && game.state !== 'menu' && !game.paused && !IS_TOUCH && !ui.settingsOpen()) game.openPause(); };
 canvas.addEventListener('mousedown', () => { if (!IS_TOUCH && !input.locked && game.state !== 'menu' && !game.paused) input.requestLock(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) game.openPause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { game.openPause(); sfx.suspend(); } else sfx.resume(); });
 addEventListener('keydown', (e) => { if (e.code === 'Tab') { e.preventDefault(); if (game.state !== 'menu') ui.toggleBoard(true); } });
 addEventListener('keyup', (e) => { if (e.code === 'Tab') ui.toggleBoard(false); });
 if (IS_TOUCH) { let bt = 0; $('top').addEventListener('pointerdown', () => { ui.toggleBoard(true); clearTimeout(bt); bt = setTimeout(() => ui.toggleBoard(false), 3000); }); }

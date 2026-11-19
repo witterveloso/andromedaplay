@@ -6,7 +6,7 @@ export class Input {
     this.canvas = canvas;
     this.keys = {};
     this.lx = 0; this.ly = 0;           // look acumulado
-    this.fireMouse = false; this.fireTouch = false;
+    this.fireMouse = false; this.fireTouch = false; this.fireTouchL = false; this.auto = false;
     this.joy = { x: 0, y: 0 };
     this.crouchTouch = false;
     this.sens = 1;
@@ -105,6 +105,7 @@ export class Input {
       const endF = (e) => { if (e.pointerId === fid) fid = null; };
       fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF);
     }
+    bindBtn('btn-fire-l', () => { this.fireTouchL = true; }, () => { this.fireTouchL = false; });
     bindBtn('btn-reload', () => this.on.reload());
     bindBtn('btn-crouch', () => { this.crouchTouch = !this.crouchTouch; document.getElementById('btn-crouch').classList.toggle('active', this.crouchTouch); });
     bindBtn('btn-cam', () => this.on.cam());
@@ -126,6 +127,6 @@ export class Input {
     if (l > 1) { x /= l; y /= l; }
     return { x, y, sprint: !!(k.ShiftLeft || k.ShiftRight) || this.joy.y < -0.95 };
   }
-  get fire() { return this.fireMouse || this.fireTouch; }
+  get fire() { return this.fireMouse || this.fireTouch || this.fireTouchL || this.auto; }
   get crouch() { return !!(this.keys.KeyC || this.keys.ControlLeft) || this.crouchTouch; }
 }

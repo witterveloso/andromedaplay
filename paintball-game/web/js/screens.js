@@ -102,7 +102,7 @@ export function createScreens(game) {
       range('fov', 'Campo de visão', 'Maior = vê mais dos lados', 60, 100, 1),
       range('aimAssist', 'Assistência de mira', 'Enquanto atira, puxa a mira para o inimigo mais próximo. 0 = desligada', 0, 1, 0.05),
     ] },
-    { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos sonoros', 0, 1, 0.05)] },
+    { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos e música', 0, 1, 0.05), range('music', 'Música', 'Trilha de fundo. 0 = só efeitos', 0, 1, 0.05)] },
     { id: 'gfx', label: 'Gráficos', rows: () => [
       select('quality', 'Qualidade', 'Troque para Baixa se o jogo estiver pesado. Recarrega a página.', [['auto', 'Automática'], ['high', 'Alta'], ['low', 'Baixa']]),
     ] },
@@ -115,6 +115,8 @@ export function createScreens(game) {
     ] },
     { id: 'touch', label: 'Celular', rows: () => [
       range('touchScale', 'Tamanho dos botões', '', 0.8, 1.5, 0.05),
+      toggle('autoFire', 'Tiro automático', 'Atira sozinho quando a mira cruza um inimigo'),
+      toggle('fireLeft', 'Botão de fogo extra', 'Segundo botão de fogo à esquerda'),
       toggle('lefty', 'Modo canhoto', 'Inverte joystick e botões'),
       toggle('haptics', 'Vibração', 'Vibra quando você acerta ou é marcado'),
     ] },
@@ -220,6 +222,7 @@ export function createScreens(game) {
     root.setProperty('--cross', S.get('crossColor'));
     $('crosshair').classList.toggle('dot', S.get('crossStyle') === 'dot');
     document.body.classList.toggle('lefty', S.get('lefty'));
+    document.body.classList.toggle('nofl', !S.get('fireLeft'));
     document.body.classList.toggle('touch', IS_TOUCH);
   };
   S.onChange(() => api.apply());

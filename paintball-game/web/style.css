@@ -238,3 +238,8 @@ button, .map, .sw, .seg button, .chip { touch-action: manipulation; -webkit-user
 }
 .map.loading::before { content: 'Carregando…'; position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; background: rgba(5, 7, 11, .62); font: 800 13px var(--display); letter-spacing: .14em; text-transform: uppercase; animation: pulse 1s infinite; }
 body.busy .cta { opacity: .75; }
+
+/* botão de fogo extra (à esquerda) para atirar enquanto a outra mão mira */
+#btn-fire-l { left: calc(22px + var(--safe-l)); bottom: calc(150px + var(--safe-b)); width: calc(70px * var(--ts)); height: calc(70px * var(--ts)); background: rgba(255, 138, 0, .45) !important; font-size: 12px; }
+body.nofl #btn-fire-l { display: none; }
+body.lefty #btn-fire-l { left: auto; right: calc(22px + var(--safe-r)); }
