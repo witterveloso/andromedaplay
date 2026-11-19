@@ -240,6 +240,31 @@ button, .map, .sw, .seg button, .chip { touch-action: manipulation; -webkit-user
 body.busy .cta { opacity: .75; }
 
 /* botão de fogo extra (à esquerda) para atirar enquanto a outra mão mira */
-#btn-fire-l { left: calc(22px + var(--safe-l)); bottom: calc(150px + var(--safe-b)); width: calc(70px * var(--ts)); height: calc(70px * var(--ts)); background: rgba(255, 138, 0, .45) !important; font-size: 12px; }
+#btn-fire-l { left: calc(22px + var(--safe-l)); bottom: calc(92px + var(--safe-b)); width: calc(70px * var(--ts)); height: calc(70px * var(--ts)); background: rgba(255, 138, 0, .45) !important; font-size: 12px; }
 body.nofl #btn-fire-l { display: none; }
 body.lefty #btn-fire-l { left: auto; right: calc(22px + var(--safe-r)); }
+
+/* mapa de localização (radar) + aviso de esconderijo */
+#radar { position: absolute; left: calc(16px + var(--safe-l)); top: calc(54px + var(--safe-t)); width: 126px; height: 189px; border-radius: 10px; border: 1px solid var(--line); background: rgba(8, 10, 14, .6); box-shadow: 0 4px 16px rgba(0, 0, 0, .4); pointer-events: none; transform: scale(var(--hud-scale)); transform-origin: top left; transition: width .2s var(--ease), height .2s var(--ease); }
+body.ingame #radar { pointer-events: auto; cursor: pointer; }
+#radar.big { width: 252px; height: 378px; }
+body.touch #radar { top: calc(64px + var(--safe-t)); left: calc(14px + var(--safe-l)); width: 96px; height: 144px; }
+body.touch #radar.big { width: 220px; height: 330px; }
+body.radar-off #radar { display: none; }
+#stealth { position: absolute; left: 50%; top: calc(86px + var(--safe-t)); transform: translateX(-50%); padding: 5px 14px; border-radius: 999px; background: rgba(125, 255, 122, .14); border: 1px solid var(--ok); color: var(--ok); font: 700 12px var(--font); letter-spacing: .18em; opacity: 0; transition: opacity .25s; }
+#stealth.on { opacity: 1; }
+
+/* modos de jogo */
+.chip { cursor: pointer; color: inherit; }
+.chip[aria-checked=true] { background: rgba(255, 138, 0, .16); border-color: var(--o); color: #ffd9a8; }
+.mode-desc { margin: -8px 0 16px; max-width: 420px; font-size: 13px; line-height: 1.45; color: #c4cdd9; }
+#flag-status { margin-top: 3px; font-size: 10.5px; letter-spacing: .12em; color: #ffd24a; display: none; }
+body.flagmode #flag-status { display: block; }
+@media (max-height: 520px) { .mode-desc { display: none; } }
+
+.top-actions { display: flex; gap: 8px; }
+#btn-sound { font-size: 20px; }
+#btn-sound.blocked { animation: pulse 1.2s infinite; border-color: var(--o); }
+#build { position: fixed; right: 10px; bottom: 6px; z-index: 30; font-size: 10px; color: rgba(255, 255, 255, .35); letter-spacing: .08em; pointer-events: none; }
+body.ingame #build { display: none; }
+body.touch #map-label { display: none; }

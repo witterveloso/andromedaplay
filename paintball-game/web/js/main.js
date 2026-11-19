@@ -10,6 +10,7 @@ import { Input, IS_TOUCH } from './input.js';
 import { camoTexture } from './camo.js';
 import { settings, PALETTES } from './settings.js';
 import { createScreens } from './screens.js';
+import { createRadar } from './radar.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -55,10 +56,11 @@ const sfx = new Sfx();
 const hud = new HUD();
 const overlay = new MaskOverlay($('mask'));
 const input = new Input(canvas);
-const AMB = { arena: 'outdoor', ferro: 'outdoor', favela: 'outdoor', galpao: 'indoor', cidade: 'city' };
+const AMB = { arena: 'arena', ferro: 'ferro', favela: 'favela', galpao: 'galpao', cidade: 'cidade' };
 // o navegador só libera o áudio depois de um gesto: primeiro toque/clique/tecla em qualquer lugar
-const unlockAudio = () => { sfx.setVolume(settings.get('volume')); sfx.setMusic(settings.get('music')); sfx.unlock(); sfx.setAmbient(AMB[world.map.id] || 'outdoor'); };
-['pointerdown', 'touchend', 'click', 'keydown'].forEach((ev) => addEventListener(ev, unlockAudio, { capture: true, once: true }));
+const unlockAudio = () => { sfx.setVolume(settings.get('volume')); sfx.setMusic(settings.get('music')); sfx.unlock(); sfx.setAmbientLevel(settings.get('ambient')); if (!sfx.amb) sfx.setAmbient(world.map.id); };
+// celulares só liberam o áudio em toques completos (touchend/click): tenta em todos até o som estar ativo
+['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach((ev) => addEventListener(ev, () => { if (!sfx.running) unlockAudio(); }, { capture: true }));
 addEventListener('click', (e) => { if (e.target.closest && e.target.closest('button')) sfx.ui(); }, true);
 
 function resize() {
@@ -112,6 +114,8 @@ const game = {
   score: [0, 0], roundNo: 0, roundTime: 0, cd: 0, endT: 0, combatants: [], player: null,
   camMode: 'fpp', shake: 0, switchT: 0, menuOrbit: 0,
   get difficulty() { return settings.get('diff'); },
+  get mode() { return settings.get('mode'); },
+  flag: { pos: new THREE.Vector3(), carrier: null, mesh: null, cloth: null, beacon: null, cd: 0 },
   get camPref() { return params.get('cam') === 'tpp' ? 'tpp' : settings.get('cam'); },
 
   distToListener(p) { return camera.position.distanceTo(p); },
@@ -195,6 +199,7 @@ const game = {
       this.switchT = 1.2;
       hud.banner('VOCÊ FOI MARCADO!', 'Mãos para cima — aguarde a rodada', 0, TEAM_CSS[shooter.team]);
     }
+    this.dropFlag(victim);
     this.updateAlive();
     this.checkRoundEnd();
   },
@@ -203,7 +208,81 @@ const game = {
     [0, 1].forEach((t) => hud.alive(t, this.combatants.filter((c) => c.team === t).map((c) => c.alive)));
   },
 
+  buildFlag() {
+    if (this.flag.mesh) return;
+    const g = new THREE.Group();
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.8, 8), new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: 0.8, roughness: 0.3 }));
+    pole.position.y = 1.4; pole.castShadow = true;
+    const clothGeo = new THREE.PlaneGeometry(1.0, 0.62, 10, 4);
+    const cloth = new THREE.Mesh(clothGeo, new THREE.MeshStandardMaterial({ color: 0xffd24a, emissive: 0xffa000, emissiveIntensity: 0.35, roughness: 0.6, side: THREE.DoubleSide }));
+    cloth.position.set(0.5, 2.45, 0); cloth.castShadow = true;
+    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 16, 18, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd24a, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    beacon.position.y = 8;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.95, 32), new THREE.MeshBasicMaterial({ color: 0xffd24a, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03;
+    g.add(pole, cloth, beacon, ring);
+    g.visible = false; scene.add(g);
+    Object.assign(this.flag, { mesh: g, cloth, beacon, ring, base: clothGeo.attributes.position.array.slice() });
+  },
+
+  resetFlag() {
+    const f = this.flag; f.carrier = null; f.cd = 0;
+    f.pos.set(world.flagSpot ? world.flagSpot.x : 0, 0, world.flagSpot ? world.flagSpot.z : 0);
+    if (f.mesh && f.mesh.parent !== scene) scene.add(f.mesh);
+    if (f.mesh) f.mesh.position.copy(f.pos);
+  },
+
+  dropFlag(c) {
+    const f = this.flag; if (f.carrier !== c) return;
+    f.carrier = null; f.cd = 1.2;
+    f.pos.set(c.pos.x, 0, c.pos.z); world.collide(f.pos, 0.5);
+    hud.feed(`<b style="color:${TEAM_CSS[c.team]}">${c.isPlayer ? 'Você' : c.name}</b> derrubou a bandeira`, c.team);
+  },
+
+  updateFlag(dt) {
+    const f = this.flag, on = this.mode === 'flag';
+    document.body.classList.toggle('flagmode', on);
+    if (!f.mesh) return;
+    f.mesh.visible = on && this.state !== 'menu';
+    if (!f.mesh.visible) return;
+    const t = performance.now() / 1000;
+    f.cloth.rotation.y = 0;
+    const pos = f.cloth.geometry.attributes.position, b = f.base;
+    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(b[i * 3] * 5 - t * 6) * 0.07 * (b[i * 3] + 0.5));
+    pos.needsUpdate = true;
+    f.beacon.material.opacity = 0.14 + 0.08 * Math.sin(t * 3);
+    if (f.carrier) {
+      const root = f.carrier.model.root;
+      if (f.mesh.parent !== root) { root.add(f.mesh); f.mesh.scale.setScalar(0.5); f.mesh.rotation.set(0, Math.PI, 0.08); f.mesh.position.set(0.0, 0.3, 0.3); }
+      f.beacon.visible = false; f.ring.visible = false;
+    } else {
+      if (f.mesh.parent !== scene) { scene.add(f.mesh); f.mesh.scale.setScalar(1); f.mesh.rotation.set(0, 0, 0); }
+      f.mesh.position.copy(f.pos); f.beacon.visible = true; f.ring.visible = true;
+      if (this.state !== 'playing') return;
+      f.cd = Math.max(0, f.cd - dt);
+      if (f.cd > 0) return;
+      let best = null, bd = 1.15;
+      for (const c of this.combatants) {
+        if (!c.alive) continue;
+        const d = Math.hypot(c.pos.x - f.pos.x, c.pos.z - f.pos.z);
+        if (d < bd) { bd = d; best = c; }
+      }
+      if (best) {
+        f.carrier = best; sfx.beep(true);
+        hud.feed(`<b style="color:${TEAM_CSS[best.team]}">${best.isPlayer ? 'Você' : best.name}</b> pegou a bandeira!`, best.team);
+        if (best.isPlayer) hud.banner('VOCÊ PEGOU A BANDEIRA!', 'Leve até a base inimiga', 1800, '#ffd24a');
+      }
+    }
+    // captura: portador chega à base inimiga
+    const c = f.carrier;
+    if (c && this.state === 'playing') {
+      const ok = c.team === 0 ? c.pos.z < -25 : c.pos.z > 25;
+      if (ok && Math.abs(c.pos.x) < 8) this.endRound(c.team, 'flag');
+    }
+  },
+
   setup() {
+    this.buildFlag();
     const nm = NAMES.slice().sort(() => Math.random() - 0.5);
     this.player = new Combatant(this, { name: 'Você', team: 0, isPlayer: true });
     this.combatants.push(this.player);
@@ -239,6 +318,7 @@ const game = {
   nextRound() {
     this.roundNo++;
     this.layout();
+    this.resetFlag();
     this.player.pods = 4;
     balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
     world.clearSplats();
@@ -256,8 +336,9 @@ const game = {
     if (alive[0] === 0 || alive[1] === 0) this.endRound(alive[0] === 0 ? 1 : 0);
   },
 
-  endRound(winner) {
+  endRound(winner, why) {
     this.state = 'roundover'; this.endT = 3.6;
+    if (why === 'flag') { sfx.beep(true); }
     if (winner >= 0) this.score[winner]++;
     hud.score(this.score[0], this.score[1]);
     const matchOver = this.score.some((s) => s >= WIN_SCORE);
@@ -269,7 +350,7 @@ const game = {
     } else if (winner < 0) {
       hud.banner('EMPATE', 'Tempo esgotado', 0, '#fff');
     } else {
-      hud.banner(`RODADA ${TEAM_NAME[winner]}`, `Placar ${this.score[0]} – ${this.score[1]}`, 0, TEAM_CSS[winner]);
+      hud.banner(why === 'flag' ? `BANDEIRA CAPTURADA!` : `RODADA ${TEAM_NAME[winner]}`, `${why === 'flag' ? TEAM_NAME[winner] + ' · ' : ''}Placar ${this.score[0]} – ${this.score[1]}`, 0, TEAM_CSS[winner]);
       winner === 0 ? sfx.win() : sfx.lose();
     }
   },
@@ -283,7 +364,7 @@ const game = {
       if (!this.tutorialWait) this.cd -= dt;
       const n = Math.ceil(this.cd);
       if (n !== this.lastCd && n >= 1 && n <= 3) { this.lastCd = n; hud.banner(String(n), 'Prepare-se', 1000, '#fff'); sfx.beep(false); }
-      if (this.cd <= 0) { this.state = 'playing'; hud.banner('TIRO LIVRE!', '', 1200, '#ffd24a'); sfx.beep(true); }
+      if (this.cd <= 0) { this.state = 'playing'; hud.banner('TIRO LIVRE!', this.mode === 'flag' ? 'Pegue a bandeira no centro e leve à base inimiga' : '', 1800, '#ffd24a'); sfx.beep(true); }
     } else if (this.state === 'playing') {
       this.roundTime += dt;
       hud.time(ROUND_TIME - this.roundTime);
@@ -311,11 +392,18 @@ const game = {
       const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, d = Math.hypot(dx, dz);
       if (d < 0.7 && d > 1e-4) { const k = (0.7 - d) / 2 / d; a.pos.x -= dx * k; a.pos.z -= dz * k; b.pos.x += dx * k; b.pos.z += dz * k; }
     }
+    for (const c of cs) {
+      if (!c.alive || c.vel.lengthSq() < 0.5) { c.stepT = 0; continue; }
+      c.stepT = (c.stepT || 0) + dt * Math.min(1.6, c.vel.length() / 3);
+      if (c.stepT > 0.5) { c.stepT = 0; sfx.step(c.isPlayer ? (c.crouch ? 0.35 : 0.8) : Math.min(1, 7 / Math.max(7, this.distToListener(c.pos))) * (c.crouch ? 0.3 : 0.7)); }
+    }
     for (const c of cs) c.syncModel(dt);
     this.stepBalls(dt);
     particles.update(dt);
     this.updateCamera(dt);
     this.updateHud(dt);
+    this.updateFlag(dt);
+    if (this.radar) this.radar.update(dt);
     overlay.update(dt);
     if (this.switchT > 0) { this.switchT -= dt; if (this.switchT <= 0 && !p.alive) { this.camMode = 'tpp'; hud.camLabel('tpp'); } }
   },
@@ -467,6 +555,9 @@ const game = {
     hud.ammo(p.hopper, p.pods, p.reloadT);
     $('reload-hint').classList.toggle('on', p.alive && this.state === 'playing' && (p.hopper < 30 || p.reloadT > 0) && p.reloadT <= 0 && p.pods > 0);
     hud.crosshair(p.spread, p.alive);
+    if (this.mode === 'flag') { const f = this.flag; $('flag-status').textContent = f.carrier ? `BANDEIRA: ${f.carrier.isPlayer ? 'VOCÊ' : f.carrier.name.toUpperCase()} (${TEAM_NAME[f.carrier.team]})` : 'BANDEIRA: NO CHÃO'; }
+    const hidden = p.alive && this.state === 'playing' && world.isInterior(p.pos.x, p.pos.z) && !this.combatants.some((c) => c instanceof Bot && c.alive && c.target === p);
+    $('stealth').classList.toggle('on', hidden);
   },
 
   toggleCam() {
@@ -480,9 +571,10 @@ const game = {
   setMap(id) {
     settings.set('map', id);
     world.loadMap(id);
-    sfx.setAmbient(AMB[id] || 'outdoor');
+    sfx.setAmbient(id);
+    if (this.radar) this.radar.reset();
     this.layout();
-    $('map-label').textContent = `${MAPS[id].name} · Eliminação`;
+    $('map-label').textContent = `${MAPS[id].name} · ${settings.get('mode') === 'flag' ? 'Centerflag' : 'Eliminação'}`;
   },
   setPalette(i) {
     paletteApply(i);
@@ -521,6 +613,7 @@ const game = {
     this.paused = false; this.state = 'menu'; this.matchOver = false;
     hud.hideBanner(); overlay.clear(false); this.cine = null;
     balls.forEach((b) => { b.life = 0; b.mesh.visible = false; });
+    if (this.flag.mesh) this.flag.mesh.visible = false;
     sfx.setMusicScale(1); this.layout(); ui.showHome();
     if (document.pointerLockElement) document.exitPointerLock();
   },
@@ -533,11 +626,15 @@ await loadCharacterAssets();
 game.setup();
 const ui = createScreens(game);
 game.ui = ui;
+game.unlockAudio = unlockAudio;
+const radar = createRadar(game, $('radar'));
+game.radar = radar;
 hud.camLabel(game.camPref);
-$('map-label').textContent = `${MAPS[startMap].name} · Eliminação`;
+const mapLabel = () => { $('map-label').textContent = `${MAPS[world.map.id].name} · ${settings.get('mode') === 'flag' ? 'Centerflag' : 'Eliminação'}`; };
+mapLabel(); settings.onChange((k) => { if (k === 'mode') mapLabel(); });
 sfx.setVolume(settings.get('volume'));
-settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); if (k === 'music') sfx.setMusic(v); });
-sfx.setMusic(settings.get('music')); sfx.ambKind = AMB[startMap] || 'outdoor';
+settings.onChange((k, v) => { if (k === 'volume') sfx.setVolume(v); if (k === 'music') sfx.setMusic(v); if (k === 'ambient') sfx.setAmbientLevel(v); });
+sfx.setMusic(settings.get('music')); sfx.ambKind = startMap; sfx.setAmbientLevel(settings.get('ambient'));
 input.on.reload = () => { if (game.state === 'playing' && !game.paused) game.player.startReload(); };
 input.on.cam = () => { if (!game.paused && game.state !== 'menu') game.toggleCam(); };
 input.on.pause = () => {
@@ -550,6 +647,7 @@ canvas.addEventListener('mousedown', () => { if (!IS_TOUCH && !input.locked && g
 document.addEventListener('visibilitychange', () => { if (document.hidden) { game.openPause(); sfx.suspend(); } else sfx.resume(); });
 addEventListener('keydown', (e) => { if (e.code === 'Tab') { e.preventDefault(); if (game.state !== 'menu') ui.toggleBoard(true); } });
 addEventListener('keyup', (e) => { if (e.code === 'Tab') ui.toggleBoard(false); });
+addEventListener('keydown', (e) => { if (e.code === 'KeyM' && !e.repeat && game.state !== 'menu') radar.toggleBig(); });
 if (IS_TOUCH) { let bt = 0; $('top').addEventListener('pointerdown', () => { ui.toggleBoard(true); clearTimeout(bt); bt = setTimeout(() => ui.toggleBoard(false), 3000); }); }
 loaderProgress(1, 'Pronto!');
 await nextFrame();

@@ -7,7 +7,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // ---------------------------------------------------------------------------
 // utilitários compartilhados pelos mapas
 // ---------------------------------------------------------------------------
-function helpers({ group, obstacles, quality }) {
+function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
   const hi = quality === 'high';
   const mats = new Map();
   const M = (kind, params = {}, opts = {}) => {
@@ -108,7 +108,7 @@ function helpers({ group, obstacles, quality }) {
     im.castShadow = false; im.receiveShadow = false; group.add(im);
     return im;
   }
-  return { M, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles };
+  return { M, rnd, add, box, cyl, ground, decal, wire, bunting, flush, backdrop, hi, group, obstacles, interiors, spots };
 }
 
 // espelhamento por simetria central: fn(s) com s = +1 e -1 (posição*s, rotação +π se s<0)
@@ -180,6 +180,33 @@ function car(H, { x, z, alongX = false, color = [150, 60, 50], y = 0, stack = 0,
 function barrel(H, x, z, color, collide = true) {
   H.cyl({ x, z, r: 0.3, h: 0.95, mat: H.M('rust', { color, tile: 1 }), seg: 14, collide });
 }
+
+
+// barraco com porta: 4 paredes (com abertura), piso e telhado. Dá para entrar e se esconder:
+// as paredes bloqueiam tiros e a visão; os bots também usam o interior (waypoint na porta).
+function hut(H, { x, z, w, d, h = 3, doors = ['+z'], doorW = 1.5, t = 0.25, wallMat, floorMat, roofMat, crate = true }) {
+  const wall = (cx, cz, ww, dd) => H.box({ x: cx, z: cz, w: ww, d: dd, h, mat: wallMat });
+  const lintel = (cx, cz, ww, dd) => H.box({ x: cx, z: cz, w: ww, d: dd, h: h - 2.3, y: 2.3, mat: wallMat, collide: false });
+  [['+z', z + d / 2 - t / 2], ['-z', z - d / 2 + t / 2]].forEach(([side, cz]) => {
+    if (doors.includes(side)) { const sl = (w - doorW) / 2, off = doorW / 2 + sl / 2; wall(x - off, cz, sl, t); wall(x + off, cz, sl, t); lintel(x, cz, doorW, t); }
+    else wall(x, cz, w, t);
+  });
+  const L = d - 2 * t;
+  [['+x', x + w / 2 - t / 2], ['-x', x - w / 2 + t / 2]].forEach(([side, cx]) => {
+    if (doors.includes(side)) { const sl = (L - doorW) / 2, off = doorW / 2 + sl / 2; wall(cx, z - off, t, sl); wall(cx, z + off, t, sl); lintel(cx, z, t, doorW); }
+    else wall(cx, z, t, L);
+  });
+  H.box({ x, z, w: w - 2 * t, d: d - 2 * t, h: 0.05, mat: floorMat, collide: false, shadow: false });
+  H.box({ x, z, w: w + 0.5, d: d + 0.5, h: 0.25, y: h, mat: roofMat, collide: false });
+  H.interiors.push({ x, z, w: w - 2 * t, d: d - 2 * t });
+  const door = doors[0], nx = door === '+x' ? 1 : door === '-x' ? -1 : 0, nz = door === '+z' ? 1 : door === '-z' ? -1 : 0;
+  const via = { x: x + nx * (w / 2 + 1.8), z: z + nz * (d / 2 + 1.8) };
+  const inX = w / 2 - t - 0.8, inZ = d / 2 - t - 0.8;
+  const via2 = { x: x + nx * (w / 2 - t - 0.7), z: z + nz * (d / 2 - t - 0.7) };   // logo depois da porta
+  [[0, 0], [-inX, -inZ], [inX, -inZ], [-inX, inZ], [inX, inZ]].forEach(([ox, oz]) => { if (!(crate && Math.abs(ox + nx * -inX) < 0.01 && Math.abs(oz + nz * -inZ) < 0.01)) H.spots.push({ x: x + ox, z: z + oz, via, via2 }); });
+  if (crate) H.box({ x: x - nx * (w / 2 - t - 0.55), z: z - nz * (d / 2 - t - 0.55), w: 0.9, d: 0.9, h: 1.0, mat: H.M('wood', {}) });
+}
+const flip = (doors, s) => (s > 0 ? doors : doors.map((d) => (d[0] === '+' ? '-' : '+') + d[1]));
 
 // ===========================================================================
 // MAPA 1 — ARENA SPEEDBALL (campo de torneio)
@@ -330,6 +357,7 @@ function buildGalpao(ctx) {
     H.box({ x: -13 * s, z: 3.5 * s, w: 1.4, d: 0.3, h: 3.0, y: 0, mat: steel, collide: false });
     barrel(H, 2 * s, 14 * s, [60, 90, 150]); barrel(H, 2.7 * s, 14.4 * s, [150, 50, 40]); barrel(H, 2.2 * s, 15.1 * s, [90, 90, 90]);
     H.box({ x: -2 * s, z: 21 * s, w: 4, d: 0.6, h: 1.1, mat: concrete });
+    hut(H, { x: -14 * s, z: 21.5 * s, w: 6, d: 5, h: 3, doors: flip(['+x'], s), wallMat: metal([100, 120, 130]), floorMat: M('concrete', { base: 120 }), roofMat: metal([90, 100, 105]) });
   });
   // lâmpadas penduradas (emissivas) + luzes pontuais quentes
   const lamp = new THREE.MeshBasicMaterial({ color: 0xffe3a8, fog: false });
@@ -381,8 +409,9 @@ function buildFavela(ctx) {
     roofPts.push([x - w / 2, h + 0.3, z - d / 2], [x + w / 2, h + 0.3, z + d / 2], [x - w / 2, h + 0.3, z + d / 2], [x + w / 2, h + 0.3, z - d / 2]);
   }
   // centro: bar da comunidade
-  house({ x: 0, z: 0, w: 3.4, d: 3.4, h: 3.4, c: 6, tank: 0 });
-  const awning = new THREE.Mesh(boxGeo(4.6, 0.12, 1.4, 2), new THREE.MeshStandardMaterial({ color: 0xd9433a, roughness: 0.6 })); awning.position.set(0, 2.6, 2.4); group.add(awning);
+  hut(H, { x: 0, z: 0, w: 6, d: 5, h: 3.4, doors: ['+z', '-z'], wallMat: H.M('plaster', { color: COLORS[6] }, { bump: 0.9 }), floorMat: H.M('concrete', { base: 150 }), roofMat: H.M('concrete', { base: 160 }) });
+  H.decal('grafite', 31, '+z', 2.1, 2.1, 2.55, 2.6, 2.6, { word: 'BAR' });
+  const awning = new THREE.Mesh(boxGeo(4.6, 0.12, 1.4, 2), new THREE.MeshStandardMaterial({ color: 0xd9433a, roughness: 0.6 })); awning.position.set(0, 2.7, 3.0); group.add(awning);
   const HOUSES = [
     [-12.5, 7, 6, 8, 6.5, 'plaster', 0, 1], [13, 9, 5, 7, 5, 'brick', 0, 0], [-4.5, 12.5, 3.6, 5, 4, 'plaster', 2, 0], [6.5, 15.5, 4.5, 4, 7.5, 'plaster', 3, 1],
     [-14.5, 17, 5, 5, 6.5, 'brick', 0, 0], [15.5, 22.5, 5, 6, 5.5, 'plaster', 4, 1], [-15.5, 23.5, 4.5, 5, 4.5, 'plaster', 1, 0], [3, 5.5, 3.5, 3.5, 3.2, 'plaster', 5, 0],
@@ -391,7 +420,7 @@ function buildFavela(ctx) {
     HOUSES.forEach(([x, z, w, d, h, st, c, tk]) => house({ x: x * s, z: z * s, w, d, h, style: st, c: c + (s < 0 ? 2 : 0), tank: tk }));
     // muretas e caixotes de cobertura
     H.box({ x: -8 * s, z: 2.5 * s, w: 2.4, d: 0.5, h: 1.1, mat: H.M('concrete', { base: 190 }) });
-    H.box({ x: -9.5 * s, z: 21 * s, w: 2, d: 0.5, h: 1.1, mat: H.M('brick', {}) });
+    hut(H, { x: -8.5 * s, z: 20.5 * s, w: 4.5, d: 4, h: 3.2, doors: flip(['+x'], s), wallMat: H.M('brick', {}, { bump: 1.6 }), floorMat: H.M('concrete', { base: 140 }), roofMat: H.M('concrete', { base: 150 }) });
     H.box({ x: 9 * s, z: 18 * s, w: 1.2, d: 1.2, h: 1.1, mat: H.M('wood', {}) });
     barrel(H, -1.6 * s, 18 * s, [40, 100, 170]); barrel(H, 9.4 * s, 12.4 * s, [190, 70, 50]);
   });
@@ -473,7 +502,7 @@ function buildFerro(ctx) {
   H.box({ x: 0, z: 0, w: 2.6, d: 9, h: 3, mat: M('rust', { color: [228, 178, 38] }, { bump: 1.4 }) });
   for (let i = -3; i <= 3; i++) { H.decal('janela', 3, '+x', 1.33, 2.0, i * 1.2, 1, 0.9, { broken: true }); H.decal('janela', 3, '-x', -1.33, 2.0, i * 1.2, 1, 0.9, { broken: true }); }
   // barraco / escritório
-  H.box({ x: -16, z: -4, w: 4.2, d: 3.4, h: 2.8, mat: metal([140, 130, 110], 0.7) });
+  sym((s) => hut(H, { x: -16.5 * s, z: 3.5 * s, w: 4.6, d: 4, h: 2.8, doors: flip(['+x'], s), wallMat: metal([140, 130, 110], 0.7), floorMat: M('dirt', { color: [96, 80, 60] }), roofMat: metal([120, 110, 95], 0.8) }));
   // cerca de chapas + cenário
   const fence = metal([150, 130, 100], 0.75);
   [[0, 31, 42.8, 0.3, 0], [0, -31, 42.8, 0.3, 0], [21, 0, 0.3, 62.8, 0], [-21, 0, 0.3, 62.8, 0]].forEach(([x, z, w, d]) => { H.box({ x, z, w, d, h: 3.6, mat: fence, collide: false }); });
@@ -529,6 +558,7 @@ function buildCidade(ctx) {
     H.box({ x: 3.5 * s, z: 14.5 * s, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 175 }) });
     H.box({ x: -4 * s, z: 17.5 * s, w: 3.2, d: 0.7, h: 1.1, mat: M('concrete', { base: 175 }) });
     H.box({ x: -6 * s, z: 3 * s, w: 3, d: 2.5, h: 1.0, mat: M('rust', { color: [110, 100, 92] }, { bump: 2 }) });
+    hut(H, { x: -6 * s, z: 21.5 * s, w: 5, d: 4, h: 3.2, doors: flip(['+z'], s), wallMat: M('plaster', { color: [176, 170, 156] }, { bump: 1.0 }), floorMat: M('concrete', { base: 120 }), roofMat: M('concrete', { base: 130 }) });
     H.box({ x: 9 * s, z: 4 * s, w: 2.6, d: 8.6, h: 3.1, mat: M('rust', { color: [60, 100, 140] }, { bump: 1.2 }) }); // ônibus
     for (let i = -3; i <= 3; i++) { H.decal('janela', 4, '+x', (9 + 1.31) * s * (s > 0 ? 1 : 1), 2.1, (4 + i * 1.1) * s, 0.9, 0.9, { broken: true }); }
     // postes e árvores brotando do asfalto

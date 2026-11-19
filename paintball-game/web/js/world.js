@@ -141,7 +141,8 @@ export function createWorld(scene, renderer, quality = 'high') {
 
   let group = null, envTarget = null;
   const world = {
-    obstacles: [], coverSpots: [], map: null, splatMats,
+    obstacles: [], coverSpots: [], interiors: [], map: null, splatMats,
+    isInterior(x, z) { return this.interiors.some((i) => Math.abs(x - i.x) < i.w / 2 && Math.abs(z - i.z) < i.d / 2); },
     splatMaterial: (team, v) => splatMats[team][v % 4],
     recolor() { // chamado ao trocar a paleta de tinta
       TEAM_PAINT.forEach((c, t) => splatMats[t].forEach((m) => { m.color.set(c); m.emissive.set(c); }));
@@ -163,7 +164,8 @@ export function createWorld(scene, renderer, quality = 'high') {
       group = new THREE.Group();
       scene.add(group);
       const obstacles = [];
-      const cfg = def.build({ group, obstacles, quality, ARENA, THREE });
+      const interiors = [], hutSpots = [];
+      const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots });
       // luz
       scene.fog = new THREE.Fog(cfg.fog.color, cfg.fog.near, cfg.fog.far);
       scene.background = null;
@@ -207,8 +209,18 @@ export function createWorld(scene, renderer, quality = 'high') {
           if (Math.abs(x) < ARENA.hx - 1.5 && Math.abs(z) < ARENA.hz - 1.5 && !inside(x, z, 0.45)) coverSpots.push({ x, z });
         }
       });
+      coverSpots.push(...hutSpots);
+      let fs = { x: 0, z: 0 };
+      if (inside(0, 0, 0.9)) {
+        search: for (let r = 1.5; r < 9; r += 0.75) for (let k = 0; k < 16; k++) {
+          const a = (k / 16) * Math.PI * 2, x = Math.cos(a) * r, z = Math.sin(a) * r;
+          if (!inside(x, z, 0.9)) { fs = { x, z }; break search; }
+        }
+      }
+      this.flagSpot = fs;
       this.obstacles = obstacles;
       this.coverSpots = coverSpots;
+      this.interiors = interiors;
       this.map = { id, name: def.name, tag: def.tag, blurb: def.blurb, menu: def.menu, indoor: !!cfg.indoor };
       this.clearSplats();
       return this.map;

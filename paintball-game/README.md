@@ -1,5 +1,8 @@
 # SPLAT ARENA — protótipo jogável (navegador)
 
+**Jogar online:** https://witterveloso.github.io/splat-arena/ (GitHub Pages)
+
+
 Paintball tático 5x5 contra bots, com **1ª e 3ª pessoa**, para **PC e celular**, em **5 campos**. Sem build: HTML + Three.js (incluído em `web/js/vendor`).
 
 ## Rodar
@@ -10,6 +13,15 @@ python3 -m http.server 8080     # ou: npx serve .
 # abra http://localhost:8080
 ```
 (precisa de servidor HTTP por causa dos módulos ES; funciona em qualquer hospedagem estática.) Atalhos de URL: `?map=favela|galpao|ferro|cidade|arena`, `?cam=tpp`, `?quality=low`.
+
+
+## Novidades
+- **Centerflag:** uma bandeira no centro do campo; pegue e leve até a base inimiga para vencer a rodada (ou elimine o outro time). Quem carrega derruba a bandeira ao ser marcado. Os bots pegam, escoltam e perseguem o portador. Escolha o modo no menu.
+- **Barracos com porta:** dá para entrar em barracos/escritórios (favela, ferro-velho, cidade e galpão), se esconder e atirar pela porta. As paredes bloqueiam tiros e visão; aparece **ESCONDIDO** quando nenhum inimigo te enxerga.
+- **Mapa de localização (radar):** vista de cima com aliados, bandeira e inimigos. Modos em Configurações: *Avistados* (quem você ou um aliado enxerga), *Todos* e *Desligado*. **M** ou toque no mapa amplia.
+- **Celular:** arraste no botão **FOGO** para girar a câmera enquanto atira; botão de fogo extra à esquerda; **tiro automático** ao cruzar um inimigo; assistência de mira.
+- **Áudio:** música, **som ambiente por campo** (vento, pássaros, pingos, percussão distante, cidade), passos e botão 🔊 no menu. No iPhone, tire o modo silencioso; o botão 🔇 pulsa enquanto o navegador estiver bloqueando o som.
+- **Atualização automática:** a versão aparece no canto do menu (vAAAAMMDD-HHMMSS). Antes de cada commit rode `python3 tools/stamp.py` para o celular baixar os arquivos novos em vez de usar o cache.
 
 ## Campos
 | Campo | Estilo | O que tem |

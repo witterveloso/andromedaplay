@@ -109,7 +109,7 @@ export class Bot extends Combatant {
     this.target = null; this.seenT = 0; this.scanT = Math.random() * 0.2;
     this.burst = 0; this.pauseT = 0; this.idleT = 0; this.strafe = 0; this.strafeT = 0;
     this.noiseY = 0; this.noiseP = 0; this.noiseT = 0;
-    this.stuckT = 0; this.lastPos = new THREE.Vector3(); this.aggr = Math.random();
+    this.stuckT = 0; this.lastPos = new THREE.Vector3(); this.aggr = Math.random(); this.via = null; this.via2 = null; this.stage = 0; this.objT = 0; this.objActive = false;
   }
   reset(x, z, yaw) {
     super.reset(x, z, yaw);
@@ -129,7 +129,13 @@ export class Bot extends Combatant {
       const score = Math.abs(s.z - wantZ) + Math.random() * 8;
       if (score < bs) { bs = score; best = s; }
     }
+    // às vezes o bot se esconde dentro de um barraco
+    if (!first && Math.random() < 0.2) {
+      const inner = spots.filter((s) => s.via);
+      if (inner.length) best = inner[(Math.random() * inner.length) | 0];
+    }
     this.dest.set(best.x, 0, best.z);
+    this.via = best.via || null; this.via2 = best.via2 || null; this.stage = 0;
     this.stuckT = 0; this.lastPos.copy(this.pos);
   }
 
@@ -153,8 +159,32 @@ export class Bot extends Combatant {
     return best;
   }
 
+  // Centerflag: pegar a bandeira, escoltar quem a leva ou perseguir o carregador inimigo
+  flagObjective(dt) {
+    const g = this.game, f = g.flag;
+    this.objT -= dt;
+    if (this.objT > 0) return;
+    this.objT = 0.5; this.objActive = false;
+    if (g.mode !== 'flag' || g.state !== 'playing' || !this.alive) return;
+    const goal = f.carrier ? f.carrier.pos : f.pos;
+    let rank = 0;
+    for (const m of g.combatants) {
+      if (m === this || m.team !== this.team || !m.alive || m === f.carrier) continue;
+      if (Math.hypot(m.pos.x - goal.x, m.pos.z - goal.z) < Math.hypot(this.pos.x - goal.x, this.pos.z - goal.z)) rank++;
+    }
+    let tx = null, tz = null;
+    if (f.carrier === this) { tx = this.pos.x * 0.4; tz = this.team === 0 ? -27.5 : 27.5; }
+    else if (!f.carrier) { if (rank < 2) { tx = f.pos.x; tz = f.pos.z; } }
+    else if (f.carrier.team === this.team) { if (rank < 3) { tx = f.carrier.pos.x + (rank - 1) * 1.6; tz = f.carrier.pos.z + (this.team === 0 ? -2 : 2); } }
+    else if (rank < 3) { tx = f.carrier.pos.x; tz = f.carrier.pos.z; }
+    if (tx === null) return;
+    this.objActive = true; this.via = null; this.via2 = null; this.stage = 2;
+    this.dest.set(tx, 0, tz);
+  }
+
   think(dt) {
     const g = this.game, P = DIFFICULTY[g.difficulty];
+    if (g.mode === 'flag') this.flagObjective(dt); else this.objActive = false;
     if (!this.alive || g.state !== 'playing') { this.vel.multiplyScalar(0.8); return; }
     this.tick(dt);
     this.scanT -= dt;
@@ -165,7 +195,7 @@ export class Bot extends Combatant {
       this.target = t;
     }
     let wishX = 0, wishZ = 0, speed = 0;
-    const t = this.target;
+    const t = (g.mode === 'flag' && g.flag.carrier === this) ? null : this.target;   // quem leva a bandeira corre, não luta
     if (t) {
       this.seenT += dt;
       const pt = t.chestCenter(new THREE.Vector3());
@@ -208,10 +238,19 @@ export class Bot extends Combatant {
       this.seenT = 0; this.burst = 0;
       if (this.hopper < 40) this.startReload();
       this.crouch = false;
-      const dx = this.dest.x - this.pos.x, dz = this.dest.z - this.pos.z, d = Math.hypot(dx, dz);
-      if (d < 0.7) {
+      // pontos de passagem: fora da porta -> logo depois da porta -> destino (para entrar nos barracos)
+      let wp = null;
+      for (let k = 0; k < 2; k++) {
+        wp = this.stage === 0 ? this.via : this.stage === 1 ? this.via2 : null;
+        if (wp && Math.hypot(wp.x - this.pos.x, wp.z - this.pos.z) < 0.8) this.stage++; else break;
+      }
+      wp = this.stage === 0 ? this.via : this.stage === 1 ? this.via2 : null;
+      const goVia = !!wp;
+      const tx = wp ? wp.x : this.dest.x, tz = wp ? wp.z : this.dest.z;
+      const dx = tx - this.pos.x, dz = tz - this.pos.z, d = Math.hypot(dx, dz);
+      if (d < 0.7 && !goVia) {
         this.idleT -= dt;
-        if (this.idleT <= 0) { this.idleT = rand(0.6, 2.2); this.pickDest(); }
+        if (this.idleT <= 0) { this.idleT = rand(0.6, 2.2); if (!this.objActive) this.pickDest(); }
         // olha para o lado do inimigo enquanto espera
         const ez = this.team === 0 ? -1 : 1;
         const wantYaw = ez < 0 ? 0 : Math.PI;
@@ -227,7 +266,7 @@ export class Bot extends Combatant {
         this.pitch += (0 - this.pitch) * Math.min(1, dt * 4);
         this.stuckT += dt;
         if (this.stuckT > 1.4) {
-          if (this.pos.distanceTo(this.lastPos) < 0.6) this.pickDest();
+          if (this.pos.distanceTo(this.lastPos) < 0.6 && !this.objActive) this.pickDest();
           this.stuckT = 0; this.lastPos.copy(this.pos);
         }
       }

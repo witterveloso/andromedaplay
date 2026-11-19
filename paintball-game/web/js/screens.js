@@ -88,6 +88,11 @@ export function createScreens(game) {
   $('map-desc').textContent = MAPS[currentMap].blurb;
   mapsEl.querySelectorAll('.map').forEach((b) => { b.classList.add('map'); });
 
+  const MODES = { elim: ['Eliminação', 'Marque todos os adversários. Melhor de 5 rodadas.'], flag: ['Centerflag', 'Pegue a bandeira no centro do campo e leve até a base inimiga, ou elimine o outro time. Quem carrega a bandeira derruba ela ao ser marcado.'] };
+  const modeText = () => { const m = S.get('mode'); $('mode-desc').textContent = MODES[m][1]; $('btn-play').querySelector('small').textContent = `${MODES[m][0]} · melhor de 5`; };
+  radio($('modes'), [{ value: 'elim', label: 'Eliminação' }, { value: 'flag', label: 'Centerflag' }], S.get('mode'), (v) => { S.set('mode', v); modeText(); }, 'chip');
+  { const br = document.createElement('span'); br.className = 'chip dis'; br.innerHTML = 'Battle Royale <i>em breve</i>'; $('modes').appendChild(br); }
+  modeText();
   radio($('palette'), PALETTES.map((p, i) => ({ value: String(i), render(b) { b.style.setProperty('--a', p.a); b.style.setProperty('--c', p.b); b.title = `${p.name}: ${p.note}`; b.setAttribute('aria-label', `${p.name}: ${p.note}`); } })),
     String(S.get('palette')), (v) => queue(false, () => { S.set('palette', Number(v)); game.setPalette(Number(v)); }), 'sw');
   radio($('seg-cam'), [{ value: 'fpp', label: '1ª pessoa' }, { value: 'tpp', label: '3ª pessoa' }], S.get('cam'), (v) => S.set('cam', v));
@@ -100,9 +105,10 @@ export function createScreens(game) {
       range('sens', 'Sensibilidade', 'Velocidade de mira', 0.3, 2.5, 0.05),
       toggle('invertY', 'Inverter eixo vertical', 'Para cima/para baixo invertidos'),
       range('fov', 'Campo de visão', 'Maior = vê mais dos lados', 60, 100, 1),
+      select('radar', 'Mapa de localização', 'Avistados: só quem você ou um aliado enxerga. Todos: mostra todos os inimigos.', [['spotted', 'Avistados'], ['all', 'Todos (fácil)'], ['off', 'Desligado']]),
       range('aimAssist', 'Assistência de mira', 'Enquanto atira, puxa a mira para o inimigo mais próximo. 0 = desligada', 0, 1, 0.05),
     ] },
-    { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos e música', 0, 1, 0.05), range('music', 'Música', 'Trilha de fundo. 0 = só efeitos', 0, 1, 0.05)] },
+    { id: 'audio', label: 'Áudio', rows: () => [range('volume', 'Volume geral', 'Efeitos e música', 0, 1, 0.05), range('music', 'Música', 'Trilha de fundo. 0 = só efeitos', 0, 1, 0.05), range('ambient', 'Som ambiente', 'Vento, pássaros, pingos, cidade… 0 = desligado', 0, 1, 0.05), soundTest()] },
     { id: 'gfx', label: 'Gráficos', rows: () => [
       select('quality', 'Qualidade', 'Troque para Baixa se o jogo estiver pesado. Recarrega a página.', [['auto', 'Automática'], ['high', 'Alta'], ['low', 'Baixa']]),
     ] },
@@ -140,6 +146,14 @@ export function createScreens(game) {
     r.querySelector('select').onchange = (e) => { S.set(k, e.target.value); if (k === 'quality') location.reload(); };
     return r;
   }
+  function soundTest() {
+    const r = mk(head('Testar o som', 'Se não ouvir nada no celular: tire o modo silencioso, suba o volume do aparelho e toque aqui.') + '<button class="btn" id="s-sound-test" style="width:auto;margin:0;padding:10px 16px">▶ Testar</button><span id="s-sound-state" class="note" style="margin:0 0 0 8px"></span>');
+    const b = r.querySelector('button'), st = r.querySelector('#s-sound-state');
+    const upd = () => { st.textContent = game.sfx.running ? 'Áudio ativo' : 'Áudio bloqueado'; };
+    b.onclick = () => { game.sfx.unlock(); game.sfx.setAmbient(game.sfx.ambKind); game.sfx.shot(1); setTimeout(() => game.sfx.hitmarker(), 250); setTimeout(upd, 300); };
+    setTimeout(upd, 0);
+    return r;
+  }
   function note(t) { const d = document.createElement('p'); d.className = 'note'; d.textContent = t; return d; }
   function renderSettings() {
     const tb = $('s-tabs'); tb.innerHTML = '';
@@ -157,6 +171,14 @@ export function createScreens(game) {
   api.openSettings = () => { settingsFrom = document.activeElement; renderSettings(); $('settings').classList.add('on'); $('s-close').focus(); };
   api.closeSettings = () => { $('settings').classList.remove('on'); if (settingsFrom && settingsFrom.focus) settingsFrom.focus(); };
   $('btn-settings').onclick = api.openSettings;
+  // botão de som: se o navegador bloqueou o áudio, o toque libera; com som ativo, liga/desliga
+  const soundBtn = $('btn-sound');
+  const paintSound = () => { const ok = game.sfx.running; soundBtn.textContent = ok && !game.sfx.muted ? '🔊' : '🔇'; soundBtn.classList.toggle('blocked', !ok); soundBtn.setAttribute('aria-label', !ok ? 'Ativar o som' : game.sfx.muted ? 'Ligar o som' : 'Desligar o som'); };
+  soundBtn.onclick = () => {
+    if (!game.sfx.running) { game.unlockAudio(); game.sfx.shot(1); setTimeout(paintSound, 300); return; }
+    game.sfx.setMuted(!game.sfx.muted); paintSound();
+  };
+  setInterval(paintSound, 700); paintSound();
   $('p-settings').onclick = api.openSettings;
   $('s-close').onclick = api.closeSettings;
   $('settings').addEventListener('click', (e) => { if (e.target.id === 'settings') api.closeSettings(); });
