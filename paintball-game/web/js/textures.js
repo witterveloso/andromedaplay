@@ -90,9 +90,11 @@ const GEN = {
     return { c: [b[0] * k, b[1] * k, b[2] * k * 0.95], h: 0.45 + 0.4 * n, r: 1 };
   },
   grass(u, v, p) {
-    const n = fbm(u, v, 5, 5, 6, 141), bl = vnoise(u, v, 128, 128, 5);
-    const b = p.color || [74, 104, 52], k = 0.62 + 0.6 * n + (bl - 0.5) * 0.35;
-    return { c: [b[0] * k, b[1] * k, b[2] * k * 0.9], h: 0.4 + 0.5 * bl, r: 0.95 };
+    const n = fbm(u, v, 5, 5, 6, 141), bl = vnoise(u, v, 128, 128, 5), blade = vnoise(u, v, 300, 90, 7);
+    const dry = smooth(0.52, 0.72, fbm(u, v, 3, 3, 4, 143)), clover = smooth(0.6, 0.8, fbm(u, v, 9, 9, 3, 144));
+    const b = p.color || [74, 104, 52], k = 0.58 + 0.62 * n + (bl - 0.5) * 0.35 + (blade - 0.5) * 0.3;
+    const g = [b[0] * k, b[1] * k, b[2] * k * 0.9];
+    return { c: [mix(mix(g[0], 150 * k, dry * 0.32), g[0] * 0.8, clover * 0.5), mix(mix(g[1], 132 * k, dry * 0.32), g[1] * 1.08, clover * 0.5), mix(g[2], 70 * k, dry * 0.32)], h: 0.35 + 0.55 * blade, r: 0.95 };
   },
   corrugated(u, v, p) {
     const color = p.color || [130, 150, 160], ridges = p.ridges || 10;

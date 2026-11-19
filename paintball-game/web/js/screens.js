@@ -198,12 +198,21 @@ export function createScreens(game) {
   const show = (id, on) => $(id).classList.toggle('on', on);
   api.showHome = () => { show('home', true); show('pause', false); show('end', false); document.body.classList.remove('ingame'); $('btn-play').focus({ preventScroll: true }); };
   api.hideHome = () => { show('home', false); document.body.classList.add('ingame'); };
-  api.showPause = () => { show('pause', true); $('p-resume').focus(); };
+  api.showPause = () => { show('pause', true); $('p-quit').classList.remove('armed'); $('p-quit').textContent = 'Sair do jogo'; $('p-resume').focus(); };
   api.hidePause = () => show('pause', false);
   $('btn-play').onclick = () => { if (busy || pending) { wantPlay = true; return; } game.begin(); };
   $('p-resume').onclick = () => game.resume();
   $('p-restart').onclick = () => { api.hidePause(); game.begin(true); };
   $('p-home').onclick = () => { api.hidePause(); game.goHome(); };
+  // sair do jogo: pede confirmação (segundo toque) e volta para a tela de abertura
+  const quit = $('p-quit'); let quitT = 0;
+  const quitReset = () => { clearTimeout(quitT); quit.textContent = 'Sair do jogo'; quit.classList.remove('armed'); };
+  quit.onclick = () => {
+    if (!quit.classList.contains('armed')) { quit.textContent = 'Toque de novo para sair'; quit.classList.add('armed'); quitT = setTimeout(quitReset, 3500); return; }
+    quitReset(); api.hidePause(); game.goHome();
+    api.showIntro(() => { game.unlockAudio && game.unlockAudio(); api.showHome(); });
+    try { window.close(); } catch (e) { /* abas abertas pelo usuário não fecham: a abertura já cumpre o papel */ }
+  };
   $('e-again').onclick = () => { show('end', false); game.begin(true); };
   $('e-home').onclick = () => { show('end', false); game.goHome(); };
 

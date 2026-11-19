@@ -16,6 +16,9 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **Desempenho:** geometria estática do campo e acessórios dos jogadores fundidos (de ~1.300 para ~500 chamadas de desenho), marcadores dos bots mais leves e um **ajuste automático de qualidade** (resolução → sombras → resolução menor) quando o aparelho não sustenta ~30 fps.
+- **Visual:** nuvens procedurais no céu, grama com falhas e trevo, copas de árvore volumosas, sombras de contato sob bunkers/obstáculos e vinheta de câmera.
+- **Pausa:** botão *Sair do jogo* (confirma com um segundo toque e volta à tela de abertura).
 - **Abertura e tutorial:** tela de abertura animada com frases que se alternam e chamada adequada ao aparelho; o tutorial de 3 passos aparece só no primeiro acesso (refaça em Configurações → *Rever o tutorial*).
 - **Centerflag:** uma bandeira no centro do campo; pegue e leve até a base inimiga para vencer a rodada (ou elimine o outro time). Quem carrega derruba a bandeira ao ser marcado. Os bots pegam, escoltam e perseguem o portador. Escolha o modo no menu.
 - **Barracos com porta:** dá para entrar em barracos/escritórios (favela, ferro-velho, cidade e galpão), se esconder e atirar pela porta. As paredes bloqueiam tiros e visão; aparece **ESCONDIDO** quando nenhum inimigo te enxerga.

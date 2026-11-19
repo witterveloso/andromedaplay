@@ -661,15 +661,32 @@ ui.showIntro(() => {
 });
 
 // ---------- loop ----------
-window.__game = game;
+window.__gov = () => ({ tier: govTier, pr: govPR, avgMs: Math.round(govAvg * 1000) }); window.__game = game; window.__r = renderer; window.__scene = scene;
 window.__manual = false;
 window.__step = (dt = 1 / 30) => { game.update(dt); renderer.render(scene, camera); };
 window.__sim = (n, dt = 1 / 30) => { for (let i = 0; i < n; i++) game.update(dt); };
 let last = performance.now();
+// governador de desempenho: se o aparelho não sustenta ~30 fps, baixa a qualidade sozinho (resolução -> sombras -> resolução menor)
+let govAvg = 0.016, govSlow = 0, govTier = 0, govPR = renderer.getPixelRatio();
+function govDegrade() {
+  govTier++;
+  if (govTier === 1) govPR = Math.min(govPR, 1);
+  else if (govTier === 2) world.setShadows(false);
+  else if (govTier === 3) govPR = Math.min(govPR, 0.75);
+  else if (govTier === 4) govPR = 0.55;
+  else return;
+  renderer.setPixelRatio(govPR); resize();
+  govAvg = 0.016; govSlow = 0;
+}
 function frame(now) {
   requestAnimationFrame(frame);
   if (window.__manual) return;
-  const dt = Math.min(0.05, (now - last) / 1000);
+  const raw = (now - last) / 1000;
+  if (game.state !== 'menu' && !game.paused && raw < 3) {            // ignora pausas e abas em segundo plano
+    govAvg += (Math.min(raw, 0.25) - govAvg) * 0.12;
+    if (govAvg > 0.036) { govSlow += Math.min(raw, 1); if (govSlow > 3) govDegrade(); } else govSlow = Math.max(0, govSlow - raw);
+  }
+  const dt = Math.min(0.05, raw);
   last = now;
   if (!game.paused) game.update(dt);
   renderer.render(scene, camera);

@@ -2,6 +2,7 @@ import * as THREE from './vendor/three.module.min.js';
 import { TEAM_PAINT } from './world.js';
 import { camoTexture } from './camo.js';
 import * as SkeletonUtils from './vendor/utils/SkeletonUtils.js';
+import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...o });
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -83,7 +84,7 @@ export function buildProceduralCharacter(team, world) {
     return a;
   };
   const armR = mkArm(1), armL = mkArm(-1);
-  const marker = buildMarker(paint);
+  const marker = buildMarker(paint, true);
   marker.position.set(0.05, -0.08, -0.5);
   pivot.add(marker);
   upper.add(pivot);
@@ -162,6 +163,43 @@ const rotX = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,
 const rotY = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), a);
 const rotZ = (a) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), a);
 const _Mq = new THREE.Quaternion(), _P = new THREE.Quaternion(), _T = new THREE.Quaternion();
+
+
+// Funde os acessórios pequenos (máscara, pods, joelheiras…) de cada osso em poucas malhas:
+// de ~60 chamadas de desenho por jogador para ~10. Materiais iguais são reaproveitados.
+function mergeGear(model) {
+  const matCache = new Map();
+  const shared = (m) => {
+    const k = [m.type, m.color?.getHex(), m.emissive?.getHex(), m.emissiveIntensity, m.roughness, m.metalness, m.side, m.envMapIntensity].join('|');
+    if (!matCache.has(k)) matCache.set(k, m);
+    return matCache.get(k);
+  };
+  model.updateMatrixWorld(true);
+  const jobs = new Map(), victims = [];
+  model.traverse((o) => {
+    if (!o.isMesh || o.isSkinnedMesh || Array.isArray(o.material)) return;
+    let rel = o.matrix.clone(), p = o.parent;
+    while (p && !p.isBone) { rel.premultiply(p.matrix); p = p.parent; }
+    if (!p) return;                                            // fora de qualquer osso
+    const mat = shared(o.material);
+    const key = p.uuid + '|' + mat.uuid;
+    let j = jobs.get(key); if (!j) jobs.set(key, (j = { bone: p, mat, geos: [] }));
+    const g = new THREE.BufferGeometry();
+    const src = o.geometry;
+    ['position', 'normal', 'uv'].forEach((n) => { if (src.attributes[n]) g.setAttribute(n, src.attributes[n].clone()); });
+    if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
+    if (src.index) g.setIndex(src.index.clone());
+    else { const n = g.attributes.position.count, idx = new Uint16Array(n); for (let i = 0; i < n; i++) idx[i] = i; g.setIndex(new THREE.BufferAttribute(idx, 1)); }
+    g.applyMatrix4(rel);
+    j.geos.push(g); victims.push(o);
+  });
+  victims.forEach((o) => { o.parent.remove(o); });
+  jobs.forEach((j) => {
+    const geo = j.geos.length === 1 ? j.geos[0] : mergeGeometries(j.geos, false);
+    const m = new THREE.Mesh(geo, j.mat); m.castShadow = false; m.frustumCulled = false;   // acessórios não projetam sombra (o corpo já projeta)
+    j.bone.add(m);
+  });
+}
 
 export function buildCharacter(team, world) {
   if (!SOLDIER) return buildProceduralCharacter(team, world);
@@ -263,6 +301,7 @@ export function buildCharacter(team, world) {
     arm.add(ring);
   });
 
+  mergeGear(model);
   const mixer = new THREE.AnimationMixer(model);
   const act = {};
   ['Idle', 'Walk', 'Run'].forEach((n) => { act[n] = mixer.clipAction(SOLDIER.clips[n]); act[n].play(); act[n].setEffectiveWeight(n === 'Idle' ? 1 : 0); });
@@ -270,7 +309,7 @@ export function buildCharacter(team, world) {
   // marcador (acompanha a mira) + máscara de tinta
   const pivot = new THREE.Group();
   pivot.position.y = 1.36;
-  const marker = buildMarker(paint);
+  const marker = buildMarker(paint, true);
   marker.position.set(0.03, -0.1, -0.3);
   pivot.add(marker);
   root.add(pivot);

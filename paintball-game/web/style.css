@@ -465,3 +465,38 @@ body.touch.ingame #tap-hint.on { opacity: 1; }
 .intro-lines span { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transform: translateY(6px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 .intro-lines span.on { opacity: 1; transform: none; }
 .intro-sub { min-height: 1.2em; }
+
+/* ===== página inicial em telas baixas (celular em paisagem): nada se amontoa ===== */
+@media (max-height: 520px) {
+  .home-left { overflow-y: auto; overflow-x: hidden; justify-content: flex-start; padding-top: 56px; padding-bottom: 12px; scrollbar-width: none; }
+  .home-left::-webkit-scrollbar { display: none; }
+  .home-left > * { flex-shrink: 0; }
+  .home-left h1 { flex-direction: row; flex-wrap: wrap; gap: 0 .3em; font-size: clamp(24px, 4.2vw, 34px); line-height: 1; margin: 0 0 12px; }
+  .home-left h1 .hl::after { display: none; }
+  .cta { min-height: 56px; justify-content: center; }
+  .cta span { font-size: 20px; line-height: 1.1; }
+  .cta small { font-size: 11px; }
+  .modes { margin: 12px 0; }
+}
+
+/* alturas médias (notebooks pequenos, tablets): título compacto e botão sempre inteiro */
+@media (max-height: 720px) and (min-height: 521px) {
+  .home-left { overflow-y: auto; justify-content: flex-start; padding-top: 78px; padding-bottom: 12px; scrollbar-width: none; }
+  .home-left::-webkit-scrollbar { display: none; }
+  .home-left > * { flex-shrink: 0; }
+  .eyebrow { margin-top: -4px; }
+  .home-left h1 { flex-direction: row; flex-wrap: wrap; gap: 0 .28em; font-size: clamp(34px, 4.6vw, 52px); line-height: .95; margin: 0 0 12px; }
+  .home-left h1 .hl::after { height: .07em; }
+  .lede { display: none; }
+  .cta { min-height: 64px; justify-content: center; }
+  .cta span { line-height: 1.1; }
+}
+
+/* sair do jogo */
+.btn.danger { color: #ffb4a8; border-color: rgba(255, 107, 87, .35); }
+.btn.danger.armed { background: #b3261e; color: #fff; border-color: #ff6b57; }
+
+/* acabamento de imagem: vinheta suave (estilo câmera de jogo) */
+#game { position: fixed; }
+body::after { content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 58%, rgba(2,6,12,.38) 100%); }
+body.touch::after { background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 66%, rgba(2,6,12,.28) 100%); }

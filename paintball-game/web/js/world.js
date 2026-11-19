@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import { MAPS } from './maps.js';
 import { setTextureQuality } from './textures.js';
+import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 
 export const ARENA = { hx: 20, hz: 30 };
 export const TEAM_PAINT = [0xff8a00, 0x00b4ff]; // 0 = equipe do jogador, 1 = adversária (mutável: paletas)
@@ -92,12 +93,25 @@ function skyMaterial(cfg) {
     uniforms: {
       top: { value: c(cfg.top) }, horizon: { value: c(cfg.horizon) }, ground: { value: c(cfg.ground) },
       sunDir: { value: new THREE.Vector3(...(cfg.sunDir || [0, 1, 0])).normalize() }, sunColor: { value: c(cfg.sunColor || 0xffffff) },
-      sunSize: { value: cfg.sunSize ?? 1 },
+      sunSize: { value: cfg.sunSize ?? 1 }, cloud: { value: cfg.clouds ?? 0.5 },
     },
     vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);} ',
-    fragmentShader: `varying vec3 vP; uniform vec3 top, horizon, ground, sunDir, sunColor; uniform float sunSize;
+    fragmentShader: `varying vec3 vP; uniform vec3 top, horizon, ground, sunDir, sunColor; uniform float sunSize, cloud;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+        return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y); }
+      float fbm(vec2 p){ float a = 0.5, s = 0.0; for(int i=0;i<4;i++){ s += a*vn(p); p = p*2.03 + 7.1; a *= 0.5; } return s; }
       void main(){ vec3 d = normalize(vP); float h = d.y;
         vec3 c = mix(horizon, top, pow(clamp(h,0.0,1.0),0.5));
+        if (cloud > 0.0 && h > 0.02) {
+          vec2 q = d.xz / (h + 0.22) * 0.9;
+          float n = fbm(q * 1.15 + vec2(3.0, 1.0));
+          float cov = smoothstep(0.55 - cloud * 0.28, 0.82 - cloud * 0.18, n);
+          float lit = clamp(fbm(q * 1.15 + vec2(3.0, 1.0) + normalize(sunDir.xz + 0.001) * 0.07) , 0.0, 1.0);
+          vec3 cc = mix(vec3(0.55, 0.58, 0.64), vec3(1.0, 0.98, 0.95), clamp((n - lit) * 5.0 + 0.55, 0.0, 1.0));
+          cc = mix(cc, horizon * 1.15 + sunColor * 0.12, 0.28);
+          c = mix(c, cc, cov * smoothstep(0.02, 0.28, h) * 0.9);
+        }
         c = mix(c, ground, clamp(-h*5.0,0.0,1.0));
         float s = max(dot(d, normalize(sunDir)), 0.0);
         c += sunColor * (pow(s, 600.0/sunSize) * 3.0 + pow(s, 12.0) * 0.28);
@@ -105,10 +119,53 @@ function skyMaterial(cfg) {
   });
 }
 
+let _ao = null;
+function aoMaterial() {
+  if (_ao) return _ao;
+  const c = makeCanvas(128, 128), g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 8, 64, 64, 62);
+  gr.addColorStop(0, 'rgba(0,0,0,0.62)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  return (_ao = new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1, fog: true }));
+}
+
 function disposeGroup(g) {
   g.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
     // materiais/texturas ficam em cache (reaproveitados ao voltar ao mapa)
+  });
+}
+
+// Junta a geometria estática do cenário: de ~1.300 chamadas de desenho para algumas dezenas.
+// Agrupa por material + sombra + célula de 24 m (para o culling continuar funcionando).
+function batchStatic(group, cell = 24) {
+  const buckets = new Map(), victims = [];
+  group.updateMatrixWorld(true);
+  group.traverse((o) => {
+    if (!o.isMesh || o.isInstancedMesh || o.isSkinnedMesh || Array.isArray(o.material) || !o.visible || o === group) return;
+    const g = o.geometry; if (!g.attributes.position) return;
+    const c = new THREE.Vector3().setFromMatrixPosition(o.matrixWorld);
+    const key = `${o.material.uuid}|${+o.castShadow}${+o.receiveShadow}|${Math.floor(c.x / cell)},${Math.floor(c.z / cell)}`;
+    let b = buckets.get(key); if (!b) buckets.set(key, (b = { mat: o.material, cast: o.castShadow, recv: o.receiveShadow, geos: [] }));
+    const ng = new THREE.BufferGeometry();
+    ['position', 'normal', 'uv'].forEach((n) => { if (g.attributes[n]) ng.setAttribute(n, g.attributes[n].clone()); });
+    if (!ng.attributes.normal) return;
+    if (!ng.attributes.uv) ng.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(ng.attributes.position.count * 2), 2));
+    if (g.index) ng.setIndex(g.index.clone());
+    else { const n = ng.attributes.position.count, idx = new (n > 65535 ? Uint32Array : Uint16Array)(n); for (let i = 0; i < n; i++) idx[i] = i; ng.setIndex(new THREE.BufferAttribute(idx, 1)); }
+    ng.applyMatrix4(o.matrixWorld);
+    b.geos.push(ng); victims.push(o);
+  });
+  victims.forEach((o) => { o.parent.remove(o); o.geometry.dispose(); });
+  buckets.forEach((b) => {
+    if (!b.geos.length) return;
+    const geo = b.geos.length === 1 ? b.geos[0] : mergeGeometries(b.geos, false);
+    if (!geo) return;
+    geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, b.mat);
+    m.castShadow = b.cast; m.receiveShadow = b.recv; m.matrixAutoUpdate = false; m.updateMatrix();
+    group.add(m);
+    if (b.geos.length > 1) b.geos.forEach((g) => g.dispose());
   });
 }
 
@@ -156,6 +213,8 @@ export function createWorld(scene, renderer, quality = 'high') {
       m.scale.setScalar(size);
       m.visible = true;
     },
+    shadowsOn: true,
+    setShadows(on) { this.shadowsOn = on; if (this.sun) this.sun.castShadow = on; },
     clearSplats() { splats.forEach((m) => { m.visible = false; }); },
 
     loadMap(id) {
@@ -168,6 +227,18 @@ export function createWorld(scene, renderer, quality = 'high') {
       const obstacles = [];
       const interiors = [], hutSpots = [];
       const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots });
+      batchStatic(group);
+      // sombra de contato (oclusão ambiente falsa): uma mancha escura suave sob cada obstáculo, em 1 chamada de desenho
+      if (obstacles.length && !cfg.indoor) {
+        const aoGeo = new THREE.PlaneGeometry(1, 1); aoGeo.rotateX(-Math.PI / 2);
+        const ao = new THREE.InstancedMesh(aoGeo, aoMaterial(), obstacles.length);
+        const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3();
+        obstacles.forEach((o, i) => {
+          const w = o.type === 'cyl' ? o.r * 2 : o.w, d = o.type === 'cyl' ? o.r * 2 : o.d, pad = Math.min(1.6, 0.7 + o.h * 0.25);
+          m4.compose(ps.set(o.x, 0.018, o.z), q, sc.set(w + pad * 2, 1, d + pad * 2)); ao.setMatrixAt(i, m4);
+        });
+        ao.renderOrder = 1; ao.frustumCulled = false; group.add(ao);
+      }
       // luz
       scene.fog = new THREE.Fog(cfg.fog.color, cfg.fog.near, cfg.fog.far);
       scene.background = null;
@@ -175,7 +246,7 @@ export function createWorld(scene, renderer, quality = 'high') {
       group.add(hemi);
       const sun = new THREE.DirectionalLight(cfg.sun.color, cfg.sun.intensity);
       sun.position.set(...cfg.sun.dir);
-      sun.castShadow = true;
+      sun.castShadow = this.shadowsOn !== false; this.sun = sun;
       const ss = sun.shadow;
       ss.mapSize.set(hi ? 2048 : 1024, hi ? 2048 : 1024);
       const SR = Math.hypot(ARENA.hx, ARENA.hz) * 0.82 + 6;

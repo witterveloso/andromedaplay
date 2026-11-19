@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
+import { mergeGeometries, mergeVertices } from './vendor/utils/BufferGeometryUtils.js';
 import { material, boxGeo, planeGeo, decalMaterial, shaftTexture, hashRand } from './textures.js';
 
 const PI = Math.PI;
@@ -117,18 +118,37 @@ function helpers({ group, obstacles, quality, interiors = [], spots = [] }) {
 // espelhamento por simetria central: fn(s) com s = +1 e -1 (posição*s, rotação +π se s<0)
 const sym = (fn) => { fn(1); fn(-1); };
 
+// copa feita de várias esferas irregulares fundidas (1 geometria): bem mais natural que um icosaedro liso
+function leafCluster() {
+  const parts = [[0, 0, 0, 3.2], [2.1, -0.7, 0.8, 2.3], [-2.0, -0.5, -0.9, 2.4], [0.6, 1.9, -0.6, 2.2], [-0.4, -0.9, 2.2, 2.1], [0.3, 1.2, 1.7, 1.8]];
+  const geos = parts.map(([x, y, z, r], k) => {
+    let g = new THREE.IcosahedronGeometry(r, 2); g.deleteAttribute('uv'); g.deleteAttribute('normal'); g = mergeVertices(g); const p = g.attributes.position, n = p.count, col = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const px = p.getX(i), py = p.getY(i), pz = p.getZ(i), L = Math.hypot(px, py, pz) || 1;
+      const j = 1 + 0.16 * Math.sin(px * 2.3 + k) * Math.cos(pz * 2.7 - k) + 0.09 * Math.sin(py * 4.1 + px * 1.7);
+      p.setXYZ(i, px * j + x, py * j * 0.86 + y, pz * j + z);
+      const up = (py / L) * 0.5 + 0.5, k2 = 0.62 + 0.55 * up + 0.12 * Math.sin(px * 5 + pz * 4);   // topo claro, barriga escura
+      col[i * 3] = k2; col[i * 3 + 1] = k2; col[i * 3 + 2] = k2 * 0.96;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
+    return g;
+  });
+  const merged = mergeGeometries(geos); geos.forEach((g) => g.dispose());
+  return merged;
+}
 function trees(H, count, rMin, rMax, hue = [0.24, 0.32], sat = 0.45, rx = 1, rz = 1.35) {
-  const trunkGeo = new THREE.CylinderGeometry(0.25, 0.4, 5, 6), leafGeo = new THREE.IcosahedronGeometry(3.4, 1);
-  const trunks = new THREE.InstancedMesh(trunkGeo, new THREE.MeshStandardMaterial({ color: 0x4b3a2a, roughness: 1 }), count);
-  const leaves = new THREE.InstancedMesh(leafGeo, new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), count);
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3(), col = new THREE.Color();
+  const trunkGeo = new THREE.CylinderGeometry(0.22, 0.42, 5.4, 8), leafGeo = leafCluster();
+  const trunks = new THREE.InstancedMesh(trunkGeo, new THREE.MeshStandardMaterial({ color: 0x5a4332, roughness: 1 }), count);
+  const leaves = new THREE.InstancedMesh(leafGeo, new THREE.MeshStandardMaterial({ roughness: 0.95, vertexColors: true }), count);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3(), col = new THREE.Color(), e = new THREE.Euler();
   for (let i = 0; i < count; i++) {
     const a = (i / count) * PI * 2 + (H.rnd() - 0.5) * 0.1, rr = rMin + H.rnd() * (rMax - rMin), s = 0.8 + H.rnd() * 0.9;
-    pos.set(Math.cos(a) * rr * rx, 2.5 * s, Math.sin(a) * rr * rz); sc.set(s, s, s);
+    q.setFromEuler(e.set(0, H.rnd() * PI * 2, 0));
+    pos.set(Math.cos(a) * rr * rx, 2.7 * s, Math.sin(a) * rr * rz); sc.set(s, s, s);
     m4.compose(pos, q, sc); trunks.setMatrixAt(i, m4);
-    pos.y = 6.2 * s; sc.set(s * (0.9 + H.rnd() * 0.3), s, s * (0.9 + H.rnd() * 0.3));
+    pos.y = 6.4 * s; sc.set(s * (0.9 + H.rnd() * 0.3), s * (0.9 + H.rnd() * 0.25), s * (0.9 + H.rnd() * 0.3));
     m4.compose(pos, q, sc); leaves.setMatrixAt(i, m4);
-    leaves.setColorAt(i, col.setHSL(hue[0] + H.rnd() * (hue[1] - hue[0]), sat, 0.2 + H.rnd() * 0.12));
+    leaves.setColorAt(i, col.setHSL(hue[0] + H.rnd() * (hue[1] - hue[0]), sat + 0.1, 0.3 + H.rnd() * 0.14));
   }
   H.group.add(trunks, leaves);
 }

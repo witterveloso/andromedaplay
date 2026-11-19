@@ -7,7 +7,7 @@ import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 // Eixo do cano = -Z. Origem no centro do corpo. userData.muzzle = boca do cano.
 export const MARKER_SPECS = { calibre: '.68', cadencia: 'até 10 bolinhas/s', capacidade: '200 no loader', peso: '≈ 1,6 kg' };
 
-export function buildMarker(paint) {
+export function buildMarker(paint, lite = false) {
   const M = (o) => new THREE.MeshStandardMaterial(o);
   const mats = {
     poly: M({ color: 0x1c1e23, roughness: 0.5, metalness: 0.3 }),
@@ -29,8 +29,9 @@ export function buildMarker(paint) {
     (parts[key] || (parts[key] = [])).push(geo);
   };
   const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-  const cylZ = (r1, r2, len, seg = 18) => { const g = new THREE.CylinderGeometry(r1, r2, len, seg); g.rotateX(Math.PI / 2); return g; };
-  const cylY = (r1, r2, len, seg = 18) => new THREE.CylinderGeometry(r1, r2, len, seg);
+  const SEG = lite ? 8 : 18;
+  const cylZ = (r1, r2, len, seg = SEG) => { const g = new THREE.CylinderGeometry(r1, r2, len, seg); g.rotateX(Math.PI / 2); return g; };
+  const cylY = (r1, r2, len, seg = SEG) => new THREE.CylinderGeometry(r1, r2, len, seg);
 
   // corpo (receiver) + janela de ejeção/placa lateral
   add('poly', box(0.058, 0.104, 0.25), 0, 0, 0);
@@ -75,9 +76,9 @@ export function buildMarker(paint) {
     }
   }
   // cilindro de ar (HPA) + regulador + manômetro
-  add('carbon', cylZ(0.031, 0.031, 0.26, 20), 0, -0.134, 0.19);
-  add('accent', cylZ(0.0318, 0.0318, 0.02, 20), 0, -0.134, 0.1);
-  add('metal', cylZ(0.022, 0.022, 0.03, 16), 0, -0.134, 0.07);
+  add('carbon', cylZ(0.031, 0.031, 0.26, lite ? Math.min(20, 8) : 20), 0, -0.134, 0.19);
+  add('accent', cylZ(0.0318, 0.0318, 0.02, lite ? Math.min(20, 8) : 20), 0, -0.134, 0.1);
+  add('metal', cylZ(0.022, 0.022, 0.03, lite ? Math.min(16, 8) : 16), 0, -0.134, 0.07);
   add('poly', box(0.05, 0.05, 0.06), 0, -0.095, 0.03);
   add('metal', new THREE.CylinderGeometry(0.0125, 0.0125, 0.012, 16), 0.035, -0.1, 0.03, 0, 0, Math.PI / 2);
   add('lens', new THREE.CylinderGeometry(0.0105, 0.0105, 0.004, 16), 0.042, -0.1, 0.03, 0, 0, Math.PI / 2);
@@ -93,9 +94,13 @@ export function buildMarker(paint) {
   add('dot', new THREE.CylinderGeometry(0.0018, 0.0018, 0.0042, 8), 0, 0.087, -0.1528, Math.PI / 2, 0, 0);
 
   const g = new THREE.Group();
-  for (const [key, geos] of Object.entries(parts)) {
+  // versão "lite" (marcador dos jogadores no campo): 3 malhas em vez de 11, sem sombra própria
+  const LITE = { poly: 'poly', dark: 'poly', rubber: 'poly', carbon: 'poly', led: 'poly', metal: 'metal', lens: 'metal', accent: 'accent', balls: 'accent', glass: 'accent', dot: 'accent' };
+  const groups = {};
+  for (const [key, geos] of Object.entries(parts)) (groups[lite ? LITE[key] : key] ||= []).push(...geos);
+  for (const [key, geos] of Object.entries(groups)) {
     const mesh = new THREE.Mesh(mergeGeometries(geos), mats[key]);
-    mesh.castShadow = key !== 'glass' && key !== 'balls';
+    mesh.castShadow = !lite && key !== 'glass' && key !== 'balls';
     if (key === 'glass') mesh.renderOrder = 2;
     g.add(mesh);
     geos.forEach((geo) => geo.dispose());
