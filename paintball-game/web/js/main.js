@@ -17,7 +17,7 @@ const params = new URLSearchParams(location.search);
 const Q = params.get('quality') || settings.get('quality');
 const LOW = Q === 'low' || (Q === 'auto' && IS_TOUCH);
 const ROUND_TIME = 150, WIN_SCORE = 3, BALL_SPEED = 88, GRAVITY = 4.2;
-const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo'];
+const NAMES = ['Rafa', 'Duda', 'Bruno', 'Tati', 'Lipe', 'Gabi', 'Caio', 'Nina', 'Davi', 'Léo', 'Bia', 'Theo', 'Vini', 'Lara', 'Pedro', 'Maju', 'Enzo', 'Livia', 'Kaio', 'Jade', 'Nando', 'Sol', 'Beto', 'Luna', 'Dani', 'Ravi', 'Isis', 'Toni', 'Mel', 'Zeca'];
 const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
 const loaderProgress = (p, tip) => { $('ld-fill').style.width = `${Math.round(p * 100)}%`; $('ld-fill').parentElement.setAttribute('aria-valuenow', String(Math.round(p * 100))); $('ld-pct').textContent = `${Math.round(p * 100)}%`; if (tip) $('ld-tip').textContent = tip; };
 loaderProgress(0.05, 'Calibrando os marcadores…');
@@ -110,7 +110,7 @@ const tmpA = V(), tmpB = V(), tmpC = V(), tmpD = V();
 
 const game = {
   world, scene, camera, sfx, input, hud, overlay,
-  state: 'menu', paused: false, settings,
+  state: 'menu', paused: false, settings, camera,
   score: [0, 0], roundNo: 0, roundTime: 0, cd: 0, endT: 0, combatants: [], player: null,
   camMode: 'fpp', shake: 0, switchT: 0, menuOrbit: 0,
   get difficulty() { return settings.get('diff'); },
@@ -308,20 +308,29 @@ const game = {
     const nm = NAMES.slice().sort(() => Math.random() - 0.5);
     this.player = new Combatant(this, { name: 'Você', team: 0, isPlayer: true });
     this.combatants.push(this.player);
-    for (let i = 0; i < 9; i++) this.combatants.push(new Bot(this, { name: nm[i], team: i < 4 ? 0 : 1 }));
+    const N = settings.get('teamSize') || 8;                       // jogadores por equipe (8, 10 ou 15)
+    for (let i = 0; i < N * 2 - 1; i++) this.combatants.push(new Bot(this, { name: nm[i % nm.length], team: i < N - 1 ? 0 : 1 }));
     this.layout();
   },
 
   layout() {
-    // laranja: você no centro + 4 bots; azul: 5 bots. Cada time ocupa 5 posições na linha de largada.
-    const k = ARENA.hx / 20 * 0.85;
-    const slots = [[0, -8, -4, 4, 8].map((v) => v * k), [-8, -4, 0, 4, 8].map((v) => v * k)];
+    // cada time se espalha pela linha de largada (em duas fileiras se for grande); você fica no centro do seu time
+    const W = ARENA.hx - 4;
+    const slotsFor = (n, playerMid) => {
+      const xs = Array.from({ length: n }, (_, i) => (n === 1 ? 0 : -W + (2 * W * i) / (n - 1)));
+      const order = playerMid ? xs.map((x, i) => ({ x, i })).sort((a, b) => Math.abs(a.x) - Math.abs(b.x)) : xs.map((x, i) => ({ x, i }));
+      return order.map((o) => ({ x: o.x, row: n > 9 ? o.i % 2 : 0 }));
+    };
+    const count = [0, 1].map((t) => this.combatants.filter((c) => c.team === t).length);
+    const slots = [slotsFor(count[0], true), slotsFor(count[1], false)];
     const idx = [0, 0];
     this.combatants.forEach((c) => {
-      const x = slots[c.team][idx[c.team]++];
-      c.reset(x, c.team === 0 ? ARENA.hz - 3 : -(ARENA.hz - 3), c.team === 0 ? 0 : Math.PI);
+      const sl = slots[c.team][idx[c.team]++], dir = c.team === 0 ? 1 : -1;
+      c.reset(sl.x, dir * (ARENA.hz - 3 - sl.row * 1.8), c.team === 0 ? 0 : Math.PI);
     });
   },
+
+  setTeamSize() { this.rebuild(); this.updateAlive(); },
 
   buzz(p) { if (settings.get('haptics') && IS_TOUCH && navigator.vibrate) { try { navigator.vibrate(p); } catch (e) { /* ignora */ } } },
 
@@ -381,6 +390,7 @@ const game = {
   // ---------- atualização ----------
   update(dt) {
     const p = this.player;
+    camera.getWorldDirection(this.camFwd || (this.camFwd = new THREE.Vector3()));
     if (this.state === 'menu') { this.menuOrbit += dt * 0.12; this.menuCamera(); particles.update(dt); return; }
     // fases da rodada
     if (this.state === 'countdown') {

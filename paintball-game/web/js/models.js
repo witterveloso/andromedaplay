@@ -168,6 +168,7 @@ const _Mq = new THREE.Quaternion(), _P = new THREE.Quaternion(), _T = new THREE.
 // Funde os acessórios pequenos (máscara, pods, joelheiras…) de cada osso em poucas malhas:
 // de ~60 chamadas de desenho por jogador para ~10. Materiais iguais são reaproveitados.
 function mergeGear(model) {
+  const made = [];
   const matCache = new Map();
   const shared = (m) => {
     const k = [m.type, m.color?.getHex(), m.emissive?.getHex(), m.emissiveIntensity, m.roughness, m.metalness, m.side, m.envMapIntensity].join('|');
@@ -197,8 +198,9 @@ function mergeGear(model) {
   jobs.forEach((j) => {
     const geo = j.geos.length === 1 ? j.geos[0] : mergeGeometries(j.geos, false);
     const m = new THREE.Mesh(geo, j.mat); m.castShadow = false; m.frustumCulled = false;   // acessórios não projetam sombra (o corpo já projeta)
-    j.bone.add(m);
+    j.bone.add(m); made.push(m);
   });
+  return made;
 }
 
 export function buildCharacter(team, world) {
@@ -301,7 +303,7 @@ export function buildCharacter(team, world) {
     arm.add(ring);
   });
 
-  mergeGear(model);
+  const gearMeshes = mergeGear(model);
   const mixer = new THREE.AnimationMixer(model);
   const act = {};
   ['Idle', 'Walk', 'Run'].forEach((n) => { act[n] = mixer.clipAction(SOLDIER.clips[n]); act[n].play(); act[n].setEffectiveWeight(n === 'Idle' ? 1 : 0); });
@@ -347,8 +349,16 @@ export function buildCharacter(team, world) {
     return out.copy(aim).slerp(up, h);
   };
 
+  const bodyMeshes = []; model.traverse((o) => { if (o.isSkinnedMesh) bodyMeshes.push(o); });
+  let lod = 0;
   const ch = {
     root, marker, paintOverlay, pose,
+    // nível de detalhe por distância: 0 completo; 1 sem acessórios/marcador; 2 também sem sombra
+    setLod(l) {
+      if (l === lod) return; lod = l;
+      gearMeshes.forEach((m) => { m.visible = l === 0; }); marker.visible = l === 0;
+      bodyMeshes.forEach((m) => { m.castShadow = l < 2; });
+    },
     setHeadPaint(on) { paintOverlay.visible = on; },
     addSplat(worldPoint, team2) {
       root.updateMatrixWorld(true);

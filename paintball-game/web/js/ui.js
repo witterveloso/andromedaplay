@@ -21,6 +21,7 @@ export class HUD {
   round(n) { this.el.round.textContent = `RODADA ${n}`; }
   alive(team, flags) {
     const el = team === 0 ? this.el.ao : this.el.ab;
+    el.classList.toggle('many', flags.length > 8);
     el.innerHTML = flags.map((a) => `<i class="${a ? 'on' : ''}" style="--c:${TEAM_CSS[team]}"></i>`).join('');
   }
   ammo(h, pods, reloading) {

@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#0a0d12">
-  <meta name="description" content="Splat Arena — paintball tático 5 contra 5 no navegador, para celular e PC.">
+  <meta name="description" content="Splat Arena — paintball tático de 8 a 15 jogadores por equipe no navegador, para celular e PC.">
   <title>Splat Arena — Paintball Online</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261119-161504">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-161504", "./js/camo.js": "./js/camo.js?v=20261119-161504", "./js/combatants.js": "./js/combatants.js?v=20261119-161504", "./js/effects.js": "./js/effects.js?v=20261119-161504", "./js/input.js": "./js/input.js?v=20261119-161504", "./js/main.js": "./js/main.js?v=20261119-161504", "./js/maps.js": "./js/maps.js?v=20261119-161504", "./js/models.js": "./js/models.js?v=20261119-161504", "./js/radar.js": "./js/radar.js?v=20261119-161504", "./js/screens.js": "./js/screens.js?v=20261119-161504", "./js/settings.js": "./js/settings.js?v=20261119-161504", "./js/textures.js": "./js/textures.js?v=20261119-161504", "./js/ui.js": "./js/ui.js?v=20261119-161504", "./js/weapon.js": "./js/weapon.js?v=20261119-161504", "./js/world.js": "./js/world.js?v=20261119-161504"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261119-161842">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/audio.js": "./js/audio.js?v=20261119-161842", "./js/camo.js": "./js/camo.js?v=20261119-161842", "./js/combatants.js": "./js/combatants.js?v=20261119-161842", "./js/effects.js": "./js/effects.js?v=20261119-161842", "./js/input.js": "./js/input.js?v=20261119-161842", "./js/main.js": "./js/main.js?v=20261119-161842", "./js/maps.js": "./js/maps.js?v=20261119-161842", "./js/models.js": "./js/models.js?v=20261119-161842", "./js/radar.js": "./js/radar.js?v=20261119-161842", "./js/screens.js": "./js/screens.js?v=20261119-161842", "./js/settings.js": "./js/settings.js?v=20261119-161842", "./js/textures.js": "./js/textures.js?v=20261119-161842", "./js/ui.js": "./js/ui.js?v=20261119-161842", "./js/weapon.js": "./js/weapon.js?v=20261119-161842", "./js/world.js": "./js/world.js?v=20261119-161842"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -83,7 +83,7 @@
       <h1 class="intro-logo" aria-label="Splat Arena"><span class="w1">SPLAT</span><span class="w2">ARENA</span></h1>
       <p class="intro-tag"><b>Mire.</b> <b>Cubra.</b> <b class="hl">Marque.</b></p>
       <div class="intro-lines" id="intro-lines" aria-hidden="true"><span class="on">Sem sangue. Só tinta e tática.</span><span>Cada bunker é uma decisão.</span><span>Um tiro e você está marcado.</span><span>Quem se esconde bem, vence.</span></div>
-      <p class="sr-only">Splat Arena: paintball tático 5 contra 5 no navegador, para celular e PC.</p>
+      <p class="sr-only">Splat Arena: paintball tático de 8 a 15 jogadores por equipe no navegador, para celular e PC.</p>
       <button id="intro-start" class="cta intro-cta"><span id="intro-cta-text">ENTRAR NO CAMPO</span></button>
       <small class="intro-sub" id="intro-sub">Clique ou aperte Enter</small>
     </div>
@@ -97,15 +97,16 @@
       <button id="btn-settings" class="icon-btn" aria-label="Configurações"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
     </header>
     <section class="home-left">
-      <p class="eyebrow">PAINTBALL TÁTICO · 5 CONTRA 5</p>
+      <p class="eyebrow">PAINTBALL TÁTICO · ATÉ 15 × 15</p>
       <h1 aria-label="Mire. Cubra. Marque."><span>Mire.</span><span>Cubra.</span><span class="hl">Marque.</span></h1>
-      <p class="lede">Cinco contra cinco em galpão, favela, ferro-velho e cidade abandonada. Um tiro de tinta e você está marcado.</p>
+      <p class="lede">Equipes de 8, 10 ou 15 em galpão, favela, ferro-velho e cidade abandonada. Um tiro de tinta e você está marcado.</p>
       <button id="btn-play" class="cta"><span>JOGAR AGORA</span><small>Eliminação · melhor de 5</small></button>
       <div id="modes" class="modes" role="radiogroup" aria-label="Modos de jogo"></div>
       <p id="mode-desc" class="mode-desc"></p>
       <div class="loadout">
         <div class="field"><span class="lab" id="lab-paint">Cor da tinta</span><div id="palette" class="swatches" role="radiogroup" aria-labelledby="lab-paint"></div></div>
         <div class="field"><span class="lab" id="lab-cam">Câmera</span><div id="seg-cam" class="seg" role="radiogroup" aria-labelledby="lab-cam"></div></div>
+        <div class="field"><span class="lab" id="lab-team">Jogadores</span><div id="seg-team" class="seg" role="radiogroup" aria-labelledby="lab-team"></div></div>
         <div class="field"><span class="lab" id="lab-diff">Bots</span><div id="seg-diff" class="seg" role="radiogroup" aria-labelledby="lab-diff"></div></div>
       </div>
     </section>
@@ -166,8 +167,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261119-161504</div>
+  <div id="build" aria-hidden="true">v20261119-161842</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261119-161504"></script>
+  <script type="module" src="js/main.js?v=20261119-161842"></script>
 </body>
 </html>

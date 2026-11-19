@@ -99,6 +99,15 @@ export class Combatant {
     const m = this.model;
     m.root.position.set(this.pos.x, 0, this.pos.z);
     m.root.rotation.y = this.yaw;
+    // LOD de equipes grandes: quem está atrás da câmera (ou muito longe) não é desenhado e anima só de vez em quando
+    const cam = this.game.camera;
+    if (!this.isPlayer && cam) {
+      const dx = this.pos.x - cam.position.x, dz = this.pos.z - cam.position.z, d2 = dx * dx + dz * dz, f = this.game.camFwd;
+      const hide = (f && dx * f.x + dz * f.z < -0.25 * Math.sqrt(d2) && d2 > 64) || d2 > 95 * 95;
+      m.root.visible = !hide;
+      if (m.setLod) m.setLod(d2 > 55 * 55 ? 2 : d2 > 26 * 26 ? 1 : 0);
+      if (hide) { this._lodT = (this._lodT || 0) + dt; if (this._lodT < 0.15) return; dt = this._lodT; this._lodT = 0; }
+    }
     m.animate(dt, { crouch: this.crouch, handsUp: !this.alive, pitch: this.pitch, speed: this.alive ? this.vel.length() : 0 });
   }
 }

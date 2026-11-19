@@ -512,3 +512,9 @@ body.touch::after { background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0
 #shooter-tag span { opacity: .85; font-size: 12px; }
 #shooter-tag::after { content: ''; position: absolute; left: 50%; bottom: -9px; margin-left: -7px; border: 7px solid transparent; border-top-color: var(--hc, #ff5a3c); border-bottom: 0; }
 @media (prefers-reduced-motion: reduce) { #hitdir i { animation: none; } }
+
+/* equipes grandes */
+.alive { flex-wrap: wrap; max-width: 200px; margin-left: auto; margin-right: auto; }
+.alive.many { gap: 3px; } .alive.many i { width: 7px; height: 7px; border-width: 1.5px; }
+#board .sheet, #end .sheet { max-height: 92vh; overflow-y: auto; }
+.table .tr { padding: 4px 10px; }

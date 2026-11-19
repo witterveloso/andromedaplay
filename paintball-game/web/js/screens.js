@@ -91,13 +91,15 @@ export function createScreens(game) {
   mapsEl.querySelectorAll('.map').forEach((b) => { b.classList.add('map'); });
 
   const MODES = { elim: ['Eliminação', 'Marque todos os adversários. Melhor de 5 rodadas.'], flag: ['Centerflag', 'Pegue a bandeira no centro do campo e leve até a base inimiga, ou elimine o outro time. Quem carrega a bandeira derruba ela ao ser marcado.'] };
-  const modeText = () => { const m = S.get('mode'); $('mode-desc').textContent = MODES[m][1]; $('btn-play').querySelector('small').textContent = `${MODES[m][0]} · melhor de 5`; };
+  const modeText = () => { const m = S.get('mode'); $('mode-desc').textContent = MODES[m][1]; $('btn-play').querySelector('small').textContent = `${MODES[m][0]} · ${S.get('teamSize')} × ${S.get('teamSize')} · melhor de 5`; };
   radio($('modes'), [{ value: 'elim', label: 'Eliminação' }, { value: 'flag', label: 'Centerflag' }], S.get('mode'), (v) => { S.set('mode', v); modeText(); }, 'chip');
   { const br = document.createElement('span'); br.className = 'chip dis'; br.innerHTML = 'Battle Royale <i>em breve</i>'; $('modes').appendChild(br); }
   modeText();
   radio($('palette'), PALETTES.map((p, i) => ({ value: String(i), render(b) { b.style.setProperty('--a', p.a); b.style.setProperty('--c', p.b); b.title = `${p.name}: ${p.note}`; b.setAttribute('aria-label', `${p.name}: ${p.note}`); } })),
     String(S.get('palette')), (v) => queue(false, () => { S.set('palette', Number(v)); game.setPalette(Number(v)); }), 'sw');
   radio($('seg-cam'), [{ value: 'fpp', label: '1ª pessoa' }, { value: 'tpp', label: '3ª pessoa' }], S.get('cam'), (v) => S.set('cam', v));
+  radio($('seg-team'), [8, 10, 15].map((n) => ({ value: String(n), label: `${n} × ${n}` })), String(S.get('teamSize')),
+    (v) => queue(false, () => { S.set('teamSize', Number(v)); game.setTeamSize(); modeText(); }));
   radio($('seg-diff'), [{ value: 'facil', label: 'Fácil' }, { value: 'normal', label: 'Normal' }, { value: 'dificil', label: 'Difícil' }], S.get('diff'), (v) => S.set('diff', v));
   const camRadio = null; // (mantido simples)
 
@@ -296,7 +298,7 @@ export function createScreens(game) {
     const el = $('intro');
     // chamada adequada ao aparelho: toque no celular, clique/Enter no computador
     $('intro-cta-text').textContent = IS_TOUCH ? 'TOQUE PARA ENTRAR NO CAMPO' : 'ENTRAR NO CAMPO';
-    $('intro-sub').textContent = IS_TOUCH ? 'Paintball tático 5 contra 5 · PC e celular' : 'Clique ou aperte Enter';
+    $('intro-sub').textContent = IS_TOUCH ? 'Paintball tático · até 15 contra 15 · PC e celular' : 'Clique ou aperte Enter';
     // frases que se alternam (3,6 s cada)
     const lines = [...document.querySelectorAll('#intro-lines span')]; let li = 0;
     const rot = setInterval(() => { lines[li].classList.remove('on'); li = (li + 1) % lines.length; lines[li].classList.add('on'); }, 3600);

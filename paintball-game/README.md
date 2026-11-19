@@ -3,7 +3,7 @@
 **Jogar online:** https://witterveloso.github.io/splat-arena/ (GitHub Pages)
 
 
-Paintball tático 5x5 contra bots, com **1ª e 3ª pessoa**, para **PC e celular**, em **5 campos**. Sem build: HTML + Three.js (incluído em `web/js/vendor`).
+Paintball tático contra bots, com equipes de **8×8, 10×10 ou 15×15** (você escolhe no menu), com **1ª e 3ª pessoa**, para **PC e celular**, em **5 campos**. Sem build: HTML + Three.js (incluído em `web/js/vendor`).
 
 ## Rodar
 
@@ -16,6 +16,7 @@ python3 -m http.server 8080     # ou: npx serve .
 
 
 ## Novidades
+- **Tamanho da equipe:** escolha 8×8, 10×10 ou 15×15 no menu. Equipes grandes usam nível de detalhe por distância (sem acessórios e sombra nos distantes, sem desenhar quem está atrás da câmera).
 - **Desempenho:** geometria estática do campo e acessórios dos jogadores fundidos (de ~1.300 para ~500 chamadas de desenho), marcadores dos bots mais leves e um **ajuste automático de qualidade** (resolução → sombras → resolução menor) quando o aparelho não sustenta ~30 fps.
 - **Visual:** nuvens procedurais no céu, grama com falhas e trevo, copas de árvore volumosas, sombras de contato sob bunkers/obstáculos e vinheta de câmera.
 - **De onde veio o tiro:** ao ser marcado, uma seta em arco aponta para o atirador (acompanha a câmera) e uma etiqueta mostra nome e distância sobre ele por ~3,5 s.
@@ -69,7 +70,7 @@ Cada campo tem luz, céu, névoa e materiais próprios. As texturas (tijolo, reb
 ## Limitações conhecidas
 - **Realismo:** cenários e personagens são procedurais/gratuitos; ficam em um nível "jogo indie estilizado-realista", não fotorrealista de CoD. Para chegar lá é preciso arte 3D profissional (modelos, texturas fotográficas e animações próprias).
 - O soldado é um modelo provisório (veja abaixo).
-- Ainda **não há multiplayer online**: hoje são 5x5 com bots.
+- Ainda **não há multiplayer online**: hoje são equipes de até 15 com bots.
 - Testado em Chromium (desktop e emulação de celular). Falta teste em aparelhos reais.
 
 ## Próximos passos
