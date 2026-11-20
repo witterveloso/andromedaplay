@@ -587,3 +587,30 @@ body.online #netinfo { display: block; } body.online #netinfo.bad { color: #ff8a
 
 /* desempenho: durante a partida nada de blur de fundo (força o navegador a re-borrar o canvas WebGL a cada quadro) */
 body.ingame *, body.ingame *::before, body.ingame *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+/* ===== menu inicial em QUALQUER altura de janela (inclusive com zoom do navegador): nada se sobrepõe ===== */
+.home-left { justify-content: flex-start; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-top: calc(64px + 1.5vh); padding-bottom: 14px; }
+.home-left::-webkit-scrollbar { display: none; }
+.home-left > * { flex-shrink: 0; }
+.home-left h1 { font-size: clamp(36px, min(7.4vw, 10.5vh), 96px); }
+.cta { min-height: 64px; justify-content: center; }
+@media (max-height: 900px) and (min-width: 761px) { .home-left h1 { flex-direction: row; flex-wrap: wrap; gap: 0 .28em; font-size: clamp(34px, min(4.8vw, 8vh), 56px); line-height: .95; } .home-left h1 .hl::after { height: .07em; } .lede { display: none; } .eyebrow { margin-top: -2px; } }
+@media (min-height: 901px) and (min-width: 761px) { .home-left { justify-content: center; } }
+
+/* compactação do menu para janelas baixas (desktop): tudo cabe sem rolar; se ainda faltar, aparece barra de rolagem fina */
+.home-left { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
+.home-left::-webkit-scrollbar { display: block; width: 6px; } .home-left::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 3px; }
+@media (max-height: 1000px) and (min-width: 761px) {
+  .home-left h1 { flex-direction: row; flex-wrap: wrap; gap: 0 .28em; font-size: clamp(34px, min(4.8vw, 7.5vh), 56px); line-height: .95; }
+  .lede { display: none; }
+  .loadout { gap: 6px; } .loadout .field { min-height: 0; }
+  .loadout .seg button { min-height: 40px; padding-top: 5px; padding-bottom: 5px; } .loadout .sw { height: 40px; }
+  .mode-desc { display: none; }
+  .modes { margin: 10px 0 8px; }
+}
+@media (max-height: 700px) and (min-width: 761px) {
+  .eyebrow { display: none; } .home-left { padding-top: 58px; }
+  .cta { min-height: 56px; padding: 8px 18px; } .cta span { font-size: 22px; }
+  .online-btn { margin-top: 8px; padding: 9px 14px; }
+  .loadout .seg button { min-height: 36px; } .loadout .sw { height: 36px; }
+}
