@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import { mergeGeometries, mergeVertices } from './vendor/utils/BufferGeometryUtils.js';
+import { buildVehicle, buildBus, VEHICLE_KINDS, vehicleSize } from './vehicles.js';
 import { material, boxGeo, planeGeo, decalMaterial, shaftTexture, hashRand } from './textures.js';
 
 const PI = Math.PI;
@@ -174,31 +175,49 @@ function roundedBox(w, h, d, r) {
   return g;
 }
 
-// carro destruído (alinhado aos eixos) — alongX: comprimento no eixo X
-function car(H, { x, z, alongX = false, color = [150, 60, 50], y = 0, stack = 0, tilt = 0, burnt = false, collide = true }) {
-  const g = new THREE.Group();
-  const body = H.paint('rust', burnt ? [40, 34, 30] : color), glass = new THREE.MeshStandardMaterial({ color: 0x0c1014, roughness: 0.2, metalness: 0.6 });
-  const tire = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.95 });
-  const L = 4.4, W = 1.85;
-  const mk = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
-  mk(boxGeo(L, 0.7, W, 1.8), body, 0, 0.55, 0);
-  mk(boxGeo(2.3, 0.62, W - 0.2, 1.8), body, -0.25, 1.2, 0);
-  mk(boxGeo(2.0, 0.5, W - 0.14, 1.8), glass, -0.25, 1.22, 0).scale.set(1.02, 1, 1.02);
-  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95], small: true }), L / 2, 0.38, 0);
-  mk(boxGeo(0.25, 0.3, W + 0.05, 1.8), H.M('rust', { color: [90, 90, 95], small: true }), -L / 2, 0.38, 0);
-  const wg = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 14);
-  [[1.4, 0.9], [1.4, -0.9], [-1.4, 0.9], [-1.4, -0.9]].forEach(([px, pz], i) => {
-    if (H.rnd() < 0.2) return;
-    const w = mk(wg, tire, px, 0.34, pz); w.rotation.x = PI / 2;
-  });
+// veículo realista (veja vehicles.js). alongX: comprimento no eixo X. Cada carro sorteia um modelo (hatch, sedã, SUV, picape, Kombi, Fusca)
+const KIND_BAG = ['hatch', 'hatch', 'hatch', 'sedan', 'sedan', 'suv', 'pickup', 'van', 'fusca', 'fusca'];
+const fprint = (L, W, ry) => { const c = Math.abs(Math.cos(ry)), n = Math.abs(Math.sin(ry)); return { w: c * L + n * W, d: n * L + c * W }; };
+function car(H, { x, z, alongX = false, color = [150, 60, 50], color2, y = 0, stack = 0, tilt = 0, burnt = false, collide = true, kind, wear, flat, stripped, doorOpen, crunch, overturned, yaw = 0 }) {
+  kind = kind || KIND_BAG[Math.floor(H.rnd() * KIND_BAG.length)];
+  wear = wear ?? (burnt ? 2 : H.rnd() < 0.55 ? 1 : 0);
+  const paint = H.M('carpaint', { color: wear >= 2 ? [200, 200, 200] : color, wear, small: true }, { metal: wear >= 2 ? 0.05 : 0.38 });   // cor assada na textura: a ferrugem não muda de cor com a tinta
+  const paint2 = kind === 'van' ? H.M('carpaint', { color: [236, 236, 230], wear, small: true }, { metal: 0.3 }) : null;
+  const sz = vehicleSize(kind);
+  const veh = buildVehicle({ kind, paint, paint2, wear, flat, stripped, doorOpen, crunch, hi: H.hi, plate: Math.floor(H.rnd() * 6), seed: H.rnd() * 10 });
+  const g = new THREE.Group(); g.add(veh);
+  if (overturned) { veh.rotation.x = PI; veh.position.y = sz.H; }
   g.position.set(x, y, z);
-  g.rotation.y = alongX ? 0 : PI / 2;
-  g.rotation.z = tilt;
+  const ry = (alongX ? 0 : PI / 2) + yaw; g.rotation.y = ry; g.rotation.z = tilt;
   H.group.add(g);
-  const dx = alongX ? L : W, dz = alongX ? W : L;
-  if (collide) H.obstacles.push({ type: 'box', x, z, w: dx, d: dz, h: y + 1.5 + stack });
+  const f = fprint(sz.L, sz.W, ry);
+  if (collide) H.obstacles.push({ type: 'box', x, z, w: f.w, d: f.d, h: y + sz.H + stack });
   return g;
 }
+// ônibus urbano
+function bus(H, { x, z, alongX = false, color = [60, 100, 140], wear = 1, flat = true }) {
+  const paint = H.M('carpaint', { color, wear, small: true }, { metal: 0.3 }), paint2 = H.M('carpaint', { color: [235, 235, 230], wear, small: true }, { metal: 0.2 });
+  const m = buildBus({ paint, paint2, wear, flat, hi: H.hi, plate: Math.floor(H.rnd() * 6), missing: H.rnd() < 0.4 ? [1] : [] });
+  const g = new THREE.Group(); g.add(m); g.position.set(x, 0, z); g.rotation.y = alongX ? 0 : PI / 2; H.group.add(g);
+  const w = alongX ? 8.6 : 2.5, d = alongX ? 2.5 : 8.6;
+  H.obstacles.push({ type: 'box', x, z, w, d, h: 3.1 });
+  return g;
+}
+// cenas de "vida real": batida, carro depenado sobre blocos, capotado, carbonizado, abandonado de porta aberta
+function carScene(H, R, kind, x, z, s = 1, colors) {
+  const C = colors, pick = () => C[Math.floor(R() * C.length)], f = s < 0 ? PI : 0;
+  switch (kind) {
+    case 'crash':   // dois carros que se chocaram: frentes amassadas, em ângulo
+      car(H, { x: x - 1.5 * s, z, alongX: true, yaw: f, color: pick(), crunch: 1, wear: 1, kind: 'sedan' });
+      car(H, { x: x + 1.15 * s, z: z + 2.1 * s, alongX: false, yaw: f + 0.28 * s, color: pick(), crunch: 0.85, wear: 1, kind: 'hatch' });
+      break;
+    case 'blocks':  car(H, { x, z, alongX: R() < 0.5, yaw: f, color: pick(), stripped: true, doorOpen: true, wear: 1 }); break;       // depenado
+    case 'flip':    car(H, { x, z, alongX: R() < 0.5, yaw: f, color: pick(), overturned: true, wear: 1 }); break;                        // capotado
+    case 'burnt':   car(H, { x, z, alongX: R() < 0.5, yaw: f, color: pick(), burnt: true, flat: true }); break;                           // incendiado
+    default:        car(H, { x, z, alongX: R() < 0.5, yaw: f, color: pick(), flat: true, doorOpen: true }); break;                        // abandonado
+  }
+}
+const sceneSize = (kind) => (kind === 'crash' ? { w: 6.6, d: 5.6 } : { w: 4.8, d: 4.8 });
 
 function barrel(H, x, z, color, collide = true) {
   H.cyl({ x, z, r: 0.3, h: 0.95, mat: H.paint('rust', color, { tile: 1 }), seg: 14, collide });
@@ -315,7 +334,7 @@ function container(H, metal, { x, z, alongX, color, color2, stack }) {
 }
 function carStack(H, o) {
   car(H, { ...o, stack: o.stacked ? 1.4 : 0 });
-  if (o.stacked) car(H, { x: o.x, z: o.z, alongX: o.alongX, color: o.color2 || [70, 100, 140], y: 1.5, tilt: o.tilt || 0.06, collide: false });
+  if (o.stacked) car(H, { x: o.x, z: o.z, alongX: o.alongX, color: o.color2 || [70, 100, 140], y: 1.5, tilt: o.tilt || 0.06, collide: false, wear: 1, flat: true });
 }
 
 // ===========================================================================
@@ -612,6 +631,11 @@ function buildFerro(ctx) {
   towers(H, A, R, { pairs: 2, h: 2.6, mat: H.M('corrugated', { tile: 2 }), railMat: H.M('rust', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 46 : 30, margin: 2.5, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
+    if (t < 0.34) {
+      const r2 = R();
+      if (r2 < 0.16) { const k = r2 < 0.08 ? 'crash' : 'blocks', sz = sceneSize(k); return { w: sz.w, d: sz.d, put: (x, z, sg) => carScene(H, R, k, x, z, sg, CAR_COLORS) }; }
+      if (r2 < 0.26) { const sz = sceneSize('flip'); return { w: sz.w, d: sz.d, put: (x, z, sg) => carScene(H, R, 'flip', x, z, sg, CAR_COLORS) }; }
+    }
     if (t < 0.34) { const ax = R() < 0.5, st = R() < 0.35, c = CAR_COLORS[Math.floor(R() * 7)], c2 = CAR_COLORS[Math.floor(R() * 7)]; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => carStack(H, { x, z, alongX: ax, color: c, color2: c2, stacked: st, tilt: (R() - 0.5) * 0.16 }) }; }
     if (t < 0.55) { const ax = R() < 0.5, st = R() < 0.4, c = [[180, 90, 50], [60, 110, 130], [90, 130, 80], [140, 60, 50]][Math.floor(R() * 4)], c2 = [[60, 110, 130], [180, 90, 50]][Math.floor(R() * 2)]; return { w: ax ? 6.1 : 2.5, d: ax ? 2.5 : 6.1, put: (x, z) => container(H, metal, { x, z, alongX: ax, color: c, color2: c2, stack: st }) }; }
     if (t < 0.68) { const tall = R() < 0.4; return { w: 2.1, d: 2.1, put: (x, z) => { H.cyl({ x, z, r: 1.0, h: tall ? 1.3 : 1.0, mat: tireMat, seg: 16 }); if (tall) { const t2 = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.3, 10, 20), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 })); t2.rotation.x = PI / 2; t2.position.set(x, 1.5, z); H.add(t2); } } }; }
@@ -681,10 +705,14 @@ function buildCidade(ctx) {
   towers(H, A, R, { pairs: 2, h: 3.0, mat: H.M('concrete', { tile: 2 }), railMat: H.M('concrete', { tile: 2 }) });
   scatter(H, A, R, { count: H.hi ? 66 : 42, margin: 2.2, zMax: hz - 8, xMax: hx - 3, make: (R) => {
     const t = R();
+    if (t < 0.36) {
+      const r2 = R(), kinds = ['crash', 'burnt', 'flip', 'abandoned', 'abandoned', 'blocks'];
+      if (r2 < 0.5) { const k = kinds[Math.floor(R() * kinds.length)], sz = sceneSize(k); return { w: sz.w, d: sz.d, put: (x, z, sg) => carScene(H, R, k, x, z, sg, [[120, 120, 125], [140, 60, 50], [90, 100, 110], [170, 160, 150], [60, 85, 120], [150, 120, 50]]) }; }
+    }
     if (t < 0.36) { const ax = R() < 0.3, bt = R() < 0.5; return { w: ax ? 4.4 : 1.9, d: ax ? 1.9 : 4.4, put: (x, z) => car(H, { x, z, alongX: ax, color: [[120, 120, 125], [140, 60, 50], [90, 100, 110]][Math.floor(R() * 3)], burnt: bt }) }; }
     if (t < 0.58) { const ax = R() < 0.5; return { w: ax ? 3.2 : 0.7, d: ax ? 0.7 : 3.2, put: (x, z) => H.box({ x, z, w: ax ? 3.2 : 0.7, d: ax ? 0.7 : 3.2, h: 1.1, mat: concS }) }; }
     if (t < 0.74) return { w: 3, d: 2.5, put: (x, z) => H.box({ x, z, w: 3, d: 2.5, h: 1.0, mat: rustS }) };
-    if (t < 0.84) return { w: 2.6, d: 8.6, put: (x, z) => H.box({ x, z, w: 2.6, d: 8.6, h: 3.1, mat: H.paint('rust', [60, 100, 140], {}, { bump: 1.2 }) }) };
+    if (t < 0.84) return { w: 2.6, d: 8.6, put: (x, z) => bus(H, { x, z, alongX: false, color: [[60, 100, 140], [190, 150, 40], [150, 60, 50]][Math.floor(R() * 3)] }) };
     if (t < 0.93) { const ax = R() < 0.5; return { w: ax ? 6.1 : 2.5, d: ax ? 2.5 : 6.1, put: (x, z) => container(H, (c) => H.paint('corrugated', c, { rust: 0.52, ridges: 8 }, { bump: 1.8 }), { x, z, alongX: ax, color: [70, 110, 90] }) }; }
     return { w: 1.2, d: 1.2, put: (x, z) => H.box({ x, z, w: 1.2, d: 1.2, h: 1.1, mat: M('wood', {}) }) };
   } });

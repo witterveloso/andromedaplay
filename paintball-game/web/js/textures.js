@@ -96,6 +96,21 @@ const GEN = {
     const g = [b[0] * k, b[1] * k, b[2] * k * 0.9];
     return { c: [mix(mix(g[0], 150 * k, dry * 0.32), g[0] * 0.8, clover * 0.5), mix(mix(g[1], 132 * k, dry * 0.32), g[1] * 1.08, clover * 0.5), mix(g[2], 70 * k, dry * 0.32)], h: 0.35 + 0.55 * blade, r: 0.95 };
   },
+  carpaint(u, v, p) {
+    const wear = p.wear || 0, b = p.color || [205, 208, 208];
+    const n = fbm(u, v, 3, 3, 4, 171), g = fbm(u, v, 12, 12, 4, 172), streak = vnoise(u, v, 260, 10, 7);
+    let k = 0.93 + 0.14 * (n - 0.5) + 0.06 * (g - 0.5);
+    k *= 1 - smooth(0.45, 1.0, v) * (0.16 + 0.12 * wear);                       // sujeira embaixo
+    let c = [b[0] * k * 1.08, b[1] * k * 1.08, b[2] * k * 1.08], h = 0.5 + 0.12 * (g - 0.5), r = 0.34 + 0.2 * wear;
+    if (streak > 0.94) c = [c[0] * 1.18, c[1] * 1.18, c[2] * 1.18];             // riscos
+    const ru = wear > 0 ? smooth(0.66 - 0.05 * wear, 0.84 - 0.05 * wear, fbm(u, v, 5, 5, 5, 173) * 0.8 + 0.4 * smooth(0.55, 1, v)) : 0;
+    if (ru > 0) { const rc = [150 + 40 * g, 74 + 24 * g, 38 + 14 * g]; c = [mix(c[0], rc[0], ru), mix(c[1], rc[1], ru), mix(c[2], rc[2], ru)]; h = mix(h, 0.7 + 0.3 * g, ru); r = mix(r, 0.92, ru); }
+    if (wear >= 2) {                                                              // carbonizado
+      const ash = fbm(u, v, 6, 6, 4, 174), bk = 28 + 34 * ash;
+      c = [mix(bk, 140 + 40 * g, ru * 0.55), mix(bk * 0.95, 70 + 24 * g, ru * 0.55), mix(bk * 0.9, 34 + 14 * g, ru * 0.55)]; r = 0.85; h = 0.4 + 0.4 * ash;
+    }
+    return { c, h, r };
+  },
   corrugated(u, v, p) {
     const color = p.color || [130, 150, 160], ridges = p.ridges || 10;
     const ridge = 0.5 + 0.5 * Math.sin(u * Math.PI * 2 * ridges);
@@ -131,7 +146,7 @@ const GEN = {
     return GEN.brick(u, v, { rows: p.rows || 10, cols: p.cols || 5, offset: 0.5, color: p.color || [128, 126, 120], mortarX: 0.05, mortarY: 0.08 });
   },
 };
-const TILE = { brick: 0.9, plaster: 2.5, concrete: 3, floor: 6, asphalt: 5, dirt: 6, grass: 5, corrugated: 2, rust: 2, wood: 1.2, pavers: 1.6 };
+const TILE = { carpaint: 1.5, brick: 0.9, plaster: 2.5, concrete: 3, floor: 6, asphalt: 5, dirt: 6, grass: 5, corrugated: 2, rust: 2, wood: 1.2, pavers: 1.6 };
 
 const cache = new Map();
 let QUALITY = 512;
