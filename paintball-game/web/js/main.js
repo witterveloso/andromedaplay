@@ -239,11 +239,11 @@ const game = {
       sfx.splat(1); this.buzz(n >= 2 ? [120, 40, 120] : [90, 40, 70]);
       const col = TEAM_CSS[shooter.team], reduce = settings.get('reduceFx');
       const ang = Math.atan2(-(shooter.pos.x - victim.pos.x), -(shooter.pos.z - victim.pos.z)) - victim.yaw;
-      overlay.hitStack(col, -ang, n, reduce ? 0.5 : 1);                   // a tinta acumula e permanece até o fim da rodada
+      overlay.hitStack(col, -ang, n, reduce ? 0.5 : 1, HITS_TO_OUT - 1);   // a tinta acumula e permanece até o fim da rodada (no último nível quase cobre a tela)
       if (head) overlay.hitFace(col, (0.35 + 0.15 * n) * (reduce ? 0.6 : 1));
       this.shake = reduce ? 0 : 0.3 + 0.1 * n;
       this.hitInfo = { shooter, t: 3, col };
-      hud.banner(`ATINGIDO! ${n}ª MARCA`, left === 1 ? 'Mais um tiro e você está fora — procure cobertura' : `Aguenta mais ${left} tiros — a tinta fica na tela`, 1100, col);
+      hud.banner(left === 1 ? 'QUASE FORA! ÚLTIMA MARCA' : `ATINGIDO! ${n}ª MARCA`, left === 1 ? 'Tela quase toda coberta — mais um tiro e você está fora' : `Aguenta mais ${left} tiros — a tinta fica na tela`, 1100, col);
     }
   },
 

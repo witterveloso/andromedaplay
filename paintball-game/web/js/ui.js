@@ -28,7 +28,7 @@ export class HUD {
     const el = document.getElementById('lives'); if (!el) return;
     if (this._lives === left) return; this._lives = left;
     el.querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < left));
-    el.classList.toggle('hurt', left === 2); el.classList.toggle('crit', left === 1);
+    el.classList.toggle('hurt', left >= 2 && left <= 3); el.classList.toggle('crit', left === 1);
   }
   ammo(h, pods, reloading) {
     this.el.ammo.textContent = h;
@@ -83,12 +83,13 @@ export class MaskOverlay {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     this.c.width = Math.floor(innerWidth * dpr);
     this.c.height = Math.floor(innerHeight * dpr);
-    this.W = this.c.width; this.H = this.c.height;
+    this.W = this.c.width; this.H = this.c.height; this.settled = false;
   }
   get active() { return this.blobs.length > 0; }
   _blob(x, y, r, color, ttl, dripK = 1) {
     const pts = Array.from({ length: 22 }, (_, i) => 1 + Math.sin(i * 1.7 + x) * 0.2 + rand(-0.18, 0.2));
     const sats = Array.from({ length: 7 }, () => ({ a: rand(0, 6.28), d: rand(1.05, 1.5), r: rand(0.05, 0.14) }));
+    this.settled = false;
     this.blobs.push({ x, y, r, color, pts, sats, ttl, age: 0, grow: 0.35 });
     const drips = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < drips; i++) {
@@ -113,7 +114,7 @@ export class MaskOverlay {
     }
   }
   // marcas acumuladas: a tinta dos tiros que não eliminam FICA na tela até o fim da rodada (level = 1, 2…)
-  hitStack(color, angle, level, soft = 1) {
+  hitStack(color, angle, level, soft = 1, maxLevel = 4) {
     const m = Math.min(this.W, this.H), dx = Math.sin(angle), dy = -Math.cos(angle);
     const n = Math.max(2, Math.round((2 + level * 1.5) * soft));
     for (let i = 0; i < n; i++) {
@@ -122,8 +123,16 @@ export class MaskOverlay {
       const py = near ? this.H / 2 + dy * this.H * rand(0.2, 0.44) : rand(0.1, 0.9) * this.H;
       this._blob(px, py, m * rand(0.045, 0.095) * (1 + 0.25 * level), color, 0, 0.45);
     }
-    if (this.blobs.length > 26) this.blobs.splice(0, this.blobs.length - 26);
-    if (this.drips.length > 60) this.drips.splice(0, this.drips.length - 60);
+    if (level >= maxLevel) {                                          // último nível antes de sair: a tela fica quase toda coberta, só restam frestas
+      const cols = 4, rows = 3;
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        if (Math.random() < 0.22 * soft) continue;                      // algumas frestas
+        const px = ((c + 0.5 + rand(-0.22, 0.22)) / cols) * this.W, py = ((r + 0.5 + rand(-0.22, 0.22)) / rows) * this.H;
+        this._blob(px, py, m * rand(0.2, 0.3), color, 0, 0.3);
+      }
+    }
+    if (this.blobs.length > 60) this.blobs.splice(0, this.blobs.length - 60);
+    if (this.drips.length > 110) this.drips.splice(0, this.drips.length - 110);
   }
   clear(animated = true) {
     if (!this.blobs.length) return;
@@ -132,6 +141,7 @@ export class MaskOverlay {
   update(dt) {
     const g = this.g;
     if (!this.blobs.length) return;
+    if (this.settled && this.wipe <= 0) return;                       // nada mudou: não redesenha (poupa bateria)
     g.clearRect(0, 0, this.W, this.H);
     if (this.wipe > 0) {
       this.wipe -= dt / 0.9;
@@ -170,5 +180,6 @@ export class MaskOverlay {
       g.fillStyle = gr; g.fill();
     }
     g.globalAlpha = 1;
+    this.settled = this.wipe <= 0 && this.blobs.every((b) => b.ttl === 0 && b.grow >= 1) && this.drips.every((d) => d.ttl === 0 && d.len >= d.max);
   }
 }
