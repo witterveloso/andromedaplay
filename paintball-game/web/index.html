@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=20261121-002540">
-  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/apocalipse.js": "./js/apocalipse.js?v=20261121-002540", "./js/audio.js": "./js/audio.js?v=20261121-002540", "./js/camo.js": "./js/camo.js?v=20261121-002540", "./js/combatants.js": "./js/combatants.js?v=20261121-002540", "./js/effects.js": "./js/effects.js?v=20261121-002540", "./js/helicopters.js": "./js/helicopters.js?v=20261121-002540", "./js/input.js": "./js/input.js?v=20261121-002540", "./js/main.js": "./js/main.js?v=20261121-002540", "./js/maps.js": "./js/maps.js?v=20261121-002540", "./js/models.js": "./js/models.js?v=20261121-002540", "./js/net.js": "./js/net.js?v=20261121-002540", "./js/online.js": "./js/online.js?v=20261121-002540", "./js/radar.js": "./js/radar.js?v=20261121-002540", "./js/screens.js": "./js/screens.js?v=20261121-002540", "./js/settings.js": "./js/settings.js?v=20261121-002540", "./js/textures.js": "./js/textures.js?v=20261121-002540", "./js/ui.js": "./js/ui.js?v=20261121-002540", "./js/vehicles.js": "./js/vehicles.js?v=20261121-002540", "./js/weapon.js": "./js/weapon.js?v=20261121-002540", "./js/world.js": "./js/world.js?v=20261121-002540"}}</script>
+  <link rel="stylesheet" href="style.css?v=20261121-022845">
+  <script type="importmap">{"imports": {"three": "./js/vendor/three.module.min.js", "./js/apocalipse.js": "./js/apocalipse.js?v=20261121-022845", "./js/audio.js": "./js/audio.js?v=20261121-022845", "./js/camo.js": "./js/camo.js?v=20261121-022845", "./js/characters.js": "./js/characters.js?v=20261121-022845", "./js/charselect.js": "./js/charselect.js?v=20261121-022845", "./js/combatants.js": "./js/combatants.js?v=20261121-022845", "./js/effects.js": "./js/effects.js?v=20261121-022845", "./js/helicopters.js": "./js/helicopters.js?v=20261121-022845", "./js/input.js": "./js/input.js?v=20261121-022845", "./js/main.js": "./js/main.js?v=20261121-022845", "./js/maps.js": "./js/maps.js?v=20261121-022845", "./js/models.js": "./js/models.js?v=20261121-022845", "./js/net.js": "./js/net.js?v=20261121-022845", "./js/online.js": "./js/online.js?v=20261121-022845", "./js/radar.js": "./js/radar.js?v=20261121-022845", "./js/screens.js": "./js/screens.js?v=20261121-022845", "./js/settings.js": "./js/settings.js?v=20261121-022845", "./js/textures.js": "./js/textures.js?v=20261121-022845", "./js/ui.js": "./js/ui.js?v=20261121-022845", "./js/vehicles.js": "./js/vehicles.js?v=20261121-022845", "./js/weapon.js": "./js/weapon.js?v=20261121-022845", "./js/world.js": "./js/world.js?v=20261121-022845"}}</script>
 </head>
 <body>
   <canvas id="game" aria-label="Campo de jogo"></canvas>
@@ -117,6 +117,7 @@
       <div id="modes" class="modes" role="radiogroup" aria-label="Modos de jogo"></div>
       <p id="mode-desc" class="mode-desc"></p>
       <div class="loadout">
+        <div class="field"><span class="lab" id="lab-char">Personagem</span><button id="btn-char" class="char-btn" type="button" aria-labelledby="lab-char cb-name"><span class="cb-thumb" id="cb-thumb"></span><span class="cb-txt"><b id="cb-name">Bravo</b><small id="cb-role"></small></span><span class="cb-go" aria-hidden="true">›</span></button></div>
         <div class="field"><span class="lab" id="lab-paint">Cor da tinta</span><div id="palette" class="swatches" role="radiogroup" aria-labelledby="lab-paint"></div></div>
         <div class="field"><span class="lab" id="lab-cam">Câmera</span><div id="seg-cam" class="seg" role="radiogroup" aria-labelledby="lab-cam"></div></div>
         <div class="field"><span class="lab" id="lab-team">Jogadores</span><div id="seg-team" class="seg" role="radiogroup" aria-labelledby="lab-team"></div></div>
@@ -141,6 +142,22 @@
     </section>
   </main>
 
+
+  <!-- seleção de personagem -->
+  <div id="chars" class="screen" role="dialog" aria-modal="true" aria-labelledby="chars-title">
+    <div class="sheet chars-sheet">
+      <div class="sheet-head"><h2 id="chars-title">Escolha seu personagem</h2><button id="cs-close" class="icon-btn" aria-label="Fechar">✕</button></div>
+      <div class="cs-body">
+        <div class="cs-stage">
+          <canvas id="cs-canvas" aria-label="Prévia 3D do personagem (arraste para girar)"></canvas>
+          <div class="cs-info"><b id="cs-name"></b><span id="cs-role"></span></div>
+          <div id="cs-anim" class="cs-anim" role="radiogroup" aria-label="Animação"></div>
+        </div>
+        <div id="cs-grid" class="cs-grid" role="radiogroup" aria-label="Personagens"></div>
+      </div>
+      <button id="cs-use" class="btn primary" type="button">Usar este personagem</button>
+    </div>
+  </div>
 
   <!-- online: entrar / criar sala -->
   <div id="online" class="screen" role="dialog" aria-modal="true" aria-labelledby="online-title">
@@ -206,8 +223,8 @@
     </div>
   </div>
 
-  <div id="build" aria-hidden="true">v20261121-002540</div>
+  <div id="build" aria-hidden="true">v20261121-022845</div>
   <div id="rotate" class="screen"><div><b>Gire o celular</b><br>O jogo funciona no modo paisagem.</div></div>
-  <script type="module" src="js/main.js?v=20261121-002540"></script>
+  <script type="module" src="js/main.js?v=20261121-022845"></script>
 </body>
 </html>

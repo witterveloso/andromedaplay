@@ -13,6 +13,8 @@ import { createScreens } from './screens.js';
 import { createRadar } from './radar.js';
 import { createOnline } from './online.js';
 import { tickTextures, pendingTextures } from './textures.js';
+import { CHAR_LIST, charOf, isChar, charTexture } from './characters.js';
+import { createCharSelect } from './charselect.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -80,8 +82,9 @@ let viewmodel = buildMarker(TEAM_PAINT[0]);
 viewmodel.scale.setScalar(0.5);
 const fp = new THREE.Group();
 fp.add(viewmodel);
+let fpSleeve = null;
 {
-  const sleeve = new THREE.MeshStandardMaterial({ map: camoTexture(0), roughness: 0.9 });
+  const sleeve = fpSleeve = new THREE.MeshStandardMaterial({ map: charTexture(charOf(settings.get('character'))), roughness: 0.9 });
   const glove = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.6 });
   const limb = (a, b, r) => {
     const d = b.clone().sub(a);
@@ -504,8 +507,9 @@ const game = {
   },
 
   defaultRoster() {
-    const nm = NAMES.slice().sort(() => Math.random() - 0.5), N = settings.get('teamSize') || 8, r = [{ cid: 0, name: 'Você', team: 0, me: true }];
-    for (let i = 0; i < N * 2 - 1; i++) r.push({ cid: i + 1, name: nm[i % nm.length], team: i < N - 1 ? 0 : 1, bot: true });
+    const nm = NAMES.slice().sort(() => Math.random() - 0.5), N = settings.get('teamSize') || 8, mine = isChar(settings.get('character')) ? settings.get('character') : 'bravo';
+    const others = CHAR_LIST.filter((x) => x !== mine).sort(() => Math.random() - 0.5), r = [{ cid: 0, name: 'Você', team: 0, me: true, ch: mine }];
+    for (let i = 0; i < N * 2 - 1; i++) r.push({ cid: i + 1, name: nm[i % nm.length], team: i < N - 1 ? 0 : 1, bot: true, ch: others[i % others.length] });
     return r;
   },
 
@@ -514,7 +518,7 @@ const game = {
     const roster = this.roster || (this.roster = this.defaultRoster());
     this.combatants = []; this.byCid = new Map();
     for (const r of roster) {
-      const o = { name: r.name, team: r.team, isPlayer: !!r.me };
+      const o = { name: r.name, team: r.team, isPlayer: !!r.me, ch: isChar(r.ch) ? r.ch : 'bravo' };
       const c = r.bot ? new Bot(this, o) : new Combatant(this, o);
       c.cid = r.cid; c.pid = r.pid || null; c.remote = !!r.remote;
       this.combatants.push(c); this.byCid.set(c.cid, c);
@@ -540,6 +544,14 @@ const game = {
     });
   },
 
+  // troca o personagem do jogador (menu): reconstrói só o modelo dele e a manga da visão em 1ª pessoa
+  setCharacter(id) {
+    if (!isChar(id)) return;
+    settings.set('character', id);
+    if (this.roster) { const me = this.roster.find((r) => r.me); if (me) me.ch = id; }
+    if (this.player) this.player.setCharacter(id);
+    if (fpSleeve) { fpSleeve.map = charTexture(charOf(id)); fpSleeve.needsUpdate = true; }
+  },
   setTeamSize() { this.roster = null; this.rebuild(); this.updateAlive(); },
 
   buzz(p) { if (settings.get('haptics') && IS_TOUCH && navigator.vibrate) { try { navigator.vibrate(p); } catch (e) { /* ignora */ } } },
@@ -908,6 +920,7 @@ game.setup();
 const ui = createScreens(game);
 game.ui = ui;
 game.online = createOnline(game, { THREE, NAMES });
+game.charSelect = createCharSelect(game);
 $('btn-online').onclick = () => game.online.openEntry();
 game.unlockAudio = unlockAudio;
 const radar = createRadar(game, $('radar'));

@@ -1,0 +1,173 @@
+{
+  "status": "specification_only",
+  "format": "glb/gltf",
+  "arenas": [
+    {
+      "id": "galpao",
+      "assets_required": [
+        "geometry",
+        "colliders",
+        "PBR_textures",
+        "lighting",
+        "navigation_validation"
+      ]
+    },
+    {
+      "id": "favela",
+      "assets_required": [
+        "geometry",
+        "colliders",
+        "PBR_textures",
+        "lighting",
+        "navigation_validation"
+      ]
+    },
+    {
+      "id": "ferro_velho",
+      "assets_required": [
+        "geometry",
+        "colliders",
+        "PBR_textures",
+        "lighting",
+        "navigation_validation"
+      ]
+    },
+    {
+      "id": "cidade_abandonada",
+      "assets_required": [
+        "geometry",
+        "colliders",
+        "PBR_textures",
+        "lighting",
+        "navigation_validation"
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "name": "Bravo",
+      "accent": "yellow",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Luna",
+      "accent": "purple",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Nex",
+      "accent": "lime",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Zara",
+      "accent": "orange",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Falcon",
+      "accent": "blue",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Kira",
+      "accent": "pink",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Rok",
+      "accent": "red",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    },
+    {
+      "name": "Yuri",
+      "accent": "cyan",
+      "assets_required": [
+        "rigged_glb",
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "aim",
+        "fire",
+        "hit",
+        "elimination"
+      ]
+    }
+  ],
+  "references": [
+    "refs/arenas.png",
+    "refs/8-personagens.png",
+    "refs/detalhes-equipamentos.png"
+  ]
+}

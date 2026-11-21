@@ -620,3 +620,41 @@ body.ingame *, body.ingame *::before, body.ingame *::after { -webkit-backdrop-fi
 .map-grid[data-n="6"] .map::before, .map-grid[data-n="6"] .map:nth-child(-n+2)::before { padding-top: 56%; }
 @media (max-height: 520px) { .map-grid[data-n="6"] .map, .map-grid[data-n="6"] .map:nth-child(-n+2) { grid-column: span 1; } .map-grid[data-n="6"] .map::before { padding-top: 52%; } }
 @media (max-width: 760px) and (min-height: 521px) { .map-grid[data-n="6"] .map, .map-grid[data-n="6"] .map:nth-child(-n+2) { grid-column: span 1; } }
+
+/* ===== seleção de personagem ===== */
+.char-btn { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 12px 6px 6px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: #fff; text-align: left; min-width: 214px; }
+.char-btn:hover { background: rgba(255,255,255,.12); }
+.cb-thumb { width: 38px; height: 38px; border-radius: 10px; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c, #ff8a00) 55%, #10141b), #10141b); border: 2px solid var(--c, #ff8a00); flex: none; }
+.cb-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; } .cb-thumb i { font: 800 18px var(--display); font-style: normal; color: #fff; }
+.cb-txt { display: flex; flex-direction: column; line-height: 1.15; flex: 1; } .cb-txt b { font: 700 15px var(--display); letter-spacing: .06em; text-transform: uppercase; } .cb-txt small { font-size: 11px; color: var(--muted); } .cb-go { font-size: 20px; opacity: .6; }
+#chars { align-items: center; justify-content: center; background: rgba(5, 8, 14, .78); backdrop-filter: blur(8px); z-index: 26; }
+.chars-sheet { width: min(96vw, 980px) !important; text-align: left; }
+.cs-body { display: grid; grid-template-columns: minmax(240px, 38%) 1fr; gap: 16px; align-items: stretch; }
+.cs-stage { position: relative; display: flex; flex-direction: column; gap: 8px; }
+#cs-canvas { width: 100%; height: min(54vh, 420px); border-radius: 16px; background: radial-gradient(ellipse at 50% 30%, #2a3347, #0d1118 75%); touch-action: none; cursor: grab; display: block; }
+.cs-info { display: flex; flex-direction: column; gap: 2px; } .cs-info b { font: 800 26px var(--display); letter-spacing: .08em; text-transform: uppercase; } .cs-info span { font-size: 13px; color: var(--muted); }
+.cs-anim { display: flex; flex-wrap: wrap; gap: 6px; } .cs-anim button { min-height: 36px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; }
+.cs-anim button[aria-checked=true] { background: #fff; color: #0b0e14; }
+.cs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-content: start; }
+.cs-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px 10px; border-radius: 14px; border: 2px solid var(--line); background: rgba(255,255,255,.04); color: #fff; }
+.cs-card[aria-checked=true] { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); box-shadow: 0 0 0 1px var(--c), 0 8px 24px color-mix(in srgb, var(--c) 30%, transparent); }
+.cs-thumb { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden; background: radial-gradient(circle at 50% 25%, color-mix(in srgb, var(--c) 45%, #151a24), #0d1118); display: grid; place-items: center; }
+.cs-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } .cs-thumb img:not([src]) { display: none; } .cs-thumb i { font: 800 28px var(--display); font-style: normal; opacity: .5; }
+.cs-card b { font: 700 15px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--c); } .cs-card small { font-size: 10.5px; color: var(--muted); text-align: center; }
+#cs-use { margin-top: 14px; }
+@media (max-width: 760px), (max-height: 560px) {
+  .cs-body { grid-template-columns: 34% 1fr; gap: 10px; } #cs-canvas { height: min(58vh, 260px); }
+  .cs-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; } .cs-card small { display: none; } .cs-info b { font-size: 20px; } .cs-info span { font-size: 11px; }
+  .chars-sheet { padding: 12px 14px !important; max-height: 98vh; } #cs-use { margin-top: 8px; padding: 10px; }
+}
+@media (max-width: 560px) and (min-height: 561px) { .cs-body { grid-template-columns: 1fr; } .cs-grid { grid-template-columns: repeat(4, 1fr); } }
+.cs-thumb img[src] + i { display: none; }
+/* diálogo de personagem: cabe em telas baixas (celular deitado); o botão "Usar" fica sempre visível */
+.chars-sheet { display: flex; flex-direction: column; overflow: hidden !important; }
+.chars-sheet .cs-body { flex: 1; min-height: 0; overflow-y: auto; }
+@media (max-width: 760px), (max-height: 560px) {
+  .chars-sheet .sheet-head h2 { font-size: 18px; } .chars-sheet .sheet-head { margin-bottom: 4px; }
+  #cs-canvas { height: min(44vh, 190px); } .cs-thumb { aspect-ratio: 1 / 1.08; } .cs-card { padding: 5px 4px 6px; gap: 2px; } .cs-card b { font-size: 13px; }
+  .cs-anim { gap: 4px; } .cs-anim button { min-height: 30px; padding: 3px 9px; font-size: 11px; } .cs-info { display: none; }
+  #cs-use { margin-top: 6px; min-height: 44px; }
+}

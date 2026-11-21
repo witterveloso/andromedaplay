@@ -17,16 +17,22 @@ export const DIFFICULTY = {
 };
 
 export class Combatant {
-  constructor(game, { name, team, isPlayer = false }) {
+  constructor(game, { name, team, isPlayer = false, ch = 'bravo' }) {
     this.game = game; this.name = name; this.team = team; this.isPlayer = isPlayer;
     this.pos = new THREE.Vector3();
     this.vel = new THREE.Vector3(); this.vy = 0; this.scoped = false; this.hits = 0; this.hitCd = 0;
     this.yaw = 0; this.pitch = 0; this.crouch = false;
     this.state = 'alive';
     this.hopper = MAX_HOPPER; this.pods = 4; this.reloadT = 0; this.fireCd = 0; this.heat = 0;
-    this.model = buildCharacter(team, game.world);
+    this.charId = ch; this.model = buildCharacter(team, game.world, ch);
     game.scene.add(this.model.root);
     this.kills = 0;
+  }
+  // troca o personagem (menu de seleção): reconstrói só o modelo deste jogador
+  setCharacter(id) {
+    if (id === this.charId) return;
+    const old = this.model; this.game.scene.remove(old.root); old.root.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+    this.charId = id; this.model = buildCharacter(this.team, this.game.world, id); this.game.scene.add(this.model.root); this.syncModel(0.016);
   }
   get alive() { return this.state === 'alive'; }
   get eyeY() { return this.pos.y + 1.62 - 0.45 * this.model.pose.crouch; }
@@ -129,6 +135,7 @@ export class Combatant {
       if (m.setLod) m.setLod(d2 > 55 * 55 ? 2 : d2 > 26 * 26 ? 1 : 0);
       if (hide) { this._lodT = (this._lodT || 0) + dt; if (this._lodT < 0.15) return; dt = this._lodT; this._lodT = 0; }
     }
+    if (m.setAlly) m.setAlly(!this.isPlayer && this.alive && this.game.player && this.team === this.game.player.team);   // seta da cor da equipe sobre aliados
     m.animate(dt, { crouch: this.crouch, handsUp: !this.alive, pitch: this.pitch, speed: this.alive ? this.vel.length() : 0 });
   }
 }

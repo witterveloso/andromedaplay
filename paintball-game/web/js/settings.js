@@ -6,7 +6,7 @@ export const PALETTES = [
 ];
 
 const DEFAULTS = {
-  map: 'arena', mode: 'elim', cam: 'fpp', diff: 'normal', resScale: '1', teamSize: 8, palette: 0,
+  map: 'arena', mode: 'elim', cam: 'fpp', diff: 'normal', character: 'bravo', resScale: '1', teamSize: 8, palette: 0,
   sens: 1, invertY: false, fov: 72,
   aimAssist: (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) ? 0.5 : 0,
   radar: 'spotted',

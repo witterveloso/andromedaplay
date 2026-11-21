@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import { TEAM_PAINT } from './world.js';
 import { camoTexture } from './camo.js';
+import { charOf, charTexture } from './characters.js';
 import * as SkeletonUtils from './vendor/utils/SkeletonUtils.js';
 import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 
@@ -203,13 +204,14 @@ function mergeGear(model) {
   return made;
 }
 
-export function buildCharacter(team, world) {
+export function buildCharacter(team, world, charId = 'bravo') {
   if (!SOLDIER) return buildProceduralCharacter(team, world);
-  const paint = TEAM_PAINT[team];
+  const C = charOf(charId), cacc = new THREE.Color(C.accent);
+  const paint = TEAM_PAINT[team];            // cor da EQUIPE (braçadeiras, tira da máscara, pods, marcador); o uniforme usa a cor do personagem
   const root = new THREE.Group();
   const holder = new THREE.Group();
   const model = SkeletonUtils.clone(SOLDIER.gltf.scene);
-  model.scale.setScalar(SOLDIER.scale);
+  model.scale.set(SOLDIER.scale * C.w, SOLDIER.scale * C.h, SOLDIER.scale * C.w);        // biotipo: altura e largura de ombros
   holder.add(model);
   root.add(holder);
 
@@ -218,13 +220,13 @@ export function buildCharacter(team, world) {
     o.castShadow = true; o.frustumCulled = false;
     o.material = o.material.clone();
     if (o.material.name === 'VanguardBodyMat') {
-      o.material.map = camoTexture(team);
-      o.material.bumpMap = camoTexture(team); o.material.bumpScale = 1.4;      // trama do tecido
+      o.material.map = charTexture(C);
+      o.material.bumpMap = charTexture(C); o.material.bumpScale = 1.4;      // trama do tecido
       o.material.roughness = 0.9; o.material.metalness = 0.04; o.material.envMapIntensity = 0.55;
       o.material.color.setScalar(0.86 + Math.random() * 0.2);                 // cada jogador com um tom levemente diferente
     } else {
-      o.material.color = new THREE.Color(paint).multiplyScalar(0.1);
-      o.material.emissive = new THREE.Color(paint).multiplyScalar(0.07);
+      o.material.color = cacc.clone().multiplyScalar(0.1);
+      o.material.emissive = cacc.clone().multiplyScalar(0.07);
     }
   });
 
@@ -247,7 +249,7 @@ export function buildCharacter(team, world) {
     return o;
   };
   const dark = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.55, metalness: 0.2 });
-  const lensMat = new THREE.MeshStandardMaterial({ color: 0x0d151d, roughness: 0.06, metalness: 0.75, envMapIntensity: 1.6 });
+  const lensMat = new THREE.MeshStandardMaterial({ color: cacc.clone().multiplyScalar(0.32), emissive: cacc.clone().multiplyScalar(0.12), roughness: 0.06, metalness: 0.75, envMapIntensity: 1.6 });   // lente espelhada na cor do personagem
   const accent = new THREE.MeshStandardMaterial({ color: paint, emissive: paint, emissiveIntensity: 0.25, roughness: 0.5 });
   const put = (parent, mesh, x, y, z, rx = 0, ry = 0, rz = 0) => { mesh.position.set(x, y, z); mesh.rotation.set(rx, ry, rz); mesh.castShadow = true; parent.add(mesh); return mesh; };
   const hf = gearFrame(bones.head);
@@ -296,12 +298,47 @@ export function buildCharacter(team, world) {
     const ws = arm.getWorldScale(new THREE.Vector3()).y || 1;
     const len = arm.children.find((c) => c.isBone)?.position.length() || 0.3;
     const ring = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.068 / ws, 0.068 / ws, 0.07 / ws, 16, 1, true),
+      new THREE.CylinderGeometry(0.072 / ws, 0.072 / ws, 0.12 / ws, 16, 1, true),
       new THREE.MeshStandardMaterial({ color: paint, emissive: paint, emissiveIntensity: 0.25, roughness: 0.6, side: THREE.DoubleSide })
     );
     ring.position.y = len * 0.45;
     arm.add(ring);
   });
+
+  // ---- identidade do personagem: cabelo/cabeça, kit de proteção e acessórios (a cor da EQUIPE continua nas braçadeiras/máscara/pods) ----
+  {
+    const std2 = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...o });
+    const hair = std2(C.hair, { roughness: 0.9 }), cm = std2(cacc, { roughness: 0.55 }), plate = std2(0x24272c, { roughness: 0.5, metalness: 0.35 });
+    const M = THREE.Mesh, SG = THREE.SphereGeometry, CG = THREE.CylinderGeometry, BG = THREE.BoxGeometry, TG = THREE.TorusGeometry;
+    const cap = (r, y, z, mat, sx = 1, sy = 0.78, sz = 1) => { const m = put(hf, new M(new SG(r, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat), 0, y, z); m.scale.set(sx, sy, sz); return m; };
+    switch (C.head) {
+      case 'short': cap(0.122, 0.12, 0.02, hair); break;
+      case 'bun': cap(0.12, 0.12, 0.02, hair); put(hf, new M(new SG(0.058, 12, 10), hair), 0, 0.255, 0.05); put(hf, new M(new TG(0.116, 0.012, 8, 24), cm), 0, 0.175, 0.0, Math.PI / 2, 0, 0); break;
+      case 'afro': put(hf, new M(new SG(0.15, 16, 12), hair), 0, 0.2, 0.05).scale.set(1, 0.88, 1); put(hf, new M(new TG(0.118, 0.014, 8, 24), cm), 0, 0.165, -0.005, Math.PI / 2, 0, 0); break;
+      case 'braid': cap(0.123, 0.12, 0.025, hair); for (let i = 0; i < 7; i++) put(hf, new M(new THREE.CapsuleGeometry(0.02, 0.05, 4, 8), hair), 0, 0.1 - i * 0.07, 0.13 + (i > 3 ? 0.01 * (i - 3) : 0), 0.15, 0, 0); put(hf, new M(new TG(0.022, 0.008, 6, 12), cm), 0, 0.1 - 7 * 0.07, 0.17, Math.PI / 2, 0, 0); break;
+      case 'cap': cap(0.127, 0.14, 0.015, cm, 1, 0.8, 1); put(hf, new M(new BG(0.14, 0.012, 0.1), cm), 0, 0.16, 0.14, -0.15, 0, 0); break;       // boné virado para trás
+      case 'pony': cap(0.12, 0.12, 0.02, hair); put(hf, new M(new THREE.CapsuleGeometry(0.03, 0.17, 4, 8), hair), 0, 0.15, 0.16, 0.95, 0, 0); put(hf, new M(new TG(0.032, 0.01, 6, 12), cm), 0, 0.185, 0.115, 0.95 + Math.PI / 2, 0, 0); break;
+      case 'helmet': { const hm = std2(0x2a2d31, { roughness: 0.4, metalness: 0.5 }); cap(0.14, 0.12, 0.02, hm, 1, 0.9, 1.02); put(hf, new M(new BG(0.04, 0.012, 0.26), cm), 0, 0.255, 0.0); break; }                       // capacete reforçado
+      case 'curly': cap(0.118, 0.12, 0.02, hair); for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; put(hf, new M(new SG(0.042, 8, 6), hair), Math.cos(a) * 0.085, 0.215, Math.sin(a) * 0.085 + 0.02); } put(hf, new M(new SG(0.05, 8, 6), hair), 0, 0.245, 0.02); break;
+      default: break;
+    }
+    if (C.kit.includes('gaiter')) put(hf, new M(new CG(0.075, 0.08, 0.09, 14), cm), 0, -0.03, 0.005);                                              // gola no pescoço
+    // tronco: placa peitoral, ombreiras, rádio, luz tecnológica
+    if (C.kit.includes('plate')) { put(cf, new M(new BG(0.3, 0.22, 0.04), plate), 0, 0.07, -0.2); put(cf, new M(new BG(0.3, 0.02, 0.045), cm), 0, 0.185, -0.2); }
+    if (C.kit.includes('radio')) { put(cf, new M(new BG(0.06, 0.09, 0.035), dark), -0.1, 0.18, -0.21); put(cf, new M(new CG(0.006, 0.006, 0.12, 5), dark), -0.115, 0.26, -0.21); }
+    if (C.kit.includes('tech')) { put(cf, new M(new BG(0.2, 0.012, 0.01), new THREE.MeshStandardMaterial({ color: cacc, emissive: cacc, emissiveIntensity: 1.1 })), 0, 0.12, -0.222); }
+    if (C.kit.includes('pads')) [bones.armL, bones.armR].forEach((arm) => { const f = gearFrame(arm); put(f, new M(new SG(0.088, 14, 10), plate), 0, 0.03, 0).scale.set(1, 0.72, 1); put(f, new M(new TG(0.084, 0.008, 6, 20), cm), 0, 0.0, 0, Math.PI / 2, 0, 0); });
+    // quadril: cinto e bolsas
+    const hipf = gearFrame(bones.hips);
+    if (C.kit.includes('belt')) put(hipf, new M(new TG(0.19, 0.016, 6, 28), cm), 0, 0.07, 0, Math.PI / 2, 0, 0).scale.set(1.0, 0.86, 1);
+    if (C.kit.includes('pouch')) { [-1, 1].forEach((sx) => put(hipf, new M(new BG(0.07, 0.1, 0.06), dark), sx * 0.2, 0.0, 0.0)); put(hipf, new M(new BG(0.1, 0.07, 0.05), dark), 0, 0.02, 0.17); }
+    // antebraços: pulseira (tecnológica = emissiva)
+    if (C.kit.includes('bracelet') || C.kit.includes('tech')) [bones.foreL, bones.foreR].forEach((fb, i) => {
+      const len = fb.children.find((c) => c.isBone)?.position.length() || 0.25, ws = fb.getWorldScale(new THREE.Vector3()).y || 1;
+      const mat = C.kit.includes('tech') && i === 0 ? new THREE.MeshStandardMaterial({ color: cacc, emissive: cacc, emissiveIntensity: 1.0, roughness: 0.4 }) : cm;
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.046 / ws, 0.046 / ws, 0.05 / ws, 14, 1, true), mat); mat.side = THREE.DoubleSide; r.position.y = len * 0.8; fb.add(r);
+    });
+  }
 
   const gearMeshes = mergeGear(model);
   const mixer = new THREE.AnimationMixer(model);
@@ -351,8 +388,12 @@ export function buildCharacter(team, world) {
 
   const bodyMeshes = []; model.traverse((o) => { if (o.isSkinnedMesh) bodyMeshes.push(o); });
   let lod = 0;
+  const tagMesh = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.2, 4).rotateX(Math.PI), new THREE.MeshBasicMaterial({ color: paint, depthTest: false, transparent: true, opacity: 0.95 }));
+  tagMesh.position.y = 2.28; tagMesh.renderOrder = 12; tagMesh.visible = false; tagMesh.frustumCulled = false; root.add(tagMesh);
   const ch = {
     root, marker, paintOverlay, pose,
+    // seta sobre os ALIADOS na cor da equipe (identifica o time independente do personagem escolhido)
+    setAlly(on) { if (tagMesh.visible !== on) tagMesh.visible = on; },
     // nível de detalhe por distância: 0 completo; 1 sem acessórios/marcador; 2 também sem sombra
     setLod(l) {
       if (l === lod) return; lod = l;
@@ -400,7 +441,7 @@ export function buildCharacter(team, world) {
         twist(bones.spine1, rotX(-0.12 * c));
         bones.footL.getWorldPosition(tv); const yl = root.worldToLocal(tv).y;
         bones.footR.getWorldPosition(tv); const yr = root.worldToLocal(tv).y;
-        drop = Math.max(0, Math.min(yl, yr) - 0.132 * SOLDIER.scale);
+        drop = Math.max(0, Math.min(yl, yr) - 0.132 * SOLDIER.scale * C.h);
         const ws = bones.hips.parent.getWorldScale(tv).y || 1;
         bones.hips.position.y -= drop / ws;
         bones.hips.updateMatrixWorld(true);

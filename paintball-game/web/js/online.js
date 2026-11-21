@@ -6,6 +6,7 @@ import { MAPS, MAP_LIST } from './maps.js';
 import { settings } from './settings.js';
 import { TEAM_CSS, TEAM_NAME } from './ui.js';
 import { radio } from './screens.js';
+import { CHAR_LIST, isChar } from './characters.js';
 
 const $ = (id) => document.getElementById(id);
 const r2 = (v) => Math.round(v * 100) / 100;
@@ -50,7 +51,7 @@ export function createOnline(game, { THREE, NAMES }) {
       newNet(); const code = await net.host();
       role = 'host'; myId = 'host'; phase = 'lobby';
       cfg = { map: settings.get('map'), mode: settings.get('mode'), teamSize: settings.get('teamSize') || 8, diff: settings.get('diff'), versus: 'coop', fill: true };
-      players = [{ id: 'host', name, team: 0, host: true }];
+      players = [{ id: 'host', name, team: 0, host: true, ch: settings.get('character') }];
       busy(false, ''); show('online', false); openLobby(code);
     } catch (e) { fail(e); }
   }
@@ -61,7 +62,7 @@ export function createOnline(game, { THREE, NAMES }) {
     try {
       newNet(); await net.join(code);
       role = 'client'; myId = net.id; phase = 'lobby'; players = [];
-      net.send({ t: 'hi', name, v: 1 });
+      net.send({ t: 'hi', name, v: 1, ch: settings.get('character') });
       busy(false, ''); show('online', false); openLobby(code);
     } catch (e) { fail(e); }
   }
@@ -134,9 +135,9 @@ export function createOnline(game, { THREE, NAMES }) {
     const used = new Set(humans.map((p) => p.name)), pool = NAMES.filter((n) => !used.has(n)).sort(() => Math.random() - 0.5);
     let cid = 0, bn = 0; const roster = [];
     [0, 1].forEach((t) => {
-      byTeam[t].forEach((p) => roster.push({ cid: cid++, name: p.name, team: t, pid: p.id, bot: false }));
+      byTeam[t].forEach((p) => roster.push({ cid: cid++, name: p.name, team: t, pid: p.id, bot: false, ch: isChar(p.ch) ? p.ch : 'bravo' }));
       const nb = cfg.versus === 'coop' ? N - byTeam[t].length : (cfg.fill ? N - byTeam[t].length : 0);
-      for (let i = 0; i < nb; i++) roster.push({ cid: cid++, name: pool[bn++ % pool.length] || `Bot ${bn}`, team: t, pid: null, bot: true });
+      for (let i = 0; i < nb; i++) roster.push({ cid: cid++, name: pool[bn++ % pool.length] || `Bot ${bn}`, team: t, pid: null, bot: true, ch: CHAR_LIST[(bn * 5 + t * 3) % CHAR_LIST.length] });
     });
     return { roster, N };
   }
@@ -158,7 +159,7 @@ export function createOnline(game, { THREE, NAMES }) {
   function enterGame(roster, c) {
     const meR = roster.find((r) => r.pid === myId);
     myCid = meR ? meR.cid : -1;
-    const list = roster.map((r) => ({ cid: r.cid, name: r.name, team: r.team, pid: r.pid, me: r.pid === myId, bot: role === 'host' && r.bot, remote: r.pid !== myId && !r.bot }));
+    const list = roster.map((r) => ({ cid: r.cid, name: r.name, team: r.team, pid: r.pid, ch: r.ch, me: r.pid === myId, bot: role === 'host' && r.bot, remote: r.pid !== myId && !r.bot }));
     game.startOnline(list, c);
     targets = new Map(); snapAcc = 0; inAcc = 0; queueEv = [];
   }
@@ -185,7 +186,7 @@ export function createOnline(game, { THREE, NAMES }) {
         case 'hi':
           if (phase !== 'lobby') { net.sendTo(from, { t: 'busy' }); setTimeout(() => { try { net.conns.get(from)?.close(); } catch (e) { /* ignora */ } }, 400); return; }
           if (players.length >= 10) { net.sendTo(from, { t: 'busy', full: true }); return; }
-          players.push({ id: from, name: clean(m.name) || 'Amigo', team: cfg.versus === 'pvp' ? (players.filter((p) => p.team === 0).length <= players.filter((p) => p.team === 1).length ? 0 : 1) : 0 });
+          players.push({ id: from, ch: isChar(m.ch) ? m.ch : 'bravo', name: clean(m.name) || 'Amigo', team: cfg.versus === 'pvp' ? (players.filter((p) => p.team === 0).length <= players.filter((p) => p.team === 1).length ? 0 : 1) : 0 });
           broadcastLobby(); renderLobby(); break;
         case 'team': if (phase === 'lobby' && cfg.versus === 'pvp') { const p = players.find((x) => x.id === from); if (p) { p.team = m.team ? 1 : 0; broadcastLobby(); renderLobby(); } } break;
         case 'ready': ready.add(from); maybeBegin(); break;
