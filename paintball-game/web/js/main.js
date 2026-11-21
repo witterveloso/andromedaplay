@@ -613,6 +613,7 @@ const game = {
   update(dt) {
     const p = this.player;
     camera.getWorldDirection(this.camFwd || (this.camFwd = new THREE.Vector3()));
+    world.updateAnim(dt);                                              // fogo, fumaça e cinzas dos cenários
     if (this.state === 'menu') { this.menuOrbit += dt * 0.12; this.menuCamera(); particles.update(dt); return; }
     if (this.isClient) { this.updateClient(dt); return; }
     // fases da rodada

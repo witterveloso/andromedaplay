@@ -55,7 +55,7 @@ export function createScreens(game) {
   api.tip = () => TIPS[Math.floor(Math.random() * TIPS.length)];
 
   // ---------------- menu inicial ----------------
-  const mapsEl = $('maps');
+  const mapsEl = $('maps'); mapsEl.dataset.n = String(MAP_LIST.length);
   const mapItems = MAP_LIST.map((id) => ({
     value: id,
     render(b) {

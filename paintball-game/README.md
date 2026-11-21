@@ -3,7 +3,7 @@
 **Jogar online:** https://witterveloso.github.io/splat-arena/ (GitHub Pages)
 
 
-Paintball tático contra bots, com equipes de **8×8, 10×10 ou 15×15** (você escolhe no menu), com **1ª e 3ª pessoa**, para **PC e celular**, em **5 campos**. Sem build: HTML + Three.js (incluído em `web/js/vendor`).
+Paintball tático contra bots, com equipes de **8×8, 10×10 ou 15×15** (você escolhe no menu), com **1ª e 3ª pessoa**, para **PC e celular**, em **6 campos**. Sem build: HTML + Three.js (incluído em `web/js/vendor`).
 
 ## Rodar
 
@@ -12,10 +12,12 @@ cd paintball-game/web
 python3 -m http.server 8080     # ou: npx serve .
 # abra http://localhost:8080
 ```
-(precisa de servidor HTTP por causa dos módulos ES; funciona em qualquer hospedagem estática.) Atalhos de URL: `?map=favela|galpao|ferro|cidade|arena`, `?cam=tpp`, `?quality=low`.
+(precisa de servidor HTTP por causa dos módulos ES; funciona em qualquer hospedagem estática.) Atalhos de URL: `?map=favela|galpao|ferro|cidade|apocalipse|arena`, `?cam=tpp`, `?quality=low`.
 
 
 ## Novidades
+- **Zona Zero (novo campo apocalíptico):** rodovia colapsada ao pôr do sol vermelho, **engarrafamento de carros e ônibus carbonizados**, viaduto desabado com rampa (terreno alto), trincheiras de sacos de areia, ruínas enterráveis, árvores mortas, prédios queimados no horizonte, **fogo, colunas de fumaça e cinzas/brasas no ar** (animados) e som ambiente próprio (vento, estalos de fogo, explosões distantes). **Helicópteros caídos que dá para entrar** (`web/js/helicopters.js`): um **helicóptero de transporte** no meio do mapa (cabine com duas portas em lados opostos, rombo no teto, bancos de lona, caixas, nariz/cabine de comando, motores, rotor quebrado) — a bandeira do Centerflag nasce dentro dele — e **quatro helicópteros leves** nos flancos (janelas altas abertas: dá para atirar de dentro por cima da parede baixa). Os bots entram nos helicópteros e sobem nas rampas.
+  - *Desenho de nível:* 3 corredores (rodovia com carros em faixas e canteiro com brechas, flancos de ruínas), objetivo central com cobertura sólida e sem linha de tiro reta, terreno alto exposto (risco/recompensa), largada protegida por trincheira. Layout simétrico por rotação de 180° (justo para os dois times).
 - **Veículos realistas:** carros e ônibus modelados por código (`web/js/vehicles.js`): carroceria com perfil curvo, vidros, rodas com aro, faróis, grade, para-choques, lanternas, **placas Mercosul**, portas e espelhos, pintura com sujeira e ferrugem. Modelos: hatch (estilo Gol/Uno), sedã, SUV, picape, **Kombi** (bicolor) e **Fusca**. Cenas do dia a dia: **batida** (frentes amassadas), carro **depenado sobre blocos**, **capotado**, **incendiado**, abandonado com portas abertas e pneus murchos; ônibus urbano na Cidade Abandonada.
 - **Desempenho (2ª rodada):** texturas dos campos agora são pintadas **aos poucos** (a tela não congela ao trocar de campo — de ~2,3 s para ~0,17 s de travada) e a memória de vídeo do campo anterior é liberada; no celular: **sem sombras em tempo real** (mancha escura sob cada jogador), copas de árvore e céu mais leves, menos luzes no galpão, resolução limitada, e sem *blur* de fundo no HUD durante a partida. Nova opção **Configurações → Gráficos → Resolução** (100/75/50%).
 - **Jogar online com amigos:** no menu, *Jogar online com amigos*. Um jogador cria a **sala** (código de 5 letras + link `?sala=CÓDIGO`), os outros entram pelo código ou link. O anfitrião escolhe **Amigos × Bots** (todos no mesmo time contra os bots) ou **Amigos × Amigos** (cada um escolhe a equipe; dá para completar as equipes com bots), campo, modo (Eliminação/Centerflag), tamanho da equipe (8/10/15) e dificuldade. Até 10 jogadores. Conexão **direta entre os aparelhos (WebRTC, via PeerJS)**: sem servidor próprio; o anfitrião roda a simulação (bots, tiros, acertos, rodadas) e os convidados recebem o estado ~15×/s e mandam posição, mira e tiros. Se o anfitrião sair, a sala fecha; quem sai no meio some da partida.
@@ -44,6 +46,7 @@ Todos os campos têm **60 × 90 m** (antes 40 × 60 m), com 70–190 obstáculos
 | **Galpão Abandonado** | interior | colunas, estantes, contêineres, empilhadeira, feixes de luz do telhado, poeira no ar |
 | **Morro Vivo** (favela/comunidade) | urbano | casas de tijolo aparente e reboco colorido, lajes com caixa d'água, fios, bandeirinhas, grafites (PAZ, ARTE, SAMBA…), morro ao fundo ao pôr do sol |
 | **Ferro-Velho** | industrial | carros empilhados, pneus, montes de sucata, contêineres, ônibus velho, guindaste |
+| **Zona Zero** | apocalíptico | rodovia colapsada, carros/ônibus carbonizados, helicópteros caídos enterráveis, viaduto desabado, fogo, fumaça e cinzas |
 | **Cidade Abandonada** | urbano | ruas com faixas, prédios em ruínas com janelas quebradas, carros queimados, ônibus, barricadas |
 
 Cada campo tem luz, céu, névoa e materiais próprios. As texturas (tijolo, reboco, concreto, chapa enferrujada, asfalto, madeira, terra) são **geradas por código** (`js/textures.js`) com cor + relevo + rugosidade (PBR), então não há arquivos de textura pesados.

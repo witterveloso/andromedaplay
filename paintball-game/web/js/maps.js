@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import { mergeGeometries, mergeVertices } from './vendor/utils/BufferGeometryUtils.js';
 import { buildVehicle, buildBus, VEHICLE_KINDS, vehicleSize } from './vehicles.js';
+import { buildApocalipse } from './apocalipse.js';
 import { material, boxGeo, planeGeo, decalMaterial, shaftTexture, hashRand } from './textures.js';
 
 const PI = Math.PI;
@@ -732,11 +733,13 @@ function buildCidade(ctx) {
 }
 
 const SIZE = { hx: 30, hz: 45 };
+const LIB = { helpers, hashRand, car, bus, carScene, sceneSize, hut, scatter, towers, sym, flip, container, barrel, decalMaterial, overlaps };
 export const MAPS = {
   arena: { name: 'Arena Speedball', tag: 'Torneio', blurb: 'Campo amplo com dezenas de bunkers infláveis. O clássico competitivo.', size: SIZE, menu: { r: 56, h: 16, rz: 1.3, look: [0, 1.4, 0] }, build: buildArena },
   galpao: { name: 'Galpão Abandonado', tag: 'Interior', blurb: 'Hall enorme com colunas, estantes, contêineres e escritórios.', size: SIZE, menu: { r: 22, h: 5, rz: 1.7, look: [0, 1.6, 0] }, build: buildGalpao },
   favela: { name: 'Morro Vivo', tag: 'Comunidade', blurb: 'Labirinto de becos, lajes e muita cor. Combate vertical e curto.', size: SIZE, menu: { r: 34, h: 17, rz: 1.4, look: [0, 1.6, 0] }, build: buildFavela },
   ferro: { name: 'Ferro-Velho', tag: 'Industrial', blurb: 'Pátio gigante de carcaças empilhadas, pneus e contêineres.', size: SIZE, menu: { r: 44, h: 14, rz: 1.3, look: [0, 1.4, 0] }, build: buildFerro },
   cidade: { name: 'Cidade Abandonada', tag: 'Urbano', blurb: 'Avenidas, quarteirões em ruínas e ônibus tombado.', size: SIZE, menu: { r: 40, h: 16, rz: 1.35, look: [0, 1.6, 0] }, build: buildCidade },
+  apocalipse: { name: 'Zona Zero', tag: 'Apocalipse', blurb: 'Rodovia colapsada, engarrafamento carbonizado e helicópteros caídos: entre neles para se esconder.', size: SIZE, menu: { r: 40, h: 15, rz: 1.3, look: [0, 1.6, 0] }, build: (ctx) => buildApocalipse(ctx, LIB) },
 };
 export const MAP_LIST = Object.keys(MAPS);

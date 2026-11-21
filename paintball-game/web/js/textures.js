@@ -107,7 +107,7 @@ const GEN = {
     if (ru > 0) { const rc = [150 + 40 * g, 74 + 24 * g, 38 + 14 * g]; c = [mix(c[0], rc[0], ru), mix(c[1], rc[1], ru), mix(c[2], rc[2], ru)]; h = mix(h, 0.7 + 0.3 * g, ru); r = mix(r, 0.92, ru); }
     if (wear >= 2) {                                                              // carbonizado
       const ash = fbm(u, v, 6, 6, 4, 174), bk = 28 + 34 * ash;
-      c = [mix(bk, 140 + 40 * g, ru * 0.55), mix(bk * 0.95, 70 + 24 * g, ru * 0.55), mix(bk * 0.9, 34 + 14 * g, ru * 0.55)]; r = 0.85; h = 0.4 + 0.4 * ash;
+      c = [mix(bk, 112 + 30 * g, ru * 0.3), mix(bk * 0.95, 62 + 18 * g, ru * 0.3), mix(bk * 0.9, 36 + 10 * g, ru * 0.3)]; r = 0.85; h = 0.4 + 0.4 * ash;
     }
     return { c, h, r };
   },

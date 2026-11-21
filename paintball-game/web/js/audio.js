@@ -89,7 +89,7 @@ export class Sfx {
     if (!kind) return;
     const c = this.ctx, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
     src.buffer = this.noise; src.loop = true;
-    const cfg = { arena: ['lowpass', 520, 0.5, 0.16], ferro: ['lowpass', 420, 0.5, 0.16], favela: ['lowpass', 600, 0.5, 0.13], galpao: ['lowpass', 190, 0.6, 0.2], cidade: ['bandpass', 280, 0.4, 0.15] }[kind] || ['lowpass', 450, 0.5, 0.14];
+    const cfg = { arena: ['lowpass', 520, 0.5, 0.16], ferro: ['lowpass', 420, 0.5, 0.16], favela: ['lowpass', 600, 0.5, 0.13], galpao: ['lowpass', 190, 0.6, 0.2], cidade: ['bandpass', 280, 0.4, 0.15], apocalipse: ['lowpass', 240, 0.5, 0.18] }[kind] || ['lowpass', 450, 0.5, 0.14];
     f.type = cfg[0]; f.frequency.value = cfg[1]; f.Q.value = cfg[2]; g.gain.value = cfg[3];
     lfo.frequency.value = 0.1; lg.gain.value = cfg[1] * 0.4; lfo.connect(lg); lg.connect(f.frequency);
     src.connect(f); f.connect(g); g.connect(this.ambBus); src.start(); lfo.start();
@@ -98,7 +98,7 @@ export class Sfx {
       const o = c.createOscillator(), og = c.createGain(); o.type = 'sawtooth'; o.frequency.value = 50; og.gain.value = 0.012; o.connect(og); og.connect(this.ambBus); o.start(); this.amb.hum = o;
       const prevStop = this.amb.lfo; this.amb.lfo = { stop() { prevStop.stop(); o.stop(); } };
     }
-    const events = { arena: ['birds', 'gust'], ferro: ['crow', 'clank', 'gust'], favela: ['dog', 'gust', 'birds'], galpao: ['drip', 'creak', 'clang'], cidade: ['gust', 'creak', 'siren', 'clank'] }[kind] || ['gust'];
+    const events = { arena: ['birds', 'gust'], ferro: ['crow', 'clank', 'gust'], favela: ['dog', 'gust', 'birds'], galpao: ['drip', 'creak', 'clang'], cidade: ['gust', 'creak', 'siren', 'clank'], apocalipse: ['gust', 'creak', 'crackle', 'crackle', 'boom', 'clank'] }[kind] || ['gust'];
     const next = () => {
       this.evTimer = setTimeout(() => { if (this.ctx && this.ctx.state === 'running' && this.ambKind === kind) this._ambEvent(events[Math.floor(Math.random() * events.length)]); next(); }, 1500 + Math.random() * 4500);
     };
@@ -114,6 +114,8 @@ export class Sfx {
     else if (name === 'creak') { this._toneAt(t, 120, 70, 0.8, 0.045, 'sawtooth', d); this._toneAt(t + 0.05, 180, 95, 0.7, 0.03, 'square', d); }
     else if (name === 'clank' || name === 'clang') { const f = 480 + Math.random() * 500; this._toneAt(t, f, f * 0.98, name === 'clang' ? 0.9 : 0.35, 0.07, 'triangle', d); this._toneAt(t, f * 2.4, f * 2.3, 0.25, 0.03, 'square', d); }
     else if (name === 'siren') { const g = c.createGain(), o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(600, t); o.frequency.linearRampToValueAtTime(900, t + 1.6); o.frequency.linearRampToValueAtTime(600, t + 3.2); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.018, t + 0.8); g.gain.linearRampToValueAtTime(0.0001, t + 3.2); o.connect(g); g.connect(d); o.start(t); o.stop(t + 3.3); }
+    else if (name === 'crackle') { for (let i = 0; i < 7; i++) this._noiseAt(t + i * 0.05 + Math.random() * 0.05, 'highpass', 1800 + Math.random() * 2200, 1, 0.03, 0.06, d); }
+    else if (name === 'boom') { this._noiseAt(t, 'lowpass', 140, 0.7, 1.6, 0.22, d); this._toneAt(t, 70, 28, 1.4, 0.18, 'sine', d); }
     else if (name === 'gust') { const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = this.noise; f.type = 'bandpass'; f.frequency.value = 500 + Math.random() * 400; f.Q.value = 0.6; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.22, t + 1.4); g.gain.linearRampToValueAtTime(0.0001, t + 3.2); s.connect(f); f.connect(g); g.connect(d); s.start(t, Math.random() * 0.4, 3.3); }
   }
   // percussão distante (surdo + caixa), baixinha, para o clima de comunidade

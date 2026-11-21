@@ -614,3 +614,9 @@ body.ingame *, body.ingame *::before, body.ingame *::after { -webkit-backdrop-fi
   .online-btn { margin-top: 8px; padding: 9px 14px; }
   .loadout .seg button { min-height: 36px; } .loadout .sw { height: 36px; }
 }
+
+/* 6 campos: grade 3 × 2 uniforme (a Zona Zero entra como 6º) */
+.map-grid[data-n="6"] .map, .map-grid[data-n="6"] .map:nth-child(-n+2) { grid-column: span 2; aspect-ratio: auto; }
+.map-grid[data-n="6"] .map::before, .map-grid[data-n="6"] .map:nth-child(-n+2)::before { padding-top: 56%; }
+@media (max-height: 520px) { .map-grid[data-n="6"] .map, .map-grid[data-n="6"] .map:nth-child(-n+2) { grid-column: span 1; } .map-grid[data-n="6"] .map::before { padding-top: 52%; } }
+@media (max-width: 760px) and (min-height: 521px) { .map-grid[data-n="6"] .map, .map-grid[data-n="6"] .map:nth-child(-n+2) { grid-column: span 1; } }

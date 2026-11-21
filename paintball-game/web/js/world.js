@@ -214,6 +214,8 @@ export function createWorld(scene, renderer, quality = 'high') {
       m.scale.setScalar(size);
       m.visible = true;
     },
+    anim: [], animT: 0,
+    updateAnim(dt) { if (!this.anim.length) return; this.animT += dt; for (const fn of this.anim) fn(dt, this.animT); },
     shadowsOn: hi,                                   // celular (qualidade baixa): sem sombras em tempo real
     setShadows(on) { this.shadowsOn = on; if (this.sun) this.sun.castShadow = on; },
     clearSplats() { splats.forEach((m) => { m.visible = false; }); },
@@ -227,8 +229,9 @@ export function createWorld(scene, renderer, quality = 'high') {
       group = new THREE.Group();
       scene.add(group);
       const obstacles = [];
-      const interiors = [], hutSpots = [], ramps = [];
-      const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots, ramps });
+      const interiors = [], hutSpots = [], ramps = [], anim = [];
+      const cfg = def.build({ group, obstacles, quality, ARENA, THREE, interiors, spots: hutSpots, ramps, anim });
+      this.anim = anim; this.animT = 0;
       batchStatic(group);
       // sombra de contato (oclusão ambiente falsa): uma mancha escura suave sob cada obstáculo, em 1 chamada de desenho
       if (obstacles.length && !cfg.indoor) {
