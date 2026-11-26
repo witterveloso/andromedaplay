@@ -27,7 +27,7 @@
   --c-panel:#34425e; --c-panel-hi:#3d4c6b; --c-panel-lo:#2a3650; --c-ink:#e8edf6; --c-rule:#5b7cb8;
   --c-black:#1a1e26; --c-btn:#2c3038; --c-btn-hi:#4a505b; --c-sel:#a8bddb; --c-on:#a3a8b0;
   --c-led-off:#3a3d42; --c-green:#8dff5c; --c-yellow:#ffd23d; --c-orange:#ffa53a; --c-red:#ff4b3a;
-  --c-desk:#0d1117; --c-tape:#f4f4ef; --c-ytape:#f5e13a;
+  --c-desk:#0d1117; --c-tape:#f4f4ef;
   color-scheme:dark;
 }
 @media (prefers-color-scheme: light){
@@ -209,6 +209,25 @@ button{font:inherit;color:inherit}
 .toast{position:fixed;left:50%;top:calc(72px + env(safe-area-inset-top,0px));transform:translate(-50%,-12px);background:var(--ok);color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+.mcard.wide{max-width:860px}
+.srchead{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.srchead p{color:var(--muted);margin:0;font-size:14px;max-width:62ch}
+.srctools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 12px}
+.srclist{display:flex;flex-direction:column;gap:6px}
+.srow{display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr) 64px;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--raised);transition:border-color .15s,background .15s}
+.srow.on{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.srow.drop{border-color:var(--accent);background:var(--accent-soft)}
+.sin b{display:block;font-family:var(--f-display);font-size:16px;letter-spacing:.03em}
+.sin span{font-size:11.5px;color:var(--muted)}
+.srow select{width:100%;height:34px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit;font-size:13.5px;padding:0 8px}
+.srow select:disabled{opacity:.45}
+.srow .fixed{font-size:13px;color:var(--muted);padding-left:4px}
+.btn.sm{height:34px;font-size:13px;padding:0 10px;width:100%;justify-content:flex-start;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.btn.sm span{overflow:hidden;text-overflow:ellipsis}
+.smeter{height:8px;border-radius:4px;background:var(--sunken);overflow:hidden;border:1px solid var(--line)}
+.smeter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok) 70%,var(--accent) 88%,var(--bad))}
+.stagewrap.dropping{outline:3px dashed var(--accent);outline-offset:-6px}
+@media (max-width:700px){.srow{grid-template-columns:1fr 1fr}.sin{grid-column:1 / -1;display:flex;gap:8px;align-items:baseline}.smeter{grid-column:1 / -1}}
 @media (max-width:1100px){.work{grid-template-columns:minmax(300px,350px) minmax(0,1fr)}.lab{display:none}}
 @media (max-width:860px){
   .appbar{height:56px;gap:4px}
@@ -225,6 +244,9 @@ button{font:inherit;color:inherit}
   .mission{padding:12px 14px}
   .mtext{font-size:14.5px}
 }
+.ib.nudge{border-color:var(--accent);animation:nudge 1.6s ease-in-out 3}
+@keyframes nudge{50%{box-shadow:0 0 0 6px var(--accent-soft)}}
+@media (prefers-reduced-motion: reduce){.ib.nudge{animation:none}}
 /* ---------- A MESA ---------- */
 .console{width:1480px;background:linear-gradient(180deg,var(--c-panel-hi) 0%,var(--c-panel) 40%,var(--c-panel-lo) 100%);border-radius:14px 14px 10px 10px;color:var(--c-ink);font-family:var(--f-panel);font-weight:600;
   box-shadow:0 30px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.15),inset 0 0 0 2px #222a3a;user-select:none;-webkit-user-select:none;touch-action:manipulation;position:relative;outline:none}
@@ -383,8 +405,6 @@ button{font:inherit;color:inherit}
 .plab{display:grid;width:66px;text-align:center;font-size:10px;line-height:1.15;margin-top:2px;border-top:1px solid var(--c-ink)}
 .plab b{font-size:12px}
 .plab span{font-size:9px}
-.ytape{width:70px;height:22px;background:var(--c-ytape);color:#111;font-family:Arial,sans-serif;font-weight:500;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:4px;white-space:nowrap;overflow:hidden}
-.ytape.none{background:transparent}
 .ststrip{width:96px;background:linear-gradient(#2f4a7c,#283f69);margin:0 8px;border-radius:4px;display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:0}
 .stinarea{width:170px;display:flex;flex-direction:column;align-items:center;gap:6px}
 .stinarea .two{display:flex;gap:14px}
@@ -406,6 +426,7 @@ button{font:inherit;color:inherit}
     <button class="crumb" id="crumb" type="button" aria-label="Trocar de módulo"><span class="n" id="crumbN">00</span><span class="t" id="crumbT">Comece aqui</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
     <div class="grow"></div>
     <div class="ring" title="Progresso do curso"><span id="progtxt">0/0</span><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="bgc" cx="18" cy="18" r="15"/><circle class="fgc" id="progc" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="94.25"/></svg></div>
+    <button class="ib" id="srcBtn" type="button" title="Fontes de áudio: conecte arquivos ou geradores nas entradas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0V8zM12 17v5"/></svg><span class="lab">Fontes</span></button>
     <button class="ib" id="audioBtn" type="button" aria-pressed="false" title="Ouvir a mesa nos fones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></svg><span class="lab">Ouvir</span></button>
     <button class="ib hide-sm" id="panelBtn" type="button" aria-pressed="true" title="Mostrar/ocultar aula (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
     <button class="ib" id="themeBtn" type="button" title="Tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span class="sr" id="themeLab">Tema</span></button>
@@ -444,11 +465,12 @@ button{font:inherit;color:inherit}
   <div class="mcard">
     <div class="eyebrow">Bem-vindo</div>
     <h2 id="onbT">Aprenda a 01V96 operando a mesa</h2>
-    <p style="color:var(--muted);margin:0">Um simulador da mesa do estúdio, com a mesma cena, os mesmos nomes de canal e os faders onde estavam nas fotos.</p>
+    <p style="color:var(--muted);margin:0">Um simulador do painel da 01V96 no estado de fábrica. Conecte os seus próprios áudios e opere a mesa como se estivesse na técnica.</p>
     <ol class="steps">
       <li><span class="sn">1</span><div><b>Leia a aula no painel</b><span>Cada termo destacado acende o controle correspondente na mesa.</span></div></li>
       <li><span class="sn">2</span><div><b>Faça a missão do rodapé</b><span>Ela se completa sozinha quando você executa a ação na mesa. "Mostrar na mesa" aproxima e aponta o controle.</span></div></li>
-      <li><span class="sn">3</span><div><b>Mexa como na mesa real</b><span>Clique nos botões; arraste knobs e faders para cima e para baixo; use a roda do mouse. Ctrl + roda dá zoom e arrastar o fundo move a mesa.</span></div></li>
+      <li><span class="sn">3</span><div><b>Conecte áudio em Fontes</b><span>Carregue arquivos seus (ou use os geradores de treino) em cada entrada. Também dá para arrastar um arquivo até um conector da mesa.</span></div></li>
+      <li><span class="sn">4</span><div><b>Mexa como na mesa real</b><span>Clique nos botões; arraste knobs e faders para cima e para baixo; use a roda do mouse. Ctrl + roda dá zoom e arrastar o fundo move a mesa.</span></div></li>
     </ol>
     <div class="mfoot"><button class="btn pri" type="button" id="onbGo">Começar</button></div>
   </div>
@@ -471,6 +493,17 @@ button{font:inherit;color:inherit}
     <div class="mfoot"><button class="btn" type="button" id="resetProg">Zerar progresso</button><button class="btn pri" type="button" data-close>Fechar</button></div>
   </div>
 </div>
+<div class="modal" id="src" hidden role="dialog" aria-modal="true" aria-labelledby="srcT">
+  <div class="mcard wide">
+    <div class="srchead"><div><div class="eyebrow">Entradas da mesa</div><h2 id="srcT">Fontes de áudio</h2>
+      <p>Escolha o que está conectado em cada entrada: um arquivo seu (toca em loop) ou um gerador de treino. Você também pode arrastar arquivos para as linhas abaixo ou para os conectores da mesa. Os arquivos ficam só neste navegador.</p></div>
+      <button class="ib" type="button" data-close aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="srctools"><button class="btn" type="button" id="srcDemo">Usar fontes de treino</button><button class="btn" type="button" id="srcPlay"></button><button class="btn ghost" type="button" id="srcClear">Desconectar tudo</button></div>
+    <div class="srclist" id="srclist"></div>
+    <div class="mfoot" style="margin-top:16px"><button class="btn pri" type="button" data-close>Pronto</button></div>
+  </div>
+</div>
+<input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac" hidden>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -519,25 +552,17 @@ function dynOut(d,lv){if(!d.on||lv===NEG)return{out:lv,gr:0};const r=RATIOS[d.ri
   if(d.type==='EXPAND'){if(lv<d.thr){const o=d.thr+(lv-d.thr)*Math.min(r,20);return{out:o+d.gain,gr:lv-o}}return{out:lv+d.gain,gr:0}}
   if(lv>d.thr){const o=d.thr+(lv-d.thr)/(r===Infinity?1e9:r);return{out:o+d.gain,gr:lv-o}}return{out:lv+d.gain,gr:0}}
 
-/* ---------- fontes ligadas na mesa (cenário do estúdio) ---------- */
-const SOURCES=[
- {n:'Lapela 1 (Apdor)',t:'voz',lvl:-45,cond:true,f0:112},
- {n:'Lapela 2 (Conv1)',t:'voz',lvl:-46,cond:true,f0:205},
- {n:'Lapela 3 (Conv2)',t:'voz',lvl:-44,cond:true,f0:128},
- {n:'Lapela 4 (Riva)',t:'voz',lvl:-45,cond:true,f0:104},
- {n:'Lapela 5 (Marcio)',t:'voz',lvl:-47,cond:true,f0:135},
- {n:'Lapela 6 (Conv)',t:'voz',lvl:-45,cond:true,f0:218},
- null,null,null,
- {n:'Híbrida telefônica (CALL)',t:'tel',lvl:2,f0:142},
- {n:'Retorno do link (LINK)',t:'link',lvl:4,f0:160},
- {n:'Playback de VT',t:'vt',lvl:4,f0:120},
- {n:'Trilha BG (L)',t:'mus',lvl:4,side:0},
- {n:'Trilha BG (R)',t:'mus',lvl:4,side:1},
- {n:'Celular (CEL)',t:'tel',lvl:-8,f0:190},
- {n:'PA',t:'voz',lvl:2,f0:150}
-];
-const SRC2TR=[{n:'2TR IN L (player)',t:'mus',lvl:-8,side:0,alt:1},{n:'2TR IN R (player)',t:'mus',lvl:-8,side:1,alt:1}];
-const NAMES16=['Apdor','Conv1','Conv2','Riva','Marcio','Conv','CH 7','CH 8','CH 9','CALL','LINK','VT','BG','BG','CEL','PA'];
+/* ---------- fontes conectadas nas entradas (o aluno escolhe em "Fontes de áudio") ---------- */
+const CONN={cond:{n:'Mic condensador (+48V)',lvl:-45},dyn:{n:'Mic dinâmico',lvl:-52},line:{n:'Linha (+4 dBu)',lvl:4}};
+const GENS={voz:'Voz (gerador)',mus:'Música (gerador)',tone:'Tom 1 kHz',noise:'Ruído rosa',file:'Arquivo de áudio'};
+const F0S=[112,205,128,104,135,218,150,180,120,160,142,190,115,200,125,170];
+const SRC=Array(16).fill(null);let SRC2=null;// SRC2 = 2TR IN (estéreo, -10 dBV)
+function finalize(s,k){s.t=s.kind==='file'?'file':s.gen;s.lvl=k===16?-8:(k>=12?CONN.line.lvl:CONN[s.conn].lvl);s.cond=k<12&&s.conn==='cond';s.n=s.name||GENS[s.t==='file'?'file':s.gen];if(!s.f0)s.f0=F0S[k%16];return s}
+function setSource(k,s){if(k===16){detach2tr();SRC2=s?finalize(s,16):null;delete ENV['2tr14'];delete ENV['2tr15'];if(AU.on)attach2tr();return}
+  audioDetach(k);SRC[k]=s?finalize(s,k):null;delete ENV['ad'+k];if(AU.on&&SRC[k])audioAttach(k)}
+const TD=new Float32Array(1024);
+function anDb(an){if(!an)return-120;an.getFloatTimeDomainData(TD);let p=0;for(let i=0;i<TD.length;i++){const v=Math.abs(TD[i]);if(v>p)p=v}return p>1e-6?20*Math.log10(p):-120}
+let openSources=()=>{};
 const FXTYPES=['REVERB HALL','REVERB ROOM','REVERB STAGE','REVERB PLATE','EARLY REF.','MONO DELAY','STEREO DELAY','ECHO','CHORUS','FLANGE','PHASER','PITCH CHANGE','DE-ESSER','BYPASS'];
 const isRev=t=>/REVERB|EARLY/.test(t), isDly=t=>/DELAY|ECHO/.test(t);
 const PATCHOPT=['---',...Array.from({length:16},(_,i)=>'AD'+(i+1)),...Array.from({length:8},(_,i)=>'ADAT'+(i+1)),...Array.from({length:16},(_,i)=>'SLOT'+(i+1)),'FX1-1','FX1-2','FX2-1','FX2-2','FX3-1','FX3-2','FX4-1','FX4-2'];
@@ -564,50 +589,38 @@ const DYNLIB=[
 
 /* ---------- estado ---------- */
 function mkProc(name){return{name,fader:0,on:true,solo:false,eqOn:true,att:0,eq:mkEq(),dyn:mkDyn(),lv:NEG,lvPre:NEG}}
-function mkCh(i){const c=mkProc(i<16?NAMES16[i]:'CH'+(i+1));Object.assign(c,{pan:0,patch:i<16?'AD'+(i+1):(i<24?'ADAT'+(i-15):'SLOT'+(i-23)),aux:Array(8).fill(0),auxPre:Array(8).fill(true),st:true,bus:Array(8).fill(false),phase:false,dlyOn:false,dly:0,ins:false,insPos:'PRE EQ',safe:false});return c}
+function mkCh(i){const c=mkProc('CH'+(i+1));Object.assign(c,{pan:0,patch:i<16?'AD'+(i+1):(i<24?'ADAT'+(i-15):'SLOT'+(i-23)),aux:Array(8).fill(0),auxPre:Array(8).fill(true),st:true,bus:Array(8).fill(false),phase:false,dlyOn:false,dly:0,ins:false,insPos:'PRE EQ',safe:false});return c}
 function defaultState(){
+  /* Estado de fábrica: cena 00 (Initial Data), faders em -∞, nenhum projeto carregado */
   const S={};
-  S.ad=Array.from({length:16},(_,k)=>({plug:!!SOURCES[k]||k<12,g:k<12?-44:4,pad:false,lv:NEG,peakT:0}));
-  // ganhos iniciais
-  S.ad[0].g=-30; S.ad[3].g=-60; S.ad[1].g=-45; S.ad[2].g=-43; S.ad[4].g=-46; S.ad[5].g=-44;
-  [6,7,8].forEach(k=>S.ad[k].g=-50);
-  [9,10,11].forEach(k=>{S.ad[k].g=-16;S.ad[k].pad=true});
-  S.ad[12].g=4;S.ad[13].g=4;S.ad[14].g=-8;S.ad[15].g=2;
-  S.phantom=[false,true]; S.sw1516='CH'; S.monSrc='MON'; S.monLvl=4; S.phLvl=3.5; S.contrast=.75;
+  S.ad=Array.from({length:16},(_,k)=>({g:k<12?-16:4,pad:false,lv:NEG,raw:NEG,hold:NEG,peakT:0}));
+  S.phantom=[false,false]; S.sw1516='CH'; S.monSrc='MON'; S.monLvl=4; S.phLvl=3.5; S.contrast=.75;
   S.ch=Array.from({length:32},(_,i)=>mkCh(i));
-  const f=[0,-45,-45,-45,-45,-45,-70,-70,-70,-70,-70,-10,-50,-50,-50,-10];
-  f.forEach((d,i)=>S.ch[i].fader=dbToPos(d));
-  S.ch.forEach((c,i)=>c.on=(i>=11&&i<=14)||i>=16);
-  S.ch[12].pan=-63;S.ch[13].pan=63;
   S.aux=Array.from({length:8},(_,i)=>Object.assign(mkProc('AUX'+(i+1)),{fader:dbToPos(0)}));
   S.bus=Array.from({length:8},(_,i)=>Object.assign(mkProc('BUS'+(i+1)),{fader:dbToPos(0)}));
-  S.st=Object.assign(mkProc('STEREO'),{fader:dbToPos(0)});
-  S.stin=Array.from({length:4},(_,i)=>Object.assign(mkProc('ST IN'+(i+1)),{pan:0,fader:dbToPos(0),on:false,patch:'FX'+(i+1),st:true,aux:Array(8).fill(0),auxPre:Array(8).fill(false),bus:Array(8).fill(false)}));
+  S.st=mkProc('STEREO');
+  S.stin=Array.from({length:4},(_,i)=>Object.assign(mkProc('ST IN'+(i+1)),{pan:0,fader:0,on:true,patch:'FX'+(i+1),st:true,aux:Array(8).fill(0),auxPre:Array(8).fill(false),bus:Array(8).fill(false)}));
   S.fx=[{type:'REVERB HALL',in:'AUX7',mix:100,time:2.4},{type:'REVERB ROOM',in:'AUX8',mix:100,time:1.2},{type:'MONO DELAY',in:'---',mix:100,time:0.35},{type:'CHORUS',in:'---',mix:100,time:0.5}];
-  S.pair=Array(16).fill(false);S.pair[6]=true; // 13/14 BG já em par? (falso para a missão)
-  S.pair[6]=false;
+  S.pair=Array(16).fill(false);
   S.omni=['AUX1','AUX2','AUX3','AUX4'];
-  S.layer='1-16'; S.fm=0; S.sel={t:'st'}; S.band=1;
-  S.page='METER'; S.tab={METER:1}; S.cur={};
-  S.stinBank=0; S.clock='INT 44.1k';
+  S.layer='1-16'; S.fm=0; S.sel={t:'ch',i:0}; S.band=1;
+  S.page='METER'; S.tab={METER:0}; S.cur={};
+  S.stinBank=0; S.clock='INT 48k';
   S.soloMode='RECORD'; S.listen='AFL';
   S.osc={on:false,lvl:-18,w:1,asg:{st:true,aux:Array(8).fill(false),bus:Array(8).fill(false)}};
   S.midi={rx:1,tx:1,scRx:true,scTx:false};
   S.prefs={autoEq:true,recallConf:false,storeConf:true,meterPos:'PRE FADER',peakHold:false};
   S.uk=[1,2,6,7,8,9,10,0];
   S.scenes=Array(100).fill(null);
-  S.sceneNum=1; S.curScene=1; S.edited=false;
+  S.sceneNum=0; S.curScene=0; S.edited=false;
   S.dialog=null; S.ev={}; S.evs={}; S.seq=0; S.explored=[];
   S.remote=Array(16).fill(dbToPos(0));
   S.scenes[0]={title:'Initial Data',ro:true,data:null};
-  S.scenes[1]={title:'TEC NEWS 25',data:null};
   return S;
 }
 let S=defaultState();
 function snap(){return JSON.parse(JSON.stringify({ch:S.ch,aux:S.aux,bus:S.bus,st:S.st,stin:S.stin,fx:S.fx,pair:S.pair},(k,v)=>v===Infinity?'INF':v===NEG?'NINF':v),(k,v)=>v==='INF'?Infinity:v==='NINF'?NEG:v)}
-function initScenes(){S.scenes[1].data=snap();const s0=snap();/* scene 0: mesa zerada */
-  const z=JSON.parse(JSON.stringify(s0));z.ch.forEach((c,i)=>{c.fader=0;c.on=true;c.pan=0;c.eq=mkEq();c.dyn=mkDyn();c.aux=Array(8).fill(0);c.st=true;c.bus=Array(8).fill(false);c.name=i<16?'CH'+(i+1):'CH'+(i+1)});
-  z.st.fader=0;z.aux.forEach(a=>a.fader=0);z.bus.forEach(b=>b.fader=0);z.stin.forEach(s=>{s.fader=0;s.on=true});z.pair=Array(16).fill(false);S.scenes[0].data=z;}
+function initScenes(){S.scenes[0].data=snap()}
 initScenes();
 
 /* ---------- eventos (para as missões) ---------- */
@@ -633,6 +646,8 @@ const ENV={};
 function envOf(key,src){let e=ENV[key];if(!e){e=ENV[key]={cur:-70,tgt:-70,tm:0,turn:Math.random()*3,talk:false,ph:Math.random()*9,syl:0,bar:0}}return e}
 let T=0;
 function envStep(e,src,dt){
+  if(src.t==='tone'){e.cur=0;return}if(src.t==='noise'){e.cur=-3+(Math.random()-.5)*1.5;return}
+  if(src.t==='file'){e.cur=src.two?anDb(AU.tr&&(src.side?AU.tr.anR:AU.tr.anL)):anDb(src.an);return}
   if(src.t==='mus'){e.ph+=dt;e.bar=Math.floor((T+(src.alt?1:0))/2)%4;e.cur=-6+3*(0.5+0.5*Math.sin(e.ph*12.57))+(Math.random()-.5)*1.5;return}
   const p=src.t==='voz'?0.42:0.6;
   e.turn-=dt;if(e.turn<=0){e.talk=Math.random()<p;e.turn=e.talk?2+Math.random()*5:1.2+Math.random()*4}
@@ -641,7 +656,8 @@ function envStep(e,src,dt){
   if(src.t==='vt'){const m=-12+2*Math.sin(T*6);e.cur=Math.max(e.cur,m)}
 }
 const sensEff=k=>k<12?S.ad[k].g+(S.ad[k].pad?20:0):S.ad[k].g;
-function adSrc(k){return(k>=14&&S.sw1516==='2TR')?SRC2TR[k-14]:SOURCES[k]}
+function adSrc(k){if(k>=14&&S.sw1516==='2TR')return SRC2?Object.assign({},SRC2,{side:k-14,two:true}):null;return SRC[k]}
+function inPeak(k){const s=adSrc(k);if(!s)return NEG;return s.t==='file'?S.ad[k].hold:nominalPeak(k)}
 function nominalPeak(k){const s=adSrc(k);if(!s)return NEG;return s.lvl+6-sensEff(k)-12}
 const unlocked=()=>!S.clock.startsWith('INT');
 const fs=()=>S.clock.startsWith('INT')?S.clock.slice(4):'---';
@@ -655,11 +671,10 @@ function model(dt){
   const ul=unlocked();
   for(let k=0;k<16;k++){const a=S.ad[k],src=adSrc(k);let lv=NEG;
     if(src){const e=envOf(k>=14&&S.sw1516==='2TR'?'2tr'+k:'ad'+k,src);envStep(e,src,dt);
-      const plugged=(k>=14&&S.sw1516==='2TR')?true:a.plug;
       const power=!src.cond||S.phantom[k<8?0:1];
-      if(plugged&&power)lv=src.lvl+e.cur-sensEff(k)-12}
+      if(power)lv=src.lvl+e.cur-sensEff(k)-12}
     if(ul)lv=NEG;
-    a.raw=lv;a.lv=Math.min(lv,0);a.peakT=lv>=-3?.45:Math.max(0,a.peakT-dt)}
+    a.raw=lv;a.hold=Math.max(lv,a.hold-dt*6);a.lv=Math.min(lv,0);a.peakT=lv>=-3?.45:Math.max(0,a.peakT-dt)}
   const osc=S.osc.on&&!ul?S.osc.lvl:NEG;
   // canais
   const chs=S.ch;
@@ -713,7 +728,7 @@ function btn(cls,id,ctl,i,led,attrs=''){return`<button type="button" class="b ${
 function buildConsole(){
   let top=`<div class="lblcol"><div class="lbl" style="margin-top:-2px">INPUT<br>(BAL)</div><div class="lbl" style="margin-top:22px">INSERT<br>T:OUT R:IN<br>(UNBAL)</div><div class="lbl" style="margin-top:28px">PAD</div></div>`;
   for(let k=0;k<12;k++){top+=`<div class="incol" data-k="${k}">
-    <span class="ab" style="top:2px">A</span><div class="xlr${S.ad[k].plug?' plug':''}" id="xlr-${k}" data-ctl="plug" data-i="${k}"></div>
+    <span class="ab" style="top:2px">A</span><div class="xlr" id="xlr-${k}" data-ctl="plug" data-i="${k}"></div>
     <span class="ab" style="top:58px">B</span><div class="jack" style="margin-top:8px" data-ctl="trsb" data-i="${k}"></div>
     <div class="jack" style="margin-top:8px" data-ctl="insert" data-i="${k}"></div><div class="lbl" style="margin-top:2px">INSERT I/O</div>
     <div style="margin-top:8px">${btn('flat noled','pad-'+k,'pad',k,'')}</div><div class="lbl" style="font-size:8.5px">20dB</div>
@@ -723,7 +738,7 @@ function buildConsole(){
     <div class="pk" data-ctl="peakled" data-i="${k}"><i class="led r" id="pk-${k}"></i>PEAK</div>
     <div class="pk" data-ctl="peakled" data-i="${k}"><i class="led g" id="sg-${k}"></i>SIGNAL</div></div>`}
   for(const pr of [[12,13],[14,15]]){top+=`<div class="col1316">
-    <div style="display:flex;gap:6px;margin-top:4px">${pr.map(k=>`<div class="jack plugbig${S.ad[k].plug?'':' un'}" id="xlr-${k}" data-ctl="plug" data-i="${k}" style="position:relative"></div>`).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:4px">${pr.map(k=>`<div class="jack plugbig" id="xlr-${k}" data-ctl="plug" data-i="${k}" style="position:relative"></div>`).join('')}</div>
     <div class="lbl" style="margin-top:4px">INPUT ${pr[0]+1} / ${pr[1]+1}</div>
     <div style="height:40px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;margin-top:8px">${pr[0]===14?`${btn('flat noled','sw1516','sw1516',0,'')}<div class="lbl" style="font-size:8px;margin-top:2px">▀ CH15/16<br>▄ 2TR IN</div>`:''}</div>
     ${pr.map(k=>`<div class="gainwrap" style="height:52px"><span class="chno">${k+1}</span>${knobHTML('sm','gain-'+k,'gain',k)}</div><div class="gsc" style="width:60px"><span>+4</span><span>GAIN</span><span>-26</span></div>`).join('')}
@@ -772,7 +787,7 @@ function buildConsole(){
   let bot='';
   for(let i=0;i<16;i++){bot+=`<div class="strip">${btn('sel','sel-'+i,'sel',i,'g')}<div class="lbl">SEL</div>${btn('solo','solo-'+i,'solo',i,'o')}<div class="lbl">SOLO</div>${btn('on','on-'+i,'on',i,'y')}<div class="lbl">ON</div>
    <div class="num">${i+1}</div><div class="tape" data-ctl="tape" data-i="${i}"></div>${faderHTML('fader-'+i,i,'')}
-   <div class="plab"><b>${i+1}</b><span>${i+17}</span><span>${i<8?'AUX '+(i+1):'BUS '+(i-7)}</span></div><div class="ytape${['','','','','','','x','x','x'][i]==='x'?' none':''}" data-ctl="ytape" data-i="${i}">${i>=6&&i<=8?'':NAMES16[i]}</div></div>`}
+   <div class="plab"><b>${i+1}</b><span>${i+17}</span><span>${i<8?'AUX '+(i+1):'BUS '+(i-7)}</span></div></div>`}
   bot+=`<div class="ststrip">${btn('sel','st-sel','stsel',0,'g')}<div class="lbl">SEL</div><div style="height:41px"></div>${btn('on','st-on','ston',0,'y')}<div class="lbl">ON</div><div class="num">&nbsp;</div><div class="tape" style="width:80px;visibility:hidden"></div>${faderHTML('fader-st','st','red')}<div class="lbl" style="font-size:12px;margin-top:20px">STEREO</div></div>`;
   bot+=`<div class="stinarea"><div class="two">${[0,1].map(j=>`<div class="strip">${btn('sel','stin-sel-'+j,'stinsel',j,'g')}<div class="lbl">SEL</div>${btn('solo','stin-solo-'+j,'stinsolo',j,'o')}<div class="lbl">SOLO</div>${btn('on','stin-on-'+j,'stinon',j,'y')}<div class="lbl">ON</div></div>`).join('')}</div>
    <div class="stinlab"><span>ST IN 1/3</span><span>ST IN 2/4</span></div><div class="two">${[0,1].map(j=>knobHTML('green lg','stin-k-'+j,'stinknob',j)).join('')}</div>
@@ -973,7 +988,7 @@ function doRecall(){const n=S.sceneNum;const sc=S.scenes[n];if(!sc||!sc.data){fl
   const go=()=>{applyScene(n);ev('recall');ev('recall:'+n);S.dialog=null};if(S.prefs.recallConf){S.dialog={lines:['RECALL SCENE '+String(n).padStart(2,'0')+'?',sc.title],ok:go}}else go()}
 function doStore(){const n=S.sceneNum;if(n===0){flashMsg(['STORE','Cena 00 é somente leitura']);return}
   const cur=S.scenes[n];if(cur&&cur.ro){flashMsg(['STORE','Cena protegida']);return}
-  openTitle(cur?cur.title:(S.scenes[S.curScene]?.title||'NEW SCENE'),title=>{S.scenes[n]={title:title||'SCENE '+n,data:snap()};S.curScene=n;S.edited=false;ev('store');ev('store:'+n)})}
+  openTitle(cur?cur.title:((S.curScene>0&&S.scenes[S.curScene]?.title)||'NEW SCENE'),title=>{S.scenes[n]={title:title||'SCENE '+n,data:snap()};S.curScene=n;S.edited=false;ev('store');ev('store:'+n)})}
 let flashT=0;function flashMsg(lines){S.dialog={lines,ok:()=>{S.dialog=null},info:true};clearTimeout(flashT);flashT=setTimeout(()=>{if(S.dialog&&S.dialog.info)S.dialog=null},1800)}
 function openTitle(v,cb){openInput(v,'STORE SCENE '+String(S.sceneNum).padStart(2,'0')+' — TITLE',cb)}
 function openName(o){openInput(o.name,'CHANNEL NAME — '+tName(S.sel),v=>{if(v){o.name=v.slice(0,16);markEdit();ev('rename')}})}
@@ -995,7 +1010,7 @@ function act(ctl,i){
   const n=+i;
   if(S.dialog&&['disp','home','fmode','layer'].includes(ctl)){closeInput();S.dialog=null}
   switch(ctl){
-  case'plug':S.ad[n].plug=!S.ad[n].plug;ev('plug');break;
+  case'plug':openSources(n);ev('plug');break;
   case'pad':S.ad[n].pad=!S.ad[n].pad;ev('pad:'+n);break;
   case'phantom':S.phantom[n]=!S.phantom[n];ev('phantom:'+n);break;
   case'sw1516':S.sw1516=S.sw1516==='CH'?'2TR':'CH';ev('sw1516');break;
@@ -1056,14 +1071,17 @@ const AU={on:false};
 function sp(param,v,tc=.02){if(param._v===v)return;param._v=v;if(!isFinite(v))v=0;param.setTargetAtTime(v,AU.C.currentTime,tc)}
 function noiseBuf(C,sec=2,pink=false){const b=C.createBuffer(1,C.sampleRate*sec,C.sampleRate),d=b.getChannelData(0);let b0=0,b1=0,b2=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(pink){b0=.997*b0+w*.029591;b1=.985*b1+w*.032534;b2=.95*b2+w*.048056;d[i]=(b0+b1+b2+w*.1)*.6}else d[i]=w}return b}
 function makeIR(C,sec){const len=C.sampleRate*sec,b=C.createBuffer(2,len,C.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}return b}
-function synth(C,src){const out=C.createGain();const s={out,src};
+function synth(C,src){const out=C.createGain();const s={out,src,oscs:[]};const fin=()=>{s.oscs=s.oscs.concat(s.mo||[],s.vo?[s.vo]:[]);s.stop=()=>{s.oscs.forEach(o=>{try{o.stop()}catch(e){}});out.disconnect()};return s};
+  if(src.t==='tone'){const o=C.createOscillator();o.frequency.value=1000;const g=C.createGain();g.gain.value=.5;o.connect(g);g.connect(out);o.start();s.oscs.push(o);return fin()}
+  if(src.t==='noise'){const n=C.createBufferSource();n.buffer=noiseBuf(C,3,true);n.loop=true;const g=C.createGain();g.gain.value=.7;n.connect(g);g.connect(out);n.start();s.oscs.push(n);return fin()}
+
   if(src.t==='mus'||src.t==='vt'){const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=src.side?5200:3600;const g=C.createGain();g.gain.value=.16;lp.connect(g);
     s.mo=[0,1,2,3].map(j=>{const o=C.createOscillator();o.type=j===3?'sine':'triangle';o.connect(lp);o.start();return o});s.mg=g;g.connect(out)}
   if(src.t!=='mus'){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=src.f0;const f1=C.createBiquadFilter();f1.type='bandpass';f1.Q.value=5;f1.frequency.value=600;const f2=C.createBiquadFilter();f2.type='bandpass';f2.Q.value=7;f2.frequency.value=1600;
     const g1=C.createGain();g1.gain.value=.9;const g2=C.createGain();g2.gain.value=.55;o.connect(f1);o.connect(f2);f1.connect(g1);f2.connect(g2);const vg=C.createGain();g1.connect(vg);g2.connect(vg);
     let last=vg;if(src.t==='tel'||src.t==='link'){const hp=C.createBiquadFilter();hp.type='highpass';hp.frequency.value=src.t==='tel'?380:200;const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=src.t==='tel'?3200:6000;vg.connect(hp);hp.connect(lp);last=lp}
     const ve=C.createGain();ve.gain.value=0;last.connect(ve);ve.connect(out);o.start();Object.assign(s,{vo:o,f1,f2,ve})}
-  return s}
+  return fin()}
 const CHORDS=[[57,60,64,45],[53,57,60,41],[55,59,62,43],[52,55,59,40]];
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 function audioInit(){const C=new(window.AudioContext||window.webkitAudioContext)();AU.C=C;
@@ -1072,9 +1090,9 @@ function audioInit(){const C=new(window.AudioContext||window.webkitAudioContext)
   AU.soloBus=C.createGain();AU.monSt=C.createGain();AU.monSolo=C.createGain();AU.mon2tr=C.createGain();AU.stMaster.connect(AU.monSt);AU.soloBus.connect(AU.monSolo);[AU.monSt,AU.monSolo,AU.mon2tr].forEach(g=>g.connect(AU.out));
   AU.aux=Array.from({length:8},()=>{const g=C.createGain();return g});
   AU.fx=[0,1,2,3].map(()=>{const inp=C.createGain(),conv=C.createConvolver(),rv=C.createGain(),dl=C.createDelay(2),fb=C.createGain(),dg=C.createGain(),dry=C.createGain(),out=C.createGain();conv.buffer=makeIR(C,2.4);inp.connect(conv);conv.connect(rv);rv.connect(out);inp.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(dg);dg.connect(out);inp.connect(dry);dry.connect(out);fb.gain.value=.35;return{inp,rv,dl,dg,dry,out,cur:null}});
-  AU.syn=SOURCES.map(s=>s?synth(C,s):null);AU.syn2=SRC2TR.map(s=>synth(C,s));
-  AU.ad=Array.from({length:16},(_,k)=>{const gA=C.createGain(),gB=C.createGain(),trim=C.createGain();gA.connect(trim);gB.connect(trim);if(AU.syn[k])AU.syn[k].out.connect(gA);if(k>=14)AU.syn2[k-14].out.connect(gB);return{gA,gB,trim}});
-  AU.trOut=C.createGain();AU.syn2.forEach((s,i)=>{const p=C.createStereoPanner();p.pan.value=i?1:-1;s.out.connect(p);p.connect(AU.mon2tr)});
+  AU.syn=[];
+  AU.ad=Array.from({length:16},(_,k)=>{const gA=C.createGain(),gB=C.createGain(),trim=C.createGain();gA.connect(trim);gB.connect(trim);gA.channelCount=1;gA.channelCountMode='explicit';gA.channelInterpretation='speakers';return{gA,gB,trim}});
+  {const out=C.createGain();out.channelCount=2;out.channelCountMode='explicit';const sp2=C.createChannelSplitter(2),anL=C.createAnalyser(),anR=C.createAnalyser();anL.fftSize=anR.fftSize=1024;out.connect(sp2);sp2.connect(AU.ad[14].gB,0);sp2.connect(AU.ad[15].gB,1);sp2.connect(anL,0);sp2.connect(anR,1);out.connect(AU.mon2tr);AU.tr={out,anL,anR,syn:null}}
   const mkChain=()=>{const inp=C.createGain(),ph=C.createGain(),dl=C.createDelay(1),eq=[0,1,2,3].map(()=>C.createBiquadFilter()),cmp=C.createDynamicsCompressor(),mk=C.createGain(),fd=C.createGain(),pan=C.createStereoPanner(),stS=C.createGain(),soS=C.createGain(),pre=C.createGain();
     inp.connect(ph);ph.connect(dl);dl.connect(eq[0]);eq[0].connect(eq[1]);eq[1].connect(eq[2]);eq[2].connect(eq[3]);eq[3].connect(cmp);cmp.connect(mk);mk.connect(pre);pre.connect(fd);fd.connect(pan);pan.connect(stS);stS.connect(AU.stBus);
     const soPre=C.createGain();pre.connect(soPre);soPre.connect(soS);const soPost=C.createGain();fd.connect(soPost);soPost.connect(soS);soS.connect(AU.soloBus);
@@ -1083,7 +1101,8 @@ function audioInit(){const C=new(window.AudioContext||window.webkitAudioContext)
   AU.mkChain=mkChain;AU.ch=[];AU.stin=S.stin.map(mkChain);
   AU.osc=C.createOscillator();AU.osc.start();AU.noise=C.createBufferSource();AU.noise.buffer=noiseBuf(C,3,true);AU.noise.loop=true;AU.noise.start();
   AU.oscG=C.createGain();AU.oscW=C.createGain();AU.noiseW=C.createGain();AU.osc.connect(AU.oscW);AU.noise.connect(AU.noiseW);AU.oscW.connect(AU.oscG);AU.noiseW.connect(AU.oscG);AU.oscSt=C.createGain();AU.oscG.connect(AU.oscSt);AU.oscSt.connect(AU.stBus);
-  AU.on=true}
+  AU.on=true;AU.listen=false;for(let k=0;k<16;k++)if(SRC[k])audioAttach(k);if(SRC2)attach2tr()}
+
 function nodeFor(p){if(!p)return null;if(p.startsWith('AD')&&!p.startsWith('ADAT'))return AU.ad[+p.slice(2)-1].trim;if(p.startsWith('FX'))return AU.fx[+p[2]-1].out;return null}
 function syncChain(c,o,isSt){
   const want=o.patch;if(c.src!==want){const old=nodeFor(c.src);if(old){try{old.disconnect(c.inp)}catch(e){}}const nw=nodeFor(want);if(nw)nw.connect(c.inp);c.src=want}
@@ -1097,10 +1116,11 @@ function syncChain(c,o,isSt){
   if(o.aux)c.aux.forEach((a,k)=>{const lv=o.aux[k]>0&&o.on?dbLin(posToDb(o.aux[k])):0;sp(a.a.gain,o.auxPre[k]?1:0);sp(a.b.gain,o.auxPre[k]?0:1);sp(a.g.gain,lv)})}
 function audioSync(){if(!AU.on)return;const C=AU.C,ul=unlocked();
   for(let k=0;k<16;k++){const a=S.ad[k],src=adSrc(k);const two=k>=14&&S.sw1516==='2TR';sp(AU.ad[k].gA.gain,two?0:1);sp(AU.ad[k].gB.gain,two?1:0);
-    let g=0;if(src&&(two||a.plug)&&(!src.cond||S.phantom[k<8?0:1])&&!ul)g=dbLin(Math.min(src.lvl-sensEff(k)-12,14));sp(AU.ad[k].trim.gain,g)}
+    let g=0;if(src&&(!src.cond||S.phantom[k<8?0:1])&&!ul)g=dbLin(Math.min(src.lvl-sensEff(k)-12,14));sp(AU.ad[k].trim.gain,g)}
   const upd=(sy,key,src)=>{if(!sy)return;const e=ENV[key];if(!e)return;if(sy.ve){sp(sy.ve.gain,dbLin(Math.max(-70,e.cur))*.9,.012);if(e.syl!==sy.syl){sy.syl=e.syl;const t=C.currentTime;const fem=src.f0>180;sy.vo.frequency.setTargetAtTime(src.f0*(0.88+Math.random()*.3),t,.03);sy.f1.frequency.setTargetAtTime((fem?380:300)+Math.random()*500,t,.02);sy.f2.frequency.setTargetAtTime((fem?1200:900)+Math.random()*1400,t,.02)}}
     if(sy.mo){const bar=e.bar!==undefined?e.bar:Math.floor(T/2)%4;const ch=CHORDS[bar];if(sy.bar!==bar){sy.bar=bar;sy.mo.forEach((o,j)=>o.frequency.setTargetAtTime(mtof(ch[j]+(src.side&&j<3?12:0)),C.currentTime,.01))}sp(sy.mg.gain,src.t==='vt'?.07:.16*dbLin(e.cur+6))}};
-  SOURCES.forEach((s,k)=>{if(s)upd(AU.syn[k],'ad'+k,s)});SRC2TR.forEach((s,i)=>{const key='2tr'+(14+i);if(!ENV[key])envOf(key,s);if(S.sw1516!=='2TR'&&S.monSrc==='2TR')envStep(ENV[key],s,1/60);upd(AU.syn2[i],key,s)});
+  SRC.forEach((s,k)=>{if(s&&s.kind==='gen')upd(AU.syn[k],'ad'+k,s)});
+  if(SRC2&&SRC2.kind==='gen'&&AU.tr.syn){[0,1].forEach(i=>{const key='2tr'+(14+i),src={t:'mus',side:i};const e=envOf(key,src);if(S.sw1516!=='2TR')envStep(e,src,1/60);upd(i?AU.tr.syn.R:AU.tr.syn.L,key,src)})}
   S.ch.forEach((o,i)=>{if(!AU.ch[i]){if(!nodeFor(o.patch))return;AU.ch[i]=AU.mkChain()}syncChain(AU.ch[i],o)});S.stin.forEach((o,i)=>syncChain(AU.stin[i],Object.assign(o,{phase:false,dlyOn:false}),true));
   S.aux.forEach((a,k)=>sp(AU.aux[k].gain,a.on?dbLin(posToDb(a.fader)):0));
   S.fx.forEach((f,n)=>{const F2=AU.fx[n];if(F2.cur!==f.in){if(F2.cur&&F2.cur.startsWith('AUX'))try{AU.aux[+F2.cur.slice(3)-1].disconnect(F2.inp)}catch(e){}if(f.in.startsWith('AUX'))AU.aux[+f.in.slice(3)-1].connect(F2.inp);F2.cur=f.in}
@@ -1108,8 +1128,26 @@ function audioSync(){if(!AU.on)return;const C=AU.C,ul=unlocked();
   const st=S.st;sp(AU.stMaster.gain,st.on&&!ul?dbLin(posToDb(st.fader)):0);const d=st.dyn,comp=d.on&&!isGate(d.type);sp(AU.stDyn.threshold,comp?d.thr:0);sp(AU.stDyn.ratio,comp?Math.min(20,RATIOS[d.ri]===Infinity?20:RATIOS[d.ri]):1);
   const o=S.osc;sp(AU.osc.frequency,[100,1000,10000,1000,1000][o.w]);sp(AU.oscW.gain,o.w<3?1:0);sp(AU.noiseW.gain,o.w===3?1:o.w===4?(Math.floor(C.currentTime*2)%2?1:0):0);sp(AU.oscG.gain,o.on&&!ul?dbLin(o.lvl):0);sp(AU.oscSt.gain,o.asg.st?1:0);
   const mon=S.monSrc==='2TR';sp(AU.monSt.gain,!mon&&!S.anySolo?1:0);sp(AU.monSolo.gain,!mon&&S.anySolo?1:0);sp(AU.mon2tr.gain,mon?.6:0);
-  sp(AU.out.gain,Math.pow(S.phLvl/10,2)*1.4,.03)}
-async function toggleAudio(){if(!AU.C){try{audioInit()}catch(e){console.warn(e);return false}}if(AU.C.state==='suspended'){await AU.C.resume();AU.on=true;return true}if(AU.on){await AU.C.suspend();AU.on=false;return false}AU.on=true;return true}
+  sp(AU.out.gain,AU.listen?Math.pow(S.phLvl/10,2)*1.4:0,.03)}
+async function ensureAudio(){if(!AU.C)audioInit();if(AU.C.state==='suspended')await AU.C.resume();return AU.C}
+async function toggleAudio(){try{await ensureAudio()}catch(e){console.warn(e);return false}AU.listen=!AU.listen;return AU.listen}
+let FILES_ON=true;
+function mkPlayer(C,buf){const p={buf,node:null,off:0,t0:0,playing:false,out:C.createGain()};p.out.gain.value=2;
+  p.play=()=>{if(p.playing)return;const n=C.createBufferSource();n.buffer=buf;n.loop=true;n.connect(p.out);n.start(0,p.off%buf.duration);p.t0=C.currentTime-p.off;p.node=n;p.playing=true};
+  p.pause=()=>{if(!p.playing)return;p.off=(C.currentTime-p.t0)%buf.duration;try{p.node.stop()}catch(e){}p.node.disconnect();p.playing=false};
+  p.stop=()=>{p.pause();p.out.disconnect()};return p}
+function audioAttach(k){const s=SRC[k];if(!s||!AU.C)return;audioDetach(k);const C=AU.C;
+  if(s.kind==='file'){const p=mkPlayer(C,s.buf);s.player=p;s.an=C.createAnalyser();s.an.fftSize=1024;p.out.connect(s.an);p.out.connect(AU.ad[k].gA);if(FILES_ON)p.play();AU.syn[k]={stop:()=>p.stop()}}
+  else{const sy=synth(C,s);sy.out.connect(AU.ad[k].gA);AU.syn[k]=sy}}
+function audioDetach(k){const sy=AU.syn&&AU.syn[k];if(sy){sy.stop();AU.syn[k]=null}}
+function attach2tr(){if(!AU.C||!SRC2)return;detach2tr();const C=AU.C,s=SRC2;
+  if(s.kind==='file'){const p=mkPlayer(C,s.buf);s.player=p;p.out.connect(AU.tr.out);if(FILES_ON)p.play();AU.tr.syn={stop:()=>p.stop()}}
+  else{const m=C.createChannelMerger(2),L=synth(C,{t:'mus',side:0}),R=synth(C,{t:'mus',side:1});L.out.connect(m,0,0);R.out.connect(m,0,1);m.connect(AU.tr.out);AU.tr.syn={L,R,stop:()=>{L.stop();R.stop();m.disconnect()}}}}
+function detach2tr(){if(AU.tr&&AU.tr.syn){AU.tr.syn.stop();AU.tr.syn=null}}
+function filesPlay(on){FILES_ON=on;[...SRC,SRC2].forEach(s=>{if(s&&s.player)on?s.player.play():s.player.pause()})}
+async function loadFile(k,file){await ensureAudio();const buf=await AU.C.decodeAudioData(await file.arrayBuffer());const prev=k===16?SRC2:SRC[k];
+  setSource(k,{kind:'file',conn:(prev&&prev.conn)||(k<12?'dyn':'line'),name:file.name.replace(/\.[^.]+$/,'').slice(0,40),buf})}
+document.addEventListener('pointerdown',()=>{if(AU.C&&AU.C.state==='suspended')AU.C.resume()},{capture:true});
 
 /* =====================================================================
    SINCRONIZAÇÃO DO PAINEL (a cada quadro)
@@ -1123,7 +1161,7 @@ let dragging=null;
 function syncPanel(dt){
   for(let k=0;k<16;k++){const a=S.ad[k];setLit($('#pk-'+k),a.peakT>0);setLit($('#sg-'+k),a.lv>-40)}
   for(let k=0;k<12;k++){const p=$('#pad-'+k);if(p.classList.contains('press')!==S.ad[k].pad)p.classList.toggle('press',S.ad[k].pad)}
-  $$('.xlr,.jack.plugbig').forEach(x=>{const k=+x.dataset.i;x.classList.toggle('plug',S.ad[k].plug);x.style.opacity=S.ad[k].plug?1:.45});
+  $$('.xlr,.jack.plugbig').forEach(x=>{const k=+x.dataset.i;x.classList.toggle('plug',!!SRC[k])});
   [0,1].forEach(n=>$('#ph-'+n).classList.toggle('on',S.phantom[n]));
   $('#sw1516').classList.toggle('press',S.sw1516==='2TR');$('#monsw').classList.toggle('press',S.monSrc==='2TR');
   for(let n=1;n<=8;n++)setLit($('#fm-'+n),S.fm===n);setLit(EL.home,S.fm===0);
@@ -1133,7 +1171,7 @@ function syncPanel(dt){
   setLit($('#stl-0'),S.stinBank===0);setLit($('#stl-1'),S.stinBank===1);
   for(let i=0;i<16;i++){const t=stripT(i),o=tObj(t);setLit($('#sel-'+i),t&&S.sel.t===t.t&&S.sel.i===t.i);setLit($('#solo-'+i),o&&o.solo);setLit($('#on-'+i),o&&o.on);
     if(dragging!==i){const v=stripGet(i);EL.faders[i].style.top=(20+(1-v)*280)+'px'}
-    const tp=EL.tapes[i];const nm=S.layer==='MASTER'?'':(o&&t.t==='ch'&&t.i>=16?o.name:'');if(tp.textContent!==nm)tp.textContent=nm}
+    }
   setLit($('#st-sel'),S.sel.t==='st');setLit($('#st-on'),S.st.on);if(dragging!=='st')EL.stf.style.top=(20+(1-S.st.fader)*280)+'px';
   [0,1].forEach(j=>{const s=S.stin[S.stinBank*2+j];setLit($('#stin-sel-'+j),S.sel.t==='stin'&&S.sel.i===S.stinBank*2+j);setLit($('#stin-solo-'+j),s.solo);setLit($('#stin-on-'+j),s.on)});
   S.uk.forEach((f,n)=>{});
@@ -1177,7 +1215,7 @@ function faderDrag(e,el,i){const th=el.querySelector('.thumb');const rect=el.get
    CURSO — textos de ajuda, módulos, missões, prova
    ===================================================================== */
 const INFO={
- plug:['INPUT A — XLR balanceado','Entrada de microfone ou linha dos canais 1 a 12 (nos canais 13 a 16 são P10 TRS de linha). No simulador, clique para conectar ou desconectar o cabo.'],
+ plug:['Entrada — conector','Entrada de microfone ou linha (XLR nos canais 1 a 12; P10 de linha nos canais 13 a 16). No simulador, clique para escolher a fonte ou arraste um arquivo de áudio até aqui.'],
  trsb:['INPUT B — P10 TRS balanceado','Alternativa ao XLR no mesmo canal, pensada para fontes de linha. Use A ou B, não os dois ao mesmo tempo.'],
  insert:['INSERT I/O — P10 TRS desbalanceado','Inserção analógica antes do conversor A/D (ponta = saída para o equipamento externo, anel = retorno). Serve para um compressor ou de-esser externo só naquele canal.'],
  pad:['PAD 20 dB','Atenua a entrada em 20 dB antes do pré-amplificador. Use em fontes fortes (linha, híbrida, playback) ou quando o PEAK acende mesmo com pouco GAIN. Com PAD ligado, leia a escala de baixo do GAIN (+4 a -40).'],
@@ -1234,15 +1272,14 @@ const INFO={
  stinon:['ON do ST IN','Liga ou corta o ST IN desta tira.'],
  stinknob:['Nível do ST IN','Nível dos canais de entrada estéreo ST IN (por padrão, retornos dos efeitos internos).'],
  ukey:['USER DEFINED KEYS','Teclas programáveis (UTILITY > USER DEF): chamar cena, ligar oscilador, trocar layer…'],
- tape:['Fita de identificação','Espaço para escrever o nome do canal. Nos canais 17–32 o simulador mostra o nome do canal.'],
- ytape:['Fita de identificação','Nomes das fontes neste estúdio: lapelas, híbrida (CALL), link, VT, trilha (BG), celular e PA.'],
+ tape:['Faixa de identificação','Espaço para escrever o nome do canal.'],
  trsb2:['INPUT 13–16','Entradas P10 de linha dos canais 13 a 16.']
 };
 function infoValue(ctl,i){try{const d=knobDef(ctl,i);if(d&&d.label)return d.label();
   if(ctl==='fader'){if(i==='st')return'STEREO '+fmtDb(posToDb(S.st.fader))+' dB';const t=stripT(+i);if(!t)return'REMOTE';const v=stripGet(+i);return(S.fm>0&&t.t==='ch'?'Envio '+tName(t)+' → AUX'+S.fm:tName(t)+' '+tObj(t).name)+': '+fmtDb(posToDb(v))+' dB'}
   if(['sel','solo','on'].includes(ctl)){const t=stripT(+i);return t?tName(t)+' '+tObj(t).name:'REMOTE'}
   if(ctl==='pad')return'CH'+(+i+1)+' PAD '+(S.ad[+i].pad?'ligado':'desligado');
-  if(ctl==='plug')return SOURCES[+i]?SOURCES[+i].n:'sem fonte ligada';
+  if(ctl==='plug'){const s=SRC[+i];return s?s.n+(+i<12?' · '+CONN[s.conn].n:''):'nada conectado'}
   if(ctl==='peakled')return'CH'+(+i+1)+': '+fmtDb(S.ad[+i].lv,0)+' dBFS';
   if(ctl==='phantom')return(+i?'CH9-12':'CH1-8')+': '+(S.phantom[+i]?'ON':'OFF');
   if(ctl==='layer')return'LAYER '+i;if(ctl==='fmode')return'AUX '+i;
@@ -1262,21 +1299,28 @@ const after=(a,b)=>(S.evs[a]||0)>(S.evs[b]||0);
 const had=n=>!!S.ev[n];
 
 const MODULES=[
-{t:'Comece aqui',sub:'Como usar o curso e o simulador',body:`
+{t:'Comece aqui',sub:'Como usar o curso, o simulador e os seus áudios',body:`
 <p>A 01V96 é uma mesa digital compacta com <b>40 canais de mixagem</b>: 32 canais mono e 4 entradas estéreo (ST IN). Ela trabalha em até 96 kHz, tem 8 AUX, 8 BUS, saída STEREO, 4 processadores de efeito internos, EQ de 4 bandas e dinâmica em cada canal, 99 cenas de memória e faders motorizados.</p>
-<p>O simulador ao lado foi montado a partir das fotos da mesa do estúdio: mesmos nomes de canal (Apdor, Conv1, CALL, VT, BG, CEL, PA…), mesma cena 01 <code>TEC NEWS 25</code> e os faders na posição em que estavam.</p>
+<p>O simulador ao lado começa no estado de fábrica: cena <code>00 Initial Data</code>, todos os faders em -∞, nenhum projeto carregado e nada conectado nas entradas.</p>
+<h3>Conecte seus áudios</h3>
+<p>Abra <b>Fontes</b> na barra superior (ou clique num conector de entrada da mesa). Para cada entrada você escolhe:</p>
+<ul><li><b>Arquivo de áudio</b>: uma gravação sua (voz, música, um programa gravado). O arquivo toca em loop e os medidores leem o nível real dele. Também dá para arrastar o arquivo direto para um conector da mesa.</li>
+<li><b>Geradores de treino</b>: voz, música, tom de 1 kHz ou ruído rosa, para praticar sem arquivo.</li>
+<li><b>Tipo de conexão</b> (entradas 1–12): mic condensador (precisa de phantom), mic dinâmico ou linha. Isso muda o nível que chega na mesa, como na vida real.</li></ul>
+<p>Os arquivos ficam só neste navegador e não são enviados para lugar nenhum.</p>
 <h3>Como mexer no simulador</h3>
 <ul>
 <li><b>Botões:</b> clique ou toque.</li>
 <li><b>Knobs e faders:</b> arraste para cima ou para baixo, ou use a roda do mouse por cima deles. Segure <span class="kbd">Shift</span> para ajuste fino.</li>
 <li><b>Roda DATA:</b> arraste em círculo ou use a roda do mouse.</li>
 <li><b>Display:</b> toque num campo para selecioná-lo e toque de novo para confirmar. Com a mesa focada, as setas do teclado movem o cursor, <span class="kbd">Enter</span> confirma e <span class="kbd">+</span> / <span class="kbd">−</span> funcionam como INC/DEC.</li>
-<li><b>Ouvir:</b> o botão <b>Ouvir</b> na barra superior toca o que você estaria ouvindo nos fones da mesa. O volume é o knob <button class="ref" data-show="phlvl">PHONES LEVEL</button>.</li>
+<li><b>Ouvir:</b> o botão <b>Ouvir</b> na barra superior toca nos seus fones o que a mesa está mandando para a escuta. O volume é o knob <button class="ref" data-show="phlvl">PHONES LEVEL</button>.</li>
 </ul>
-<p>Cada módulo tem uma parte de teoria e <b>missões</b> práticas. A missão atual fica no rodapé deste painel. <b>Mostrar na mesa</b> aproxima o zoom e aponta o controle certo, e <b>Dica</b> explica para que ele serve. As missões se completam sozinhas quando você faz a ação.</p>
-<div class="note"><b>Dica</b> Bagunçou a mesa? Use o botão de reiniciar (seta circular) no canto inferior direito da mesa. Seu progresso fica guardado neste navegador. Pressione <span class="kbd">?</span> para ver os atalhos.</div>`,
- m:[{t:'Ligue a mesa ao seu ouvido: clique em "Ouvir" na barra superior (opcional, mas recomendado).',chk:()=>AU.on,show:'phlvl'},
-    {t:'Toque em qualquer controle da mesa e leia a explicação que aparece no canto inferior da mesa.',chk:()=>S.explored.length>=1}]},
+<p>A missão atual fica no rodapé deste painel. <b>Mostrar na mesa</b> aproxima o zoom e aponta o controle certo, e <b>Dica</b> explica para que ele serve. As missões se completam sozinhas quando você faz a ação.</p>
+<div class="note"><b>Dica</b> Para ouvir algo, o caminho inteiro precisa estar aberto: fonte conectada, GAIN, ON do canal, fader do canal e fader <b>STEREO</b>. Na cena 00 os faders começam em -∞.</div>`,
+ m:[{t:'Abra Fontes (barra superior) e conecte uma fonte na entrada 1: um arquivo seu ou o gerador de voz.',chk:()=>!!SRC[0],show:'xlr-0'},
+    {t:'Clique em "Ouvir" na barra superior para escutar a mesa nos fones.',chk:()=>!!AU.listen,show:'phlvl'},
+    {t:'Toque em qualquer controle da mesa e leia a explicação no canto inferior.',chk:()=>S.explored.length>=1}]},
 
 {t:'Mapa da mesa',sub:'As seções do painel e o caminho do sinal',body:`
 <p>O painel tem três faixas. Saber onde cada coisa mora é metade da operação ao vivo.</p>
@@ -1308,11 +1352,12 @@ const MODULES=[
 <div class="note warn"><b>Cuidado</b> Abaixe o fader do canal antes de ligar ou desligar o phantom, para não mandar um estalo para o ar. Não ligue phantom em equipamentos de linha desbalanceados.</div>
 <h3>Método para ajustar o ganho</h3>
 <ul><li>Peça para a pessoa falar no volume do programa (ou espere ela falar).</li><li>Abra <button class="ref" data-show="home">HOME (METER)</button> e acompanhe o canal na aba CH1-32.</li><li>Ajuste para os picos ficarem entre <b>-18 e -6 dBFS</b>. SIGNAL aceso, PEAK apagado.</li></ul>
-<p>Neste estúdio, as lapelas dos canais 1–6 estão mudas porque o phantom do grupo CH1–8 está desligado. O canal 1 está com pouco ganho e o canal 4 (Riva) está saturando.</p>`,
- m:[{t:'Ligue o PHANTOM +48V do grupo CH1–8 para as lapelas funcionarem.',chk:()=>S.phantom[0],show:'ph-0'},
-    {t:'Ajuste o GAIN do canal 1 (Apdor) para que os picos fiquem entre -18 e -4 dBFS (gire para a direita).',chk:()=>{const p=nominalPeak(0);return S.phantom[0]&&p>=-18&&p<=-4},show:'gain-0'},
-    {t:'O canal 4 (Riva) está saturando: o PEAK pisca. Ligue o PAD do canal 4 ou reduza o GAIN até o PEAK parar.',chk:()=>S.phantom[0]&&nominalPeak(3)<-3,show:'pad-3'},
-    {t:'Veja a chave CH15/16 ⇄ 2TR IN: mude para 2TR IN e volte para CH15/16. Repare que o CEL some enquanto está em 2TR.',chk:()=>(S.ev.sw1516||0)>=2&&S.sw1516==='CH',show:'sw1516'}]},
+<p>Em <b>Fontes</b>, o tipo de conexão define o nível que chega: mic dinâmico é fraco (precisa de bastante GAIN), mic condensador precisa de phantom, e linha é forte (normalmente pede PAD nas entradas 1–12). Arquivos tocam com o nível real da gravação.</p>`,
+ m:[{t:'Em Fontes, deixe a entrada 1 como "Mic condensador (+48V)", com um arquivo ou o gerador de voz. Repare que o canal fica mudo.',chk:()=>!!SRC[0]&&SRC[0].conn==='cond',show:'xlr-0'},
+    {t:'Ligue o PHANTOM +48V do grupo CH1–8 para o microfone condensador funcionar.',chk:()=>S.phantom[0]&&!!SRC[0]&&SRC[0].conn==='cond',show:'ph-0'},
+    {t:'Ajuste o GAIN do canal 1 (gire para a direita) até os picos ficarem entre -18 e -4 dBFS. Acompanhe em HOME (METER).',chk:()=>{const p=inPeak(0);return S.phantom[0]&&!!SRC[0]&&p>=-18&&p<=-4},show:'gain-0'},
+    {t:'Conecte uma fonte de "Linha" na entrada 2. Com o GAIN no mínimo o PEAK acende: ligue o PAD do canal 2 e reajuste até o PEAK apagar.',chk:()=>!!SRC[1]&&SRC[1].conn==='line'&&S.ad[1].pad&&inPeak(1)<-3,show:'pad-1'},
+    {t:'Mude a chave CH15/16 ⇄ 2TR IN para 2TR IN e volte. Em 2TR IN, os canais 15 e 16 recebem a fonte da 2TR IN.',chk:()=>(S.ev.sw1516||0)>=2&&S.sw1516==='CH',show:'sw1516'}]},
 
 {t:'Canais e layers',sub:'SEL, ON, SOLO, faders motorizados e camadas',body:`
 <p>A mesa tem 32 canais mono, mas só 16 faders. As <b>layers</b> resolvem isso: as mesmas 16 tiras controlam grupos diferentes, e os faders motorizados vão sozinhos para a posição de cada grupo.</p>
@@ -1324,12 +1369,13 @@ const MODULES=[
 <ul><li><button class="ref" data-show="sel-0">SEL</button>: escolhe o canal que o display e a seção SELECTED CHANNEL vão editar.</li>
 <li><button class="ref" data-show="solo-0">SOLO</button>: escuta o canal nos fones.</li>
 <li><button class="ref" data-show="on-0">ON</button>: liga o canal. LED amarelo aceso = no ar. Apagado = mudo.</li></ul>
-<p>Na foto, só os canais 12 a 15 (VT, BG, BG, CEL) estavam com ON aceso. Os microfones estavam mudos e com os faders baixos, que é o estado normal entre blocos.</p>
+<p>Na cena 00 (Initial Data), todos os canais começam com ON aceso e fader em -∞, inclusive o STEREO.</p>
 <div class="note"><b>Prática</b> No ar, use o ON para abrir e fechar microfones e deixe o fader já na posição certa. Assim o nível de cada pessoa não muda de uma entrada para a outra.</div>`,
- m:[{t:'Ligue o canal 1 (Apdor) com o botão ON. O LED amarelo acende.',chk:()=>S.ch[0].on,show:'on-0'},
-    {t:'Leve o fader do canal 2 (Conv1) até 0 dB (a marca 0 da escala).',chk:()=>near(chDb(1),0,1.5),show:'fader-1'},
+ m:[{t:'Desligue o canal 1 com o botão ON (o LED amarelo apaga) e ligue de novo.',chk:()=>(S.ev['on:CH01']||0)>=2&&S.ch[0].on,show:'on-0'},
+    {t:'Leve o fader do canal 1 até 0 dB (a marca 0 da escala).',chk:()=>near(chDb(0),0,1.5),show:'fader-0'},
+    {t:'Suba o fader vermelho STEREO até 0 dB. Agora o canal 1 chega à saída.',chk:()=>near(posToDb(S.st.fader),0,1.5),show:'fader-st'},
     {t:'Mude para a layer 17-32, veja os faders se moverem e volte para 1-16.',chk:()=>had('layer:17-32')&&after('layer:1-16','layer:17-32')&&S.layer==='1-16',show:'ly-17-32'},
-    {t:'Selecione o canal 5 (Marcio) com SEL. O nome dele aparece no canto do display.',chk:()=>S.sel.t==='ch'&&S.sel.i===4,show:'sel-4'}]},
+    {t:'Selecione o canal 5 com SEL. O nome dele aparece no canto do display.',chk:()=>S.sel.t==='ch'&&S.sel.i===4,show:'sel-4'}]},
 
 {t:'Display e navegação',sub:'DISPLAY ACCESS, abas, cursor, roda e ENTER',body:`
 <p>Quase toda a configuração fina mora no display. São 12 teclas de <b>DISPLAY ACCESS</b>, cada uma abrindo um grupo de páginas. Apertar de novo a mesma tecla passa para a próxima aba.</p>
@@ -1366,8 +1412,8 @@ const MODULES=[
 <p>Na aba <b>EQ LIB</b> há receitas prontas: selecione o canal, escolha a receita e pressione ENTER.</p>`,
  m:[{t:'Selecione o canal 1 e corte graves: na banda LOW, deixe o GAIN em -6 dB ou menos (ou use HPF).',chk:()=>{const b=S.ch[0].eq[0];const o=QOPT(0)[b.qi];return o==='HPF'||b.g<=-6},show:'band-0'},
     {t:'Ainda no canal 1, na banda HIGH-MID, coloque a frequência entre 2 e 4,5 kHz com GAIN de +2 dB ou mais.',chk:()=>{const b=S.ch[0].eq[2];const f=fOf(b.fi);return f>=2000&&f<=4500&&b.g>=2},show:'k-f'},
-    {t:'Selecione o canal 13 (BG) e confira o PAN: ele está todo à esquerda (L63). Mude para o centro e volte para L63.',chk:()=>had('pan')&&S.ch[12].pan<=-60&&S.sel.t==='ch'&&S.sel.i===12,show:'k-pan'},
-    {t:'Aplique a receita "Voz feminina" da EQ LIB no canal 2 (Conv1).',chk:()=>{const b=S.ch[1].eq;return QOPT(0)[b[0].qi]==='HPF'&&near(fOf(b[0].fi),120,8)},show:'da-EQ'}]},
+    {t:'Selecione o canal 2 e leve o PAN totalmente para a direita (R63).',chk:()=>S.ch[1].pan>=60,show:'k-pan'},
+    {t:'Aplique a receita "Voz feminina" da EQ LIB no canal 2.',chk:()=>{const b=S.ch[1].eq;return QOPT(0)[b[0].qi]==='HPF'&&near(fOf(b[0].fi),120,8)},show:'da-EQ'}]},
 
 {t:'Dinâmica',sub:'Compressor, gate, expansor e ducking',body:`
 <p>Cada canal tem <b>um processador de dinâmica</b>, e você escolhe o tipo dele (TYPE): COMP (compressor), EXPAND, CMP-H e CMP-S (compander), GATE e DUCKING. Saídas (AUX, BUS, STEREO) também têm o seu.</p>
@@ -1385,7 +1431,7 @@ const MODULES=[
 <div class="note"><b>Na prática</b> A dinâmica só funciona com <b>ON</b> ligado na página. Use DYN LIB para partir de uma receita e ajuste pelo ouvido e pelo GR.</div>`,
  m:[{t:'Selecione o canal 1, abra DYNAMICS e ligue o processador (campo ON + ENTER) com TYPE = COMP.',chk:()=>S.ch[0].dyn.on&&S.ch[0].dyn.type==='COMP',show:'da-DYN'},
     {t:'No canal 1, ajuste RATIO para 4:1 e THRESH entre -20 e -10 dB.',chk:()=>{const d=S.ch[0].dyn;return RATIOS[d.ri]===4&&d.thr<=-10&&d.thr>=-20},show:'wheel'},
-    {t:'Selecione o canal 3 (Conv2) e configure o TYPE como GATE, ligado.',chk:()=>S.ch[2].dyn.on&&S.ch[2].dyn.type==='GATE',show:'sel-2'}]},
+    {t:'Selecione o canal 3 e configure o TYPE como GATE, ligado.',chk:()=>S.ch[2].dyn.on&&S.ch[2].dyn.type==='GATE',show:'sel-2'}]},
 
 {t:'AUX e mix-minus',sub:'FADER MODE AUX, envios pré e pós-fader',body:`
 <p>Os 8 <b>AUX</b> são mixagens independentes da principal. Em TV e rádio eles alimentam os retornos (ponto eletrônico, fones do estúdio), a híbrida telefônica e o link.</p>
@@ -1399,9 +1445,9 @@ const MODULES=[
 <li><b>POST</b>: o envio acompanha o fader. Bom para efeitos.</li></ul>
 <p>Neste simulador o ON do canal corta também o envio pré-fader.</p>
 <h3>Mix-minus</h3>
-<p>Quem entra por telefone ou link precisa ouvir o programa <b>menos a própria voz</b>, senão ouve um eco de si mesmo com atraso. Monte um AUX com os microfones do estúdio e tudo mais, mas com o envio do próprio CALL em -∞, e ligue esse AUX (via OMNI OUT) na entrada da híbrida.</p>`,
+<p>Quem entra por telefone ou link precisa ouvir o programa <b>menos a própria voz</b>, senão ouve um eco de si mesmo com atraso. Monte um AUX com os microfones do estúdio e tudo mais, mas com o envio do próprio canal do telefone em -∞, e ligue esse AUX (via OMNI OUT) na entrada da híbrida.</p>`,
  m:[{t:'Pressione FADER MODE AUX 1. Os faders passam a mostrar os envios para o AUX 1.',chk:()=>S.fm===1,show:'fm-1'},
-    {t:'Monte o mix-minus do CALL no AUX 1: envio dos canais 1 e 2 em -10 dB ou mais, e o canal 10 (CALL) em -∞.',chk:()=>posToDb(S.ch[0].aux[0])>=-10&&posToDb(S.ch[1].aux[0])>=-10&&S.ch[9].aux[0]<0.01,show:'fader-0'},
+    {t:'Monte o mix-minus do CALL no AUX 1: envio dos canais 1 e 2 em -10 dB ou mais, e o canal 10 (o canal do telefone, neste exemplo) em -∞.',chk:()=>posToDb(S.ch[0].aux[0])>=-10&&posToDb(S.ch[1].aux[0])>=-10&&S.ch[9].aux[0]<0.01,show:'fader-0'},
     {t:'Volte os faders ao modo normal com HOME (METER).',chk:()=>S.fm===0&&after('home','fmode:1'),show:'home'}]},
 
 {t:'Roteamento e patch',sub:'PAN/ROUTING, BUS e PATCH',body:`
@@ -1412,8 +1458,8 @@ const MODULES=[
 <h3>PATCH de saída</h3>
 <p>As 4 saídas <b>OMNI OUT</b> do painel traseiro recebem o que você escolher: AUX, BUS ou STEREO. É assim que um AUX vira o retorno de um fone ou a alimentação da híbrida.</p>
 <div class="note warn"><b>Cuidado</b> Mudar o patch durante o programa troca a fonte do canal na hora. Confira antes de mexer.</div>`,
- m:[{t:'Abra PAN/ROUTING, aba ROUTING, e envie o canal 12 (VT) para o BUS 1 (para gravação separada).',chk:()=>S.ch[11].bus[0],show:'da-PAN'},
-    {t:'Na mesma grade, tire o canal 9 do STEREO (ele não tem fonte ligada).',chk:()=>!S.ch[8].st,show:'da-PAN'},
+ m:[{t:'Abra PAN/ROUTING, aba ROUTING, e envie o canal 12 para o BUS 1 (para gravação separada).',chk:()=>S.ch[11].bus[0],show:'da-PAN'},
+    {t:'Na mesma grade, tire o canal 9 do STEREO.',chk:()=>!S.ch[8].st,show:'da-PAN'},
     {t:'Abra PATCH e veja as duas abas: IN PATCH (o canal 1 recebe AD1) e OUT PATCH (o que sai nas OMNI OUT 1–4).',chk:()=>had('tab:PATCH:0')&&had('tab:PATCH:1'),show:'da-PATCH'}]},
 
 {t:'Layer MASTER e STEREO',sub:'Masters de AUX e BUS, saída principal',body:`
@@ -1434,7 +1480,7 @@ const MODULES=[
 <li><button class="ref" data-show="monlvl">MONITOR OUT LEVEL</button> e <button class="ref" data-show="phlvl">PHONES LEVEL</button>: volumes de escuta. Não afetam o programa.</li></ul>
 <div class="note warn"><b>Atenção</b> Em DIO/SETUP &gt; SOLO existe o modo <b>MIX SOLO</b>, em que o solo <b>corta os outros canais na saída STEREO</b>. No ar, use <b>RECORD SOLO</b>, que só mexe na escuta. Confira o modo na mesa do seu estúdio.</div>
 <p><b>PFL</b> escuta antes do fader (bom para conferir uma fonte que ainda não entrou). <b>AFL</b> escuta depois do fader.</p>`,
- m:[{t:'Ligue o som, pressione SOLO no canal 12 (VT) e ouça só ele.',chk:()=>S.ch[11].solo,show:'solo-11'},
+ m:[{t:'Pressione SOLO no canal 1 e ouça só ele (com Ouvir ligado).',chk:()=>S.ch[0].solo,show:'solo-0'},
     {t:'Pressione CLEAR para tirar todos os solos.',chk:()=>had('clear')&&!S.anySolo,show:'clear'},
     {t:'Mude a chave MONITOR para 2TR IN e depois volte para MONITOR.',chk:()=>had('monsw:2TR')&&S.monSrc==='MON',show:'monsw'},
     {t:'Em DIO/SETUP > SOLO, confira que o modo é RECORD SOLO e o LISTEN é PFL.',chk:()=>S.soloMode==='RECORD'&&S.listen==='PFL',show:'da-DIO'}]},
@@ -1449,7 +1495,7 @@ const MODULES=[
 <p>Nesta simulação: FX1 recebe do AUX 7 e FX2 do AUX 8.</p>`,
  m:[{t:'Pressione o botão ST IN para mostrar ST IN 3/4 e depois volte para 1/2.',chk:()=>had('stinbank:1')&&S.stinBank===0,show:'stinbtn'},
     {t:'Na página EFFECT, aba FX2, mude o TYPE para MONO DELAY.',chk:()=>S.fx[1].type==='MONO DELAY',show:'da-EFFECT'},
-    {t:'Ligue o ST IN 1 (botão ON da primeira tira ST IN) e ajuste o knob dele para -10 dB ou menos.',chk:()=>S.stin[0].on&&posToDb(S.stin[0].fader)<=-9,show:'stin-on-0'}]},
+    {t:'Suba o knob verde do ST IN 1 para algo entre -15 e -5 dB, com o ON dele aceso.',chk:()=>{const d=posToDb(S.stin[0].fader);return S.stin[0].on&&d>=-15&&d<=-5},show:'stin-k-0'}]},
 
 {t:'Cenas',sub:'STORE, RECALL, RECALL SAFE',body:`
 <p>Uma <b>cena</b> é uma foto da mesa inteira: faders, ON, EQ, dinâmica, pan, envios, roteamento, efeitos. São 99 cenas mais a 00 (dados iniciais, só leitura).</p>
@@ -1459,10 +1505,10 @@ const MODULES=[
 <p>O aviso <b>EDIT</b> no display mostra que a mesa mudou desde o último RECALL ou STORE.</p>
 <h3>RECALL SAFE</h3>
 <p>Na página SCENE, aba RCL SAFE, marque canais que <b>não</b> devem mudar ao chamar cena (por exemplo, a híbrida, se ela tem um ajuste que você não quer perder).</p>
-<div class="note"><b>Rotina</b> Grave uma cena para cada formato de programa e uma "segura" de abertura. Antes de entrar no ar, chame a cena do programa e confira os ON.</div>`,
- m:[{t:'Escolha a cena 02 com ▲, pressione STORE, dê um título e confirme com ENTER.',chk:()=>had('store:2')&&S.scenes[2]&&S.scenes[2].data,show:'sc-store'},
-    {t:'Agora mexa: baixe o fader do canal 12 (VT) até o fim.',chk:()=>had('store:2')&&S.ch[11].fader<0.05,show:'fader-11'},
-    {t:'Volte para a cena 01 com ▼ e pressione RECALL. Veja os faders voltarem sozinhos.',chk:()=>had('store:2')&&after('recall:1','store:2'),show:'sc-recall'}]},
+<div class="note"><b>Rotina</b> Grave uma cena para cada formato de programa e uma cena segura de abertura. Antes de entrar no ar, chame a cena do programa e confira os ON.</div>`,
+ m:[{t:'Escolha a cena 01 com ▲, pressione STORE, dê um título e confirme com ENTER.',chk:()=>had('store:1')&&S.scenes[1]&&S.scenes[1].data,show:'sc-store'},
+    {t:'Agora mexa na mesa: leve o fader do canal 3 até 0 dB.',chk:()=>had('store:1')&&after('fader:2','store:1')&&near(chDb(2),0,2),show:'fader-2'},
+    {t:'Com a cena 01 escolhida, pressione RECALL e veja o fader do canal 3 voltar sozinho.',chk:()=>had('store:1')&&after('recall:1','fader:2')&&after('fader:2','store:1'),show:'sc-recall'}]},
 
 {t:'Utilitários e setup',sub:'Oscilador, clock, pares, fase, delay, MIDI e teclas',body:`
 <h3>Oscilador (UTILITY &gt; OSC)</h3>
@@ -1470,7 +1516,7 @@ const MODULES=[
 <h3>Clock (DIO/SETUP &gt; W.CLOCK)</h3>
 <p>Toda a cadeia digital precisa do mesmo relógio. Se você escolher um clock externo sem sinal, a mesa fica <b>UNLOCK</b> e o áudio some. Use o interno (INT 44.1k ou INT 48k; vídeo costuma usar 48 kHz) a não ser que o estúdio tenha um gerador de sincronismo.</p>
 <h3>Pares (PAIR/GROUP)</h3>
-<p>Canais vizinhos ímpar/par viram um par estéreo: fader, ON, EQ e dinâmica passam a andar juntos. Ótimo para a trilha BG L/R.</p>
+<p>Canais vizinhos ímpar/par viram um par estéreo: fader, ON, EQ e dinâmica passam a andar juntos. Ótimo para uma trilha estéreo.</p>
 <h3>Fase e delay (ø/INSERT/DELAY)</h3>
 <p><b>Fase</b> inverte a polaridade (dois microfones captando a mesma fonte). <b>Delay</b> atrasa o áudio do canal para sincronizar com um vídeo atrasado (lip-sync); a tela mostra o atraso em quadros.</p>
 <h3>MIDI, USER DEFINED KEYS e PREFERENCE</h3>
@@ -1478,10 +1524,10 @@ const MODULES=[
  m:[{t:'Ligue o oscilador em UTILITY > OSC com SINE 1kHz e LEVEL -18 dB.',chk:()=>S.osc.on&&S.osc.w===1&&S.osc.lvl===-18,show:'da-UTILITY'},
     {t:'Desligue o oscilador.',chk:()=>had('osc:on')&&!S.osc.on,show:'da-UTILITY'},
     {t:'Em DIO/SETUP, mude o clock para INT 48k.',chk:()=>S.clock==='INT 48k',show:'da-DIO'},
-    {t:'Em PAIR/GROUP, faça par dos canais 13 e 14 (BG L/R).',chk:()=>S.pair[6],show:'da-PAIR'},
-    {t:'Em ø/INSERT/DELAY, aba DELAY, ligue um atraso de 1 quadro (cerca de 33 ms) no canal 12 (VT).',chk:()=>S.ch[11].dlyOn&&S.ch[11].dly>=30&&S.ch[11].dly<=37,show:'da-INSERT'}]},
+    {t:'Em PAIR/GROUP, faça par dos canais 13 e 14 (uma fonte estéreo).',chk:()=>S.pair[6],show:'da-PAIR'},
+    {t:'Em ø/INSERT/DELAY, aba DELAY, ligue um atraso de 1 quadro (cerca de 33 ms) no canal 12.',chk:()=>S.ch[11].dlyOn&&S.ch[11].dly>=30&&S.ch[11].dly<=37,show:'da-INSERT'}]},
 
-{t:'Operação no ar',sub:'Rotina de telejornal e solução de problemas',body:`
+{t:'Operação no ar',sub:'Rotina de programa ao vivo e solução de problemas',body:`
 <h3>Antes do programa</h3>
 <ul><li>Chame a cena do programa (RECALL) e confira que o clock está travado (sem UNLOCK).</li><li>Phantom ligado nos grupos das lapelas.</li><li>Teste cada lapela e ajuste o GAIN (picos entre -18 e -6).</li><li>Teste a híbrida e o link: o convidado tem que se ouvir sem eco (mix-minus).</li><li>STEREO em 0 dB, nenhum SOLO ativo, oscilador desligado.</li></ul>
 <h3>Durante</h3>
@@ -1494,7 +1540,7 @@ const MODULES=[
 <tr><td>Convidado ouve eco</td><td>O envio do próprio canal dele para o AUX do retorno não está em -∞.</td></tr>
 <tr><td>Fones mudos</td><td>Chave MONITOR em 2TR IN, solo de canal vazio, PHONES LEVEL.</td></tr>
 <tr><td>Canal some ao chamar cena</td><td>Cena gravada com ON apagado. Use RECALL SAFE se precisar.</td></tr></table></div>`,
- m:[{t:'Checklist: cena 01 chamada, phantom CH1–8 ligado, ON dos canais 1 a 6 acesos, STEREO em 0 dB, nenhum SOLO, oscilador desligado e clock interno.',chk:()=>S.curScene===1&&S.phantom[0]&&[0,1,2,3,4,5].every(i=>S.ch[i].on)&&near(posToDb(S.st.fader),0,1.5)&&!S.anySolo&&!S.osc.on&&!unlocked()&&S.st.on,show:'sc-recall'},
+ m:[{t:'Checklist: phantom CH1–8 ligado, canal 1 com ON e fader perto de 0 dB, STEREO em 0 dB, nenhum SOLO, oscilador desligado e clock interno.',chk:()=>S.phantom[0]&&S.ch[0].on&&near(chDb(0),0,3)&&near(posToDb(S.st.fader),0,1.5)&&S.st.on&&!S.anySolo&&!S.osc.on&&!unlocked(),show:'fader-st'},
     {t:'Simule a pane: em DIO/SETUP escolha o clock ADAT IN, veja o UNLOCK e o áudio sumir, e volte para um clock interno.',chk:()=>had('clock:ADAT IN')&&!unlocked(),show:'da-DIO'}]},
 
 {t:'Prova final',sub:'12 perguntas',quiz:true,body:`<p>Responda sem olhar a teoria. Cada resposta mostra a explicação. Você pode refazer quando quiser.</p>`,m:[]}
@@ -1502,7 +1548,7 @@ const MODULES=[
 
 const QUIZ=[
  {q:'O PEAK do canal 3 acende quando a pessoa fala. O que fazer primeiro?',o:['Baixar o fader do canal','Reduzir o GAIN (ou ligar o PAD)','Ligar o compressor','Baixar o master STEREO'],a:1,e:'PEAK é na entrada, antes do fader e do compressor. Só o GAIN e o PAD resolvem.'},
- {q:'As lapelas dos canais 1–6 não dão sinal nenhum, nem SIGNAL. O mais provável é:',o:['Fader abaixado','ON apagado','PHANTOM +48V desligado no grupo CH1–8','SOLO ativo'],a:2,e:'SIGNAL é medido na entrada. Fader, ON e solo vêm depois. Lapela condensadora sem phantom não gera sinal.'},
+ {q:'Os microfones condensadores dos canais 1–6 não dão sinal nenhum, nem SIGNAL. O mais provável é:',o:['Fader abaixado','ON apagado','PHANTOM +48V desligado no grupo CH1–8','SOLO ativo'],a:2,e:'SIGNAL é medido na entrada. Fader, ON e solo vêm depois. Microfone condensador sem phantom não gera sinal.'},
  {q:'Você quer controlar o master do AUX 3. Qual layer?',o:['1-16','17-32','MASTER','REMOTE'],a:2,e:'Na layer MASTER, faders 1–8 = AUX 1–8 e 9–16 = BUS 1–8.'},
  {q:'Em FADER MODE AUX 2, o fader do canal 5 controla:',o:['O nível do canal 5 no STEREO','O envio do canal 5 para o AUX 2','O master do AUX 2','O pan do canal 5'],a:1,e:'FADER MODE transforma os faders em envios para o AUX escolhido. HOME volta ao normal.'},
  {q:'Para o retorno (ponto) do apresentador, o envio AUX deve ser:',o:['Pós-fader','Pré-fader','Tanto faz','Pelo BUS'],a:1,e:'Pré-fader: o retorno não muda quando você mexe no fader do programa.'},
@@ -1603,13 +1649,51 @@ function applyTheme(){const r=document.documentElement;if(THEME==='system')r.rem
 
 /* ---------- modais ---------- */
 function openModal(id,v){const m=$('#'+id);m.hidden=!v;if(v){const b=m.querySelector('.btn.pri');b&&b.focus()}else $('#console').focus({preventScroll:true})}
-const anyModal=()=>!$('#onb').hidden||!$('#help').hidden;
+const anyModal=()=>!$('#onb').hidden||!$('#help').hidden||!$('#src').hidden;
+
+/* ---------- Fontes de áudio ---------- */
+const ROWS=[...Array(16).keys(),16];
+const srcOf=k=>k===16?SRC2:SRC[k];
+const rowName=k=>k===16?'2TR IN':'IN '+(k+1);
+const rowSub=k=>k===16?'RCA estéreo':k<12?'XLR / P10':'P10 linha';
+let FILE_K=0;
+function renderSources(){$('#srclist').innerHTML=ROWS.map(k=>{const s=srcOf(k),type=s?(s.kind==='file'?'file':s.gen):'none';const types=k===16?['none','mus','file']:['none','voz','mus','tone','noise','file'];
+  return`<div class="srow ${s?'on':''}" data-row="${k}"><div class="sin"><b>${rowName(k)}</b><span>${rowSub(k)}</span></div>
+   <select id="st${k}" data-stype="${k}" aria-label="Fonte da ${rowName(k)}">${types.map(t=>`<option value="${t}" ${t===type?'selected':''}>${t==='none'?'Nada conectado':GENS[t]}</option>`).join('')}</select>
+   ${k<12?`<select id="sc${k}" data-sconn="${k}" aria-label="Conexão da ${rowName(k)}" ${s?'':'disabled'}>${Object.entries(CONN).map(([c,v])=>`<option value="${c}" ${(s?s.conn:'dyn')===c?'selected':''}>${v.n}</option>`).join('')}</select>`:`<span class="fixed">${k===16?'Linha -10 dBV':'Linha (+4 dBu)'}</span>`}
+   <button type="button" class="btn sm ${type==='file'?'':'ghost'}" data-sfile="${k}" title="${type==='file'?esc(s.name):'Carregar um arquivo de áudio'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg><span>${type==='file'?esc(s.name):'Carregar arquivo…'}</span></button>
+   <div class="smeter" aria-hidden="true"><i id="sm${k}"></i></div></div>`}).join('');
+  $('#srcPlay').textContent=FILES_ON?'Pausar arquivos':'Tocar arquivos';$('#srcPlay').disabled=![...SRC,SRC2].some(s=>s&&s.kind==='file')}
+function srcMeters(){if($('#src').hidden)return;ROWS.forEach(k=>{const el=$('#sm'+k);if(!el)return;const s=srcOf(k);let d=-120;
+  if(s){if(s.kind==='file')d=k===16?Math.max(anDb(AU.tr&&AU.tr.anL),anDb(AU.tr&&AU.tr.anR))-6:anDb(s.an)-6;else{const e=ENV[k===16?'2tr14':'ad'+k];d=e?e.cur-6:-120}}
+  el.style.width=clamp((d+48)/48,0,1)*100+'%'})}
+openSources=k=>{renderSources();openModal('src',true);if(k!==undefined){const r=$(`[data-row="${k}"]`);if(r){r.scrollIntoView({block:'center'});const sel=r.querySelector('select');sel&&sel.focus()}}};
+function pickFile(k){FILE_K=k;const f=$('#fileIn');f.value='';f.click()}
+async function takeFile(k,file){if(!file)return;if(file.type&&!file.type.startsWith('audio')&&!/\.(wav|mp3|m4a|aac|ogg|flac|aif+)$/i.test(file.name)){toast('Escolha um arquivo de áudio');return}
+  toast('Carregando '+file.name+'…');try{await loadFile(k,file);ev('file');toast(rowName(k)+': '+file.name);markAudio()}catch(e){console.warn(e);toast('Não foi possível ler este arquivo')}if(!$('#src').hidden)renderSources()}
+function markAudio(){const b=$('#audioBtn');if(!AU.listen)b.classList.add('nudge')}
+$('#fileIn').addEventListener('change',e=>takeFile(FILE_K,e.target.files[0]));
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.stype!==undefined){const k=+t.dataset.stype,v=t.value,prev=srcOf(k);
+    if(v==='none')setSource(k,null);else if(v==='file'){t.value=prev?(prev.kind==='file'?'file':prev.gen):'none';pickFile(k);return}
+    else setSource(k,{kind:'gen',gen:v,conn:prev&&prev.conn?prev.conn:(v==='voz'?'dyn':'line')});ev('src');renderSources();return}
+  if(t.dataset.sconn!==undefined){const k=+t.dataset.sconn,s=SRC[k];if(s){s.conn=t.value;finalize(s,k);delete ENV['ad'+k];ev('src')}renderSources()}});
+const DEMO=[[0,'voz','cond'],[1,'voz','cond'],[2,'voz','dyn'],[3,'voz','dyn'],[4,'voz','line'],[12,'mus','line'],[13,'mus','line']];
+function demoSources(){ROWS.forEach(k=>setSource(k,null));DEMO.forEach(([k,g,c],n)=>setSource(k,{kind:'gen',gen:g,conn:c,name:g==='voz'?'Voz '+(n+1):'Música '+(k===12?'L':'R'),f0:F0S[n],side:k===13?1:0}));setSource(16,{kind:'gen',gen:'mus',name:'Música (player)'});ev('src')}
+/* arrastar arquivo para a mesa ou para as linhas */
+function dropTarget(e){const x=e.target.closest&&e.target.closest('[data-row],[data-ctl="plug"]');if(!x)return null;return x.dataset.row!==undefined?+x.dataset.row:+x.dataset.i}
+['dragover','dragenter'].forEach(t=>document.addEventListener(t,e=>{if(!e.dataTransfer||![...e.dataTransfer.types].includes('Files'))return;e.preventDefault();const sw=$('#stagewrap');sw.classList.toggle('dropping',!!e.target.closest('#stagewrap'));$$('.srow.drop').forEach(r=>r.classList.remove('drop'));const r=e.target.closest&&e.target.closest('[data-row]');if(r)r.classList.add('drop')}));
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget){$('#stagewrap').classList.remove('dropping');$$('.srow.drop').forEach(r=>r.classList.remove('drop'))}});
+document.addEventListener('drop',e=>{if(!e.dataTransfer||!e.dataTransfer.files.length)return;e.preventDefault();$('#stagewrap').classList.remove('dropping');$$('.srow.drop').forEach(r=>r.classList.remove('drop'));
+  let k=dropTarget(e);if(k===null||isNaN(k)){if(e.target.closest('#stagewrap')){k=SRC.findIndex(s=>!s);if(k<0)k=0;toast('Solte sobre um conector para escolher a entrada. Usando '+rowName(k))}else return}
+  [...e.dataTransfer.files].slice(0,16).forEach((f,n)=>takeFile(Math.min(16,k+n),f))});
 
 /* ---------- eventos ---------- */
 document.addEventListener('click',e=>{const t=e.target;
   const s=t.closest('[data-show]');if(s){e.preventDefault();highlight(s.dataset.show,{zoom:true,coach:s.textContent.trim()});return}
   const md=t.closest('[data-mod]');if(md){setMod(+md.dataset.mod);return}
   const mi=t.closest('[data-mi]');if(mi){FOC=+mi.dataset.mi;HINT=false;const y=$('#lesson').scrollTop;renderLesson();$('#lesson').scrollTop=y;const x=MODULES[CUR].m[FOC];if(x.show)highlight(x.show,{});return}
+  const sf=t.closest('[data-sfile]');if(sf){pickFile(+sf.dataset.sfile);return}
   const op=t.closest('[data-opt]');if(op&&!op.disabled){QANS[QI]=+op.dataset.opt;LS.set('e01v96.quiz',QANS);renderLesson();return}
   if(t.closest('[data-close]')){openModal(t.closest('.modal').id,false);return}
   const id=(t.closest('button')||{}).id;
@@ -1624,19 +1708,23 @@ document.addEventListener('click',e=>{const t=e.target;
    case'menuBtn':case'crumb':openDrawer(true);break;
    case'drawerClose':openDrawer(false);break;
    case'helpBtn':openModal('help',true);break;
+   case'srcBtn':openSources();break;
+   case'srcDemo':demoSources();renderSources();toast('Fontes de treino conectadas');break;
+   case'srcClear':ROWS.forEach(k=>setSource(k,null));renderSources();break;
+   case'srcPlay':filesPlay(!FILES_ON);renderSources();break;
    case'onbGo':LS.set('e01v96.onb',1);openModal('onb',false);break;
    case'panelBtn':{const w=$('#work');w.classList.toggle('nopanel');$('#panelBtn').setAttribute('aria-pressed',!w.classList.contains('nopanel'));$('#panelBtn').classList.toggle('on',w.classList.contains('nopanel'));break}
    case'themeBtn':THEME=THEMES[(THEMES.indexOf(THEME)+1)%3];LS.set('e01v96.theme',THEME);applyTheme();toast($('#themeBtn').title);break;
    case'zin':setZoom(curZ()*1.15);break;
    case'zout':setZoom(curZ()/1.15);break;
    case'zval':fitToggle();break;
-   case'resetBtn':{const keep=S.explored;S=defaultState();initScenes();S.explored=keep;Object.keys(ENV).forEach(k=>delete ENV[k]);toast('Mesa reiniciada');break}
+   case'resetBtn':{const keep=S.explored;clearHL();S=defaultState();initScenes();S.explored=keep;Object.keys(ENV).forEach(k=>delete ENV[k]);toast('Mesa reiniciada');break}
    case'resetProg':DONE={};QANS={};QI=0;LS.set('e01v96.done',DONE);LS.set('e01v96.quiz',QANS);renderLesson();openModal('help',false);toast('Progresso zerado');break;
   }});
 $('#scrim').addEventListener('click',()=>openDrawer(false));
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){if(m.id==='onb')LS.set('e01v96.onb',1);openModal(m.id,false)}}));
-$('#audioBtn').addEventListener('click',async()=>{const on=await toggleAudio();const b=$('#audioBtn');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.querySelector('.lab').textContent=on?'Ouvindo':'Ouvir';checkMissions()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#onb').hidden){LS.set('e01v96.onb',1);openModal('onb',false)}else if(!$('#help').hidden)openModal('help',false);else if($('#drawer').classList.contains('open'))openDrawer(false);else clearHL();return}
+$('#audioBtn').addEventListener('click',async()=>{const on=await toggleAudio();const b=$('#audioBtn');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.querySelector('.lab').textContent=on?'Ouvindo':'Ouvir';b.classList.remove('nudge');checkMissions()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#onb').hidden){LS.set('e01v96.onb',1);openModal('onb',false)}else if(!$('#help').hidden)openModal('help',false);else if(!$('#src').hidden)openModal('src',false);else if($('#drawer').classList.contains('open'))openDrawer(false);else clearHL();return}
   if(e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||anyModal())return;
   const k=e.key.toLowerCase();if(k==='?'){openModal('help',true)}else if(k==='m')openDrawer(!$('#drawer').classList.contains('open'));else if(k==='p')$('#panelBtn').click();else if(k==='s')showMission();else if(k==='f')fitToggle();else return;e.preventDefault()});
 /* zoom com Ctrl + roda e arrastar o fundo para mover */
@@ -1650,7 +1738,7 @@ function boot(){buildConsole();cacheEls();bindConsole();lctx=$('#lcd').getContex
   onEvent=()=>{clearTimeout(boot._c);boot._c=setTimeout(checkMissions,60)};
   if(!LS.get('e01v96.onb',0))openModal('onb',true);
   let last=performance.now(),acc=0,chk=0;
-  const loop=now=>{const dt=Math.min(.1,(now-last)/1000);last=now;model(dt);syncPanel(dt);acc+=dt;if(acc>1/30){drawLCD(acc);acc=0}audioSync();placeCoach();chk+=dt;if(chk>.4){chk=0;checkMissions()}requestAnimationFrame(loop)};
+  const loop=now=>{const dt=Math.min(.1,(now-last)/1000);last=now;model(dt);syncPanel(dt);acc+=dt;if(acc>1/30){drawLCD(acc);acc=0}audioSync();placeCoach();srcMeters();chk+=dt;if(chk>.4){chk=0;checkMissions()}requestAnimationFrame(loop)};
   requestAnimationFrame(loop);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(applyZoom)}
 boot();
