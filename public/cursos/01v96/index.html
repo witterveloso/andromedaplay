@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Escola 01V96</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: barra de estúdio no topo, trilha de módulos à esquerda + aula à direita, simulador da mesa em largura total abaixo */
+:root{
+  --bg:#e9edf3; --surface:#ffffff; --surface-2:#f3f5f9; --fg:#141a25; --muted:#556175; --line:#d3dae5;
+  --accent:#b97c0c; --accent-soft:#fbefd6; --accent-ink:#ffffff; --ok:#1d7f47; --ok-soft:#dff3e7; --bad:#b23a1e; --bad-soft:#fbe5df;
+  --navy:#25344f; --focus:#2f6fd6;
+  --f-display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --f-panel:'Barlow Semi Condensed','Arial Narrow',Arial,sans-serif;
+  /* cores físicas da mesa (objeto, não mudam com o tema) */
+  --c-panel:#34425e; --c-panel-hi:#3d4c6b; --c-panel-lo:#2a3650; --c-ink:#e8edf6; --c-rule:#5b7cb8;
+  --c-black:#1a1e26; --c-btn:#2c3038; --c-btn-hi:#4a505b; --c-sel:#a8bddb; --c-on:#a3a8b0;
+  --c-led-off:#3a3d42; --c-green:#8dff5c; --c-yellow:#ffd23d; --c-orange:#ffa53a; --c-red:#ff4b3a;
+  --c-desk:#0d1117; --c-tape:#f4f4ef; --c-ytape:#f5e13a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e131b; --surface:#161d29; --surface-2:#1c2433; --fg:#e5eaf2; --muted:#98a4b7; --line:#2a3446;
+    --accent:#e6a93a; --accent-soft:#3a2c10; --accent-ink:#1b1305; --ok:#4cc483; --ok-soft:#14301f; --bad:#f08a6a; --bad-soft:#3a1a12;
+    --navy:#a9bedf; --focus:#7aa7ff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e131b; --surface:#161d29; --surface-2:#1c2433; --fg:#e5eaf2; --muted:#98a4b7; --line:#2a3446;
+  --accent:#e6a93a; --accent-soft:#3a2c10; --accent-ink:#1b1305; --ok:#4cc483; --ok-soft:#14301f; --bad:#f08a6a; --bad-soft:#3a1a12;
+  --navy:#a9bedf; --focus:#7aa7ff; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1520px;margin:0 auto;padding-block:18px 64px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ---------- topo ---------- */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;padding-block:6px 18px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:34px;letter-spacing:.01em;margin:0;line-height:1;text-wrap:balance}
+.brand h1 b{color:var(--accent);font-weight:700}
+.brand p{margin:0;color:var(--muted);font-size:13px}
+.top .spacer{flex:1}
+.prog{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.prog .bar{width:160px;height:8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+.tbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:13.5px;font-weight:500;cursor:pointer}
+.tbtn:hover{border-color:var(--accent)}
+.tbtn.live{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tbtn svg{width:16px;height:16px}
+
+/* ---------- curso ---------- */
+.course{display:grid;grid-template-columns:270px minmax(0,1fr);gap:22px;align-items:start}
+.mods{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px);overflow:auto}
+.mods h2{font-family:var(--f-display);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 8px 8px;font-weight:600}
+.mods ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.mods button{width:100%;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;background:none;border:0;border-radius:8px;padding:7px 8px;cursor:pointer;font-size:14px}
+.mods button:hover{background:var(--surface-2)}
+.mods button.cur{background:var(--accent-soft)}
+.mods .n{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mods .t{min-width:0;line-height:1.25}
+.mods .c{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mods .done .c{color:var(--ok);font-weight:600}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 26px;min-width:0}
+.lesson .eyebrow{font-family:var(--f-mono);font-size:12px;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.lesson h2{font-family:var(--f-display);font-size:32px;line-height:1.1;margin:4px 0 12px;font-weight:700;text-wrap:balance}
+.lesson h3{font-family:var(--f-display);font-size:20px;margin:22px 0 6px;font-weight:600;letter-spacing:.01em}
+.prose{max-width:74ch}
+.prose p,.prose li{margin:0 0 10px}
+.prose ul{padding-left:20px;margin:0 0 12px}
+.prose table{border-collapse:collapse;font-size:13.5px;margin:6px 0 14px;width:100%}
+.prose .tbl{overflow-x:auto}
+.prose th,.prose td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.prose th{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.03em}
+.prose code,.kbd{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.note{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px}
+.note.warn{border-color:color-mix(in srgb,var(--bad) 45%,var(--line));background:var(--bad-soft)}
+.note b:first-child{font-family:var(--f-display);letter-spacing:.04em;text-transform:uppercase;font-size:13px;margin-right:6px}
+.ref{font:inherit;font-weight:600;color:var(--navy);background:none;border:0;border-bottom:1px dashed currentColor;padding:0;cursor:pointer}
+.ref:hover{color:var(--accent)}
+.missions{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.missions h3{margin-top:0}
+.mlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.mi{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface-2)}
+.mi .ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;margin-top:1px}
+.mi.ok{border-color:color-mix(in srgb,var(--ok) 55%,var(--line));background:var(--ok-soft)}
+.mi.ok .ck{border-color:var(--ok);background:var(--ok)}
+.mi.ok .ck::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.mi.next{border-color:var(--accent)}
+.mi .go{font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 9px;cursor:pointer;white-space:nowrap}
+.mi .go:hover{border-color:var(--accent)}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* quiz */
+.q{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 12px;background:var(--surface-2)}
+.q p{margin:0 0 8px;font-weight:600}
+.q label{display:flex;gap:9px;align-items:flex-start;padding:5px 6px;border-radius:6px;cursor:pointer}
+.q label:hover{background:var(--surface)}
+.q .fb{margin-top:6px;font-size:14px}
+.q.right{border-color:var(--ok)} .q.wrong{border-color:var(--bad)}
+.q .fb.r{color:var(--ok)} .q .fb.w{color:var(--bad)}
+
+/* ---------- simulador ---------- */
+.sim{margin-top:24px}
+.simbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px 12px 0 0;padding:10px 14px}
+.dock{flex:1 1 360px;min-width:0;display:flex;gap:10px;align-items:center;font-size:14px}
+.dock .lab{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12.5px;color:var(--accent);white-space:nowrap}
+.dock .txt{min-width:0}
+.zoom{display:flex;gap:4px;align-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.zoom button{border:1px solid var(--line);background:var(--surface-2);border-radius:6px;min-width:30px;height:28px;cursor:pointer;font-size:13px}
+.simscroll{overflow:auto;background:radial-gradient(ellipse at 50% 0%,#1d2533 0%,var(--c-desk) 70%);border-left:1px solid var(--line);border-right:1px solid var(--line);padding:18px;overscroll-behavior-x:contain}
+.stagebox{position:relative}
+.stage{transform-origin:0 0;position:absolute;left:0;top:0}
+.info{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:12px 16px;min-height:74px}
+.info .it{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.02em}
+.info .it small{font-family:var(--f-mono);font-weight:500;font-size:12px;color:var(--accent);margin-left:8px;letter-spacing:0}
+.info .id{font-size:14px;color:var(--muted);max-width:110ch}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- A MESA ---------- */
+.console{width:1480px;background:linear-gradient(180deg,var(--c-panel-hi) 0%,var(--c-panel) 40%,var(--c-panel-lo) 100%);border-radius:14px 14px 10px 10px;color:var(--c-ink);font-family:var(--f-panel);font-weight:600;
+  box-shadow:0 30px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.15),inset 0 0 0 2px #222a3a;user-select:none;-webkit-user-select:none;touch-action:manipulation;position:relative;outline:none}
+.console .knob,.console .fader,.console .wheel{touch-action:none}
+.lbl{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;text-align:center;line-height:1.05;white-space:nowrap}
+.hl{position:relative}
+.hl::after{content:"";position:absolute;inset:-6px;border:3px solid var(--c-yellow);border-radius:10px;animation:hl 1s ease-in-out infinite;pointer-events:none;z-index:9}
+@keyframes hl{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.08)}}
+
+/* LEDs */
+.led{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c-led-off);box-shadow:inset 0 1px 1px rgba(0,0,0,.6)}
+.led.lit.g{background:var(--c-green);box-shadow:0 0 6px var(--c-green)}
+.led.lit.y{background:var(--c-yellow);box-shadow:0 0 6px var(--c-yellow)}
+.led.lit.o{background:var(--c-orange);box-shadow:0 0 6px var(--c-orange)}
+.led.lit.r{background:var(--c-red);box-shadow:0 0 7px var(--c-red)}
+
+/* botões */
+.b{position:relative;display:block;width:38px;height:26px;border:0;border-radius:3px;cursor:pointer;padding:0;
+  background:linear-gradient(180deg,#4b515c 0%,#2f343c 18%,#262a31 100%);box-shadow:0 2px 0 #11141a,0 3px 5px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)}
+.b:active,.b.press{transform:translateY(1px);box-shadow:0 1px 0 #11141a,inset 0 1px 0 rgba(255,255,255,.12)}
+.b .led{position:absolute;left:50%;top:5px;width:14px;height:4px;margin-left:-7px;border-radius:1px}
+.b.sel{background:linear-gradient(180deg,#d2deef 0%,#a9bedc 20%,#93aacb 100%);width:44px;height:24px}
+.b.on{background:linear-gradient(180deg,#c9cdd3 0%,#a4a9b1 20%,#8e939b 100%);width:44px;height:24px}
+.b.solo{width:44px;height:24px}
+.b.big{width:46px;height:30px}
+.b.flat{width:30px;height:18px}
+.b.noled .led{display:none}
+
+/* conectores */
+.xlr{width:50px;height:50px;border-radius:50%;cursor:pointer;position:relative;background:radial-gradient(circle at 50% 50%,#9aa0a8 0 52%,#5d636c 53% 60%,#2a2e35 61% 100%);box-shadow:0 1px 0 rgba(255,255,255,.12),inset 0 2px 3px rgba(0,0,0,.6)}
+.xlr::before{content:"";position:absolute;inset:14px;border-radius:50%;background:
+  radial-gradient(circle at 30% 38%,#111 0 2.6px,transparent 3px),radial-gradient(circle at 70% 38%,#111 0 2.6px,transparent 3px),radial-gradient(circle at 50% 72%,#111 0 2.6px,transparent 3px),#6e747c}
+.xlr.plug{background:radial-gradient(circle at 45% 40%,#3a3e45 0 30%,#1b1d21 55%,#0d0e10 70%,#2a2e35 72% 100%)}
+.xlr.plug::before{inset:9px;background:repeating-conic-gradient(from 0deg,#24272c 0 8deg,#17191c 8deg 16deg);box-shadow:inset 0 0 0 2px #2b2f35}
+.xlr.plug::after{content:"";position:absolute;left:50%;bottom:58%;width:9px;height:46px;margin-left:-4.5px;background:linear-gradient(90deg,#c9c9c4,#f2f2ee,#b6b6b0);border-radius:4px;z-index:-1;transform-origin:50% 100%;transform:rotate(-8deg)}
+.jack{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#050608 0 26%,#8b9098 30% 46%,#c3c7cc 52%,#6f747c 62%,#2b2f36 70% 100%);box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+.jack.plugbig{width:34px;height:34px;background:radial-gradient(circle at 45% 40%,#4a4e55 0 34%,#1a1c20 60%,#2a2e35 70% 100%);cursor:pointer}
+.jack.plugbig::after{content:"";position:absolute}
+.rca{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#111 0 22%,#e8e6df 26% 42%,#b9b6ad 48%,#6f6c66 58%,#2b2f36 68% 100%)}
+.rca.red{background:radial-gradient(circle,#111 0 22%,#e8e6df 26% 34%,#e23a32 38% 50%,#7b1a16 58%,#2b2f36 68% 100%)}
+
+/* knobs */
+.knob{position:relative;width:38px;height:38px;cursor:ns-resize}
+.knob .cap{position:absolute;inset:0;border-radius:50%;transform:rotate(var(--a,0deg));
+  background:radial-gradient(circle at 42% 35%,#5a5e66 0%,#2a2d33 38%,#121417 70%);box-shadow:0 3px 5px rgba(0,0,0,.6),inset 0 0 0 2px #1b1d21}
+.knob .cap::before{content:"";position:absolute;inset:3px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.05) 0 6deg,transparent 6deg 12deg)}
+.knob .cap::after{content:"";position:absolute;left:50%;top:2px;width:3px;height:44%;margin-left:-1.5px;background:#f3f3ef;border-radius:2px}
+.knob.cream .cap{background:radial-gradient(circle at 42% 35%,#fbf8ee 0%,#ddd7c6 45%,#a8a291 80%)}
+.knob.cream .cap::after{background:#2a2a2a;height:30%}
+.knob.green .cap{background:radial-gradient(circle at 42% 35%,#9be0d2 0%,#3f9f90 40%,#1d5a52 75%)}
+.knob.green .cap::after{background:#e9fffb}
+.knob.grey .cap{background:radial-gradient(circle at 42% 35%,#9aa0a6 0%,#5f656c 40%,#2b2f34 75%)}
+.knob .tk{position:absolute;left:50%;top:50%;width:1.5px;height:4px;background:var(--c-ink);opacity:.85;margin-left:-.75px;transform-origin:50% 0}
+.knob.sm{width:30px;height:30px}
+.knob.lg{width:44px;height:44px}
+
+/* topo da mesa */
+.sec-top{display:flex;align-items:stretch;padding:14px 16px 10px 10px;height:330px;border-bottom:2px solid #1f2738}
+.lblcol{width:56px;display:flex;flex-direction:column;align-items:flex-end;padding-top:58px;gap:0;font-size:8.5px}
+.lblcol .lbl{text-align:right;font-size:8.5px}
+.incol{width:75px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--c-rule);padding:0 2px;position:relative}
+.incol:first-of-type{border-left:0}
+.incol .ab{position:absolute;font-size:9px;left:3px}
+.incol .gap{flex:0 0 auto}
+.chno{display:inline-grid;place-items:center;min-width:16px;height:14px;padding:0 2px;background:var(--c-ink);color:var(--c-panel);font-size:10px;font-weight:700;border-radius:1px}
+.gainwrap{position:relative;width:64px;height:62px;display:flex;justify-content:center;align-items:center}
+.gainwrap .chno{position:absolute;left:0;top:4px}
+.gsc{display:flex;justify-content:space-between;width:66px;font-size:8.5px;line-height:1;margin-top:-6px}
+.gsc em{font-style:normal;background:var(--c-ink);color:var(--c-panel);padding:0 2px;border-radius:1px}
+.pk{display:grid;grid-template-columns:10px auto;gap:4px;align-items:center;font-size:8.5px;margin-top:4px}
+.pk .led{width:7px;height:7px}
+.col1316{width:84px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--c-rule);padding:0 4px}
+.monblk{width:120px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--c-rule);padding:0 6px}
+.phblk{width:104px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--c-rule);padding:0 6px}
+.tblk{width:150px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--c-rule);padding:0 6px}
+.phs{display:flex;gap:16px;margin-top:2px}
+.phs .sw{display:flex;flex-direction:column;align-items:center;gap:2px}
+.toggle{width:34px;height:16px;border-radius:3px;background:#141820;position:relative;cursor:pointer;box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:12px;border-radius:2px;background:linear-gradient(#e6e6e1,#9c9c97);transition:left .12s}
+.toggle.on::after{left:18px}
+.toggle.on{box-shadow:inset 0 1px 3px rgba(0,0,0,.7),0 0 0 1px var(--c-red)}
+.offon{display:flex;gap:6px;font-size:7.5px}
+.offon span{background:var(--c-ink);color:var(--c-panel);padding:0 2px}
+.logo{font-family:'Times New Roman',Georgia,serif;font-style:italic;font-weight:700;font-size:46px;letter-spacing:-.02em;line-height:.9;color:var(--c-ink);text-align:right}
+.logo sup{font-family:var(--f-panel);font-style:italic;font-size:30px;vertical-align:baseline;position:relative;top:4px}
+.logo small{display:block;font-family:var(--f-panel);font-style:normal;font-size:8px;letter-spacing:.12em;border-top:2px solid var(--c-ink);padding-top:2px}
+
+/* meio */
+.sec-mid{display:flex;padding:14px 16px 22px;gap:14px;align-items:flex-start}
+.lblk{width:300px;display:flex;flex-direction:column;gap:6px}
+.blktitle{font-size:11.5px;letter-spacing:.06em;text-align:center;margin-bottom:2px}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 6px;padding:6px 8px;background:rgba(0,0,0,.18);border-radius:4px}
+.dgrid .cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dgrid .lbl{font-size:8.5px;height:18px;display:flex;align-items:flex-start;justify-content:center;white-space:normal}
+.fm{background:var(--c-black);border-radius:4px;padding:6px 8px}
+.layer{background:var(--c-tape);color:#222;border-radius:3px;padding:4px 8px 6px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;position:relative}
+.layer .ttl{position:absolute;top:-14px;left:0;background:var(--c-tape);padding:1px 8px;border-radius:3px 3px 0 0;font-size:11px}
+.layer .cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.layer .lbl{color:#222;font-size:8.5px}
+.lcdblk{width:500px;display:flex;flex-direction:column;align-items:center}
+.lcdframe{display:flex;gap:10px;background:linear-gradient(#20242b,#0e1013);border-radius:10px;padding:16px 14px 14px 18px;box-shadow:inset 0 0 0 1px #3a3f48,0 6px 12px rgba(0,0,0,.4)}
+.lcdframe .brand2{position:absolute}
+.lcdwrap{position:relative;width:384px;height:288px;border-radius:3px;overflow:hidden;box-shadow:inset 0 0 0 3px #08090b,0 0 0 1px #3a3f48}
+#lcd{width:384px;height:288px;display:block;cursor:pointer}
+.lcdin{position:absolute;left:60px;right:60px;top:122px;height:30px;font-family:var(--f-mono);font-size:15px;border:2px solid #1d2a0c;background:#d6f78a;color:#1d2a0c;padding:0 8px}
+.stmeter{width:46px;background:linear-gradient(#2b2f36,#191c21);border-radius:4px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.stmeter .cols{display:grid;grid-template-columns:8px 14px 8px;gap:2px;align-items:stretch}
+.stmeter .seg{display:flex;flex-direction:column;gap:2px}
+.stmeter .seg i{display:block;width:8px;height:12px;background:#2c2f34;border-radius:1px}
+.stmeter .seg i.lit{background:var(--c-green);box-shadow:0 0 3px var(--c-green)}
+.stmeter .seg i.lit.y{background:var(--c-yellow);box-shadow:0 0 3px var(--c-yellow)}
+.stmeter .seg i.lit.r{background:var(--c-red);box-shadow:0 0 3px var(--c-red)}
+.stmeter .sc{display:flex;flex-direction:column;gap:2px;font-size:7px;color:#c7ccd4;text-align:center}
+.stmeter .sc span{height:12px;line-height:12px}
+.fkeys{display:flex;gap:22px;margin-top:12px;padding-left:0}
+.fkeys .cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.rblk{flex:1;display:grid;grid-template-columns:200px minmax(0,1fr);grid-template-rows:auto 1fr;gap:10px 14px}
+.scene{grid-column:1 / -1;display:flex;gap:14px;align-items:flex-start}
+.scenebox{border:1.5px solid var(--c-black);border-radius:4px;padding:4px 10px 6px;display:flex;gap:14px;position:relative}
+.scenebox .ttl{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--c-panel);padding:0 6px;font-size:11px;white-space:nowrap}
+.scenebox .cell,.solobox .cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:6px}
+.solobox{border:1.5px solid var(--c-black);border-radius:4px;padding:4px 10px 6px;display:flex;gap:16px;align-items:flex-end}
+.selch{background:linear-gradient(#3b5a8c,#2d4670);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px #5d7fb5}
+.selch .ttl{font-size:11px;letter-spacing:.05em}
+.eqgrid{display:grid;grid-template-columns:auto auto;gap:6px 10px;align-items:center;background:rgba(0,0,0,.15);border-radius:4px;padding:6px}
+.eqgrid .cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dataz{background:var(--c-black);border-radius:0 30px 6px 30px;padding:10px 14px;display:grid;grid-template-columns:auto auto;gap:10px 18px;align-items:center;position:relative}
+.decinc{display:flex;gap:28px;justify-content:center}
+.decinc .cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.cursor{display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,30px);gap:2px;place-items:center}
+.wheel{width:150px;height:150px;border-radius:50%;cursor:grab;position:relative;
+  background:repeating-conic-gradient(#2a2d33 0 3deg,#17191d 3deg 6deg);box-shadow:0 6px 14px rgba(0,0,0,.6),inset 0 0 0 2px #0a0b0d}
+.wheel .face{position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3d4148,#1d1f24 70%);transform:rotate(var(--a,0deg));box-shadow:inset 0 2px 4px rgba(255,255,255,.08)}
+.wheel .face::after{content:"";position:absolute;left:62%;top:18%;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#141518,#2a2d33);box-shadow:inset 0 2px 3px rgba(0,0,0,.8)}
+.stinsel{display:flex;gap:10px;align-items:center;border:1.5px solid var(--c-ink);border-radius:4px;padding:6px 10px}
+.stinsel .grid{display:grid;grid-template-columns:auto auto;gap:3px 6px;font-size:10px;align-items:center}
+.stinsel .grid span{border:1px solid var(--c-ink);padding:0 5px;line-height:13px;display:flex;gap:4px;align-items:center}
+
+/* faixas */
+.sec-bot{display:flex;padding:14px 10px 18px 22px;gap:0}
+.strip{width:70px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.strip .lbl{font-size:9.5px;margin-bottom:3px}
+.strip .num{font-size:14px;margin-top:4px}
+.tape{width:66px;height:22px;background:var(--c-tape);margin:4px 0 8px;border-radius:1px;color:#333;font-size:10px;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:500;overflow:hidden;white-space:nowrap}
+.fader{position:relative;width:62px;height:320px;cursor:pointer}
+.fader .track{position:absolute;left:38px;top:20px;bottom:20px;width:5px;margin-left:-2.5px;background:#06070a;border-radius:3px;box-shadow:0 0 0 1px #4b5872}
+.fader .sc{position:absolute;left:0;top:20px;bottom:20px;width:28px}
+.fader .sc span{position:absolute;right:2px;font-size:8.5px;transform:translateY(-50%);line-height:1}
+.fader .sc i{position:absolute;right:-6px;width:5px;height:1px;background:var(--c-ink);opacity:.6}
+.fader .thumb{position:absolute;left:38px;width:40px;height:56px;margin-left:-20px;margin-top:-28px;border-radius:4px;transition:top .42s cubic-bezier(.25,.8,.3,1);
+  background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(0,0,0,.18) 5px 7px),linear-gradient(90deg,#9e9e98,#e9e9e3 30%,#f4f4ef 50%,#cfcfc9 80%,#8f8f8a);box-shadow:0 4px 6px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.25)}
+.fader .thumb::after{content:"";position:absolute;left:3px;right:3px;top:50%;height:2px;margin-top:-1px;background:#555}
+.fader .thumb.drag{transition:none}
+.fader.red .thumb{background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(0,0,0,.22) 5px 7px),linear-gradient(90deg,#8d1f1a,#e2453b 35%,#f0574c 50%,#c2362d 80%,#7a1915)}
+.fader.red .thumb::after{background:#fff}
+.plab{display:grid;width:66px;text-align:center;font-size:10px;line-height:1.15;margin-top:2px;border-top:1px solid var(--c-ink)}
+.plab b{font-size:12px}
+.plab span{font-size:9px}
+.ytape{width:70px;height:22px;background:var(--c-ytape);color:#111;font-family:Arial,sans-serif;font-weight:500;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:4px;white-space:nowrap;overflow:hidden}
+.ytape.none{background:transparent}
+.ststrip{width:96px;background:linear-gradient(#2f4a7c,#283f69);margin:0 8px;border-radius:4px;display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:0}
+.stinarea{width:170px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.stinarea .two{display:flex;gap:14px}
+.stinarea .strip{width:70px}
+.stinlab{display:flex;gap:6px}
+.stinlab span{width:76px;background:var(--c-tape);color:#222;font-size:10.5px;text-align:center;padding:1px 0}
+.ukeys{margin-top:16px;background:var(--c-black);border-radius:6px;padding:8px 12px 12px;display:grid;grid-template-columns:repeat(2,52px);gap:8px 10px;position:relative}
+.ukeys .ttl{grid-column:1 / -1;font-size:11px;text-align:center;line-height:1.1}
+.ukeys .b{width:50px;height:30px;background:linear-gradient(180deg,#d8dbe0 0%,#b9bdc4 20%,#9fa4ac 100%)}
+.ukeys .b span{position:absolute;right:4px;bottom:2px;font-size:9px;color:#222}
+.ukeys .b .led{display:none}
+@media (prefers-reduced-motion: reduce){.fader .thumb{transition:none}.hl::after{animation:none}.prog .bar i{transition:none}}
+@media (max-width:900px){
+  .course{grid-template-columns:minmax(0,1fr)}
+  .mods{position:static;max-height:260px}
+  .lesson{padding:18px 16px}
+  .lesson h2{font-size:27px}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Escola <b>01V96</b></h1>
+      <p>Curso interativo e simulador da mesa digital de 40 canais</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="prog" aria-live="polite"><span id="progtxt">0/0 missões</span><span class="bar"><i id="progbar"></i></span></div>
+    <button class="tbtn" id="audioBtn" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><span>Ligar som (fones)</span></button>
+    <button class="tbtn" id="resetBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Reiniciar mesa</span></button>
+  </header>
+
+  <div class="course">
+    <nav class="mods" aria-label="Módulos do curso">
+      <h2>Módulos</h2>
+      <ol id="modlist"></ol>
+    </nav>
+    <article class="lesson" id="lesson" aria-live="polite"></article>
+  </div>
+
+  <section class="sim" id="sim" aria-label="Simulador da mesa">
+    <div class="simbar">
+      <div class="dock"><span class="lab">Missão</span><span class="txt" id="docktxt">—</span></div>
+      <div class="zoom"><button type="button" id="zout" aria-label="Diminuir zoom">−</button><button type="button" id="zfit">Ajustar</button><button type="button" id="zin" aria-label="Aumentar zoom">+</button><span id="zval">100%</span></div>
+    </div>
+    <div class="simscroll" id="simscroll">
+      <div class="stagebox" id="stagebox"><div class="stage" id="stage"><div class="console" id="console" tabindex="0" aria-label="Mesa 01V96 simulada. Use as setas, Enter, + e − quando focada."></div></div></div>
+    </div>
+    <div class="info" id="info">
+      <div class="it" id="infot">Toque em qualquer controle</div>
+      <div class="id" id="infod">Arraste knobs e faders para cima ou para baixo, use a roda do mouse sobre eles, e clique nos botões. Com a mesa focada, as setas do teclado movem o cursor do display, Enter confirma e + / − funcionam como INC / DEC.</div>
+    </div>
+    <p class="hint">Simulador didático independente, sem vínculo com o fabricante. Os valores de nível são modelados para treino e podem diferir do equipamento real.</p>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+'use strict';
+/* =====================================================================
+   SIMULADOR 01V96 — estado, modelo de sinal, painel, LCD e áudio
+   ===================================================================== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const NEG=-Infinity;
+const dbLin=d=>d===NEG||d<-119?0:Math.pow(10,d/20);
+const pSum=arr=>{let s=0;for(const d of arr){if(d>-200)s+=Math.pow(10,d/10)}return s>0?10*Math.log10(s):NEG};
+
+/* ---------- lei do fader (escala impressa no painel) ---------- */
+const FT=[[0,-120],[0.035,-90],[0.09,-60],[0.16,-50],[0.24,-40],[0.33,-30],[0.43,-20],[0.51,-15],[0.59,-10],[0.68,-5],[0.77,0],[0.885,5],[1,10]];
+function posToDb(p){if(p<=0.006)return NEG;for(let k=1;k<FT.length;k++){if(p<=FT[k][0]){const[p0,d0]=FT[k-1],[p1,d1]=FT[k];return d0+(d1-d0)*(p-p0)/(p1-p0)}}return 10}
+function dbToPos(d){if(d===NEG||d<=-120)return 0;if(d>=10)return 1;for(let k=1;k<FT.length;k++){if(d<=FT[k][1]){const[p0,d0]=FT[k-1],[p1,d1]=FT[k];return p0+(p1-p0)*(d-d0)/(d1-d0)}}return 1}
+const fmtDb=(d,dec=1)=>(d===NEG||d<-95)?'-∞':(d>0.04?'+':'')+d.toFixed(dec);
+const SCALE=[[10,'+10'],[5,'5'],[0,'0'],[-5,'5'],[-10,'10'],[-15,'15'],[-20,'20'],[-30,'30'],[-40,'40'],[-50,'50'],[-60,'60'],[NEG,'∞']];
+
+/* ---------- EQ ---------- */
+const QL=[10,9,8,7,6,5,4.5,4,3.5,3,2.8,2.5,2.2,2,1.8,1.6,1.4,1.2,1,0.9,0.8,0.7,0.63,0.56,0.5,0.45,0.4,0.35,0.3,0.25,0.2,0.18,0.16,0.14,0.12,0.1];
+const QOPT=b=>b===0?['HPF','L.SHF',...QL]:b===3?[...QL,'H.SHF','LPF']:QL;
+const fOf=fi=>21.2*Math.pow(2,fi/12);
+const fiOf=f=>clamp(Math.round(12*Math.log2(f/21.2)),0,118);
+const fmtF=f=>f<1000?(f<100?f.toFixed(1):Math.round(f))+'Hz':(f/1000).toFixed(f<10000?2:1)+'k';
+const BANDN=['LOW','L-MID','H-MID','HIGH'];
+function mkEq(){return[{qi:QOPT(0).indexOf(0.7),fi:fiOf(125),g:0},{qi:QL.indexOf(1),fi:fiOf(1000),g:0},{qi:QL.indexOf(1),fi:fiOf(4000),g:0},{qi:QL.indexOf(0.7),fi:fiOf(10000),g:0}]}
+function bandResp(b,bi,f){const o=QOPT(bi)[b.qi],fc=fOf(b.fi),x=Math.log2(f/fc);
+  if(o==='HPF')return x<0?Math.max(-40,12*x*1.0)-(x>-0.3?3*(1+x/0.3):3):(x<0.3?-3*(1-x/0.3):0);
+  if(o==='LPF')return x>0?Math.max(-40,-12*x)-(x<0.3?3*(1-x/0.3):3):(x>-0.3?-3*(1+x/0.3):0);
+  if(o==='L.SHF')return b.g/(1+Math.exp(4*x));
+  if(o==='H.SHF')return b.g/(1+Math.exp(-4*x));
+  const q=o;return b.g/(1+Math.pow(x*2*q*1.2,2));}
+function eqResp(o,f){if(!o.eqOn)return 0;let s=0;o.eq.forEach((b,i)=>s+=bandResp(b,i,f));return s}
+
+/* ---------- dinâmica ---------- */
+const DYNT=['COMP','EXPAND','CMP-H','CMP-S','GATE','DUCKING'];
+const RATIOS=[1,1.1,1.3,1.5,1.7,2,2.5,3,3.5,4,5,6,8,10,20,Infinity];
+const fmtR=r=>r===Infinity?'∞:1':r+':1';
+function mkDyn(){return{on:false,type:'COMP',thr:-8,ri:RATIOS.indexOf(2.5),atk:30,rel:250,gain:0,knee:2,range:-56,hold:20,gr:0}}
+const isGate=t=>t==='GATE'||t==='DUCKING';
+function dynOut(d,lv){if(!d.on||lv===NEG)return{out:lv,gr:0};const r=RATIOS[d.ri];
+  if(d.type==='GATE'){if(lv<d.thr)return{out:lv+d.range,gr:-d.range};return{out:lv,gr:0}}
+  if(d.type==='DUCKING')return{out:lv,gr:0};
+  if(d.type==='EXPAND'){if(lv<d.thr){const o=d.thr+(lv-d.thr)*Math.min(r,20);return{out:o+d.gain,gr:lv-o}}return{out:lv+d.gain,gr:0}}
+  if(lv>d.thr){const o=d.thr+(lv-d.thr)/(r===Infinity?1e9:r);return{out:o+d.gain,gr:lv-o}}return{out:lv+d.gain,gr:0}}
+
+/* ---------- fontes ligadas na mesa (cenário do estúdio) ---------- */
+const SOURCES=[
+ {n:'Lapela 1 (Apdor)',t:'voz',lvl:-45,cond:true,f0:112},
+ {n:'Lapela 2 (Conv1)',t:'voz',lvl:-46,cond:true,f0:205},
+ {n:'Lapela 3 (Conv2)',t:'voz',lvl:-44,cond:true,f0:128},
+ {n:'Lapela 4 (Riva)',t:'voz',lvl:-45,cond:true,f0:104},
+ {n:'Lapela 5 (Marcio)',t:'voz',lvl:-47,cond:true,f0:135},
+ {n:'Lapela 6 (Conv)',t:'voz',lvl:-45,cond:true,f0:218},
+ null,null,null,
+ {n:'Híbrida telefônica (CALL)',t:'tel',lvl:2,f0:142},
+ {n:'Retorno do link (LINK)',t:'link',lvl:4,f0:160},
+ {n:'Playback de VT',t:'vt',lvl:4,f0:120},
+ {n:'Trilha BG (L)',t:'mus',lvl:4,side:0},
+ {n:'Trilha BG (R)',t:'mus',lvl:4,side:1},
+ {n:'Celular (CEL)',t:'tel',lvl:-8,f0:190},
+ {n:'PA',t:'voz',lvl:2,f0:150}
+];
+const SRC2TR=[{n:'2TR IN L (player)',t:'mus',lvl:-8,side:0,alt:1},{n:'2TR IN R (player)',t:'mus',lvl:-8,side:1,alt:1}];
+const NAMES16=['Apdor','Conv1','Conv2','Riva','Marcio','Conv','CH 7','CH 8','CH 9','CALL','LINK','VT','BG','BG','CEL','PA'];
+const FXTYPES=['REVERB HALL','REVERB ROOM','REVERB STAGE','REVERB PLATE','EARLY REF.','MONO DELAY','STEREO DELAY','ECHO','CHORUS','FLANGE','PHASER','PITCH CHANGE','DE-ESSER','BYPASS'];
+const isRev=t=>/REVERB|EARLY/.test(t), isDly=t=>/DELAY|ECHO/.test(t);
+const PATCHOPT=['---',...Array.from({length:16},(_,i)=>'AD'+(i+1)),...Array.from({length:8},(_,i)=>'ADAT'+(i+1)),...Array.from({length:16},(_,i)=>'SLOT'+(i+1)),'FX1-1','FX1-2','FX2-1','FX2-2','FX3-1','FX3-2','FX4-1','FX4-2'];
+const OUTOPT=['---',...Array.from({length:8},(_,i)=>'AUX'+(i+1)),...Array.from({length:8},(_,i)=>'BUS'+(i+1)),'ST L','ST R'];
+const CLOCKS=['INT 44.1k','INT 48k','INT 88.2k','INT 96k','ADAT IN','2TR IN DIG','SLOT 1'];
+const OSCW=['SINE 100Hz','SINE 1kHz','SINE 10kHz','PINK NOISE','BURST NOISE'];
+const UKF=['NO ASSIGN','SCENE RECALL 01','SCENE RECALL 02','SCENE RECALL 03','SCENE INC RECALL','SCENE DEC RECALL','OSCILLATOR ON/OFF','LAYER 1-16','LAYER 17-32','MASTER LAYER','METER PAGE','ST IN BANK'];
+const EQLIB=[
+ {n:'Flat (zerado)',b:[[0.7,125,0],[1,1000,0],[1,4000,0],[0.7,10000,0]]},
+ {n:'Voz masculina',b:[['HPF',90,0],[1.4,250,-2],[1.2,3150,3],['H.SHF',10000,2]]},
+ {n:'Voz feminina',b:[['HPF',120,0],[1.4,400,-2],[1.4,4000,3],['H.SHF',11200,2.5]]},
+ {n:'Narração/locução',b:[['L.SHF',100,-3],[2,280,-2],[1,2800,2.5],['H.SHF',9000,1.5]]},
+ {n:'Telefone (clareza)',b:[['HPF',300,0],[1,800,-1.5],[1.2,2240,4],['LPF',4000,0]]},
+ {n:'Corta grave (HPF 100Hz)',b:[['HPF',100,0],[1,1000,0],[1,4000,0],[0.7,10000,0]]},
+ {n:'Trilha sob voz (BG)',b:[[0.7,125,0],[1,500,0],[0.7,2500,-4],[0.7,10000,0]]}
+];
+const DYNLIB=[
+ {n:'Voz (compressor suave)',d:{type:'COMP',thr:-16,ri:RATIOS.indexOf(3),atk:15,rel:180,gain:3,knee:2}},
+ {n:'Locução (nivelador)',d:{type:'COMP',thr:-22,ri:RATIOS.indexOf(4),atk:25,rel:300,gain:5,knee:3}},
+ {n:'Limitador de pico',d:{type:'COMP',thr:-6,ri:RATIOS.indexOf(20),atk:1,rel:120,gain:0,knee:0}},
+ {n:'Gate de microfone',d:{type:'GATE',thr:-48,range:-30,atk:1,hold:80,rel:300}},
+ {n:'Expansor (ruído de fundo)',d:{type:'EXPAND',thr:-45,ri:RATIOS.indexOf(2),atk:2,rel:250,gain:0}}
+];
+
+/* ---------- estado ---------- */
+function mkProc(name){return{name,fader:0,on:true,solo:false,eqOn:true,att:0,eq:mkEq(),dyn:mkDyn(),lv:NEG,lvPre:NEG}}
+function mkCh(i){const c=mkProc(i<16?NAMES16[i]:'CH'+(i+1));Object.assign(c,{pan:0,patch:i<16?'AD'+(i+1):(i<24?'ADAT'+(i-15):'SLOT'+(i-23)),aux:Array(8).fill(0),auxPre:Array(8).fill(true),st:true,bus:Array(8).fill(false),phase:false,dlyOn:false,dly:0,ins:false,insPos:'PRE EQ',safe:false});return c}
+function defaultState(){
+  const S={};
+  S.ad=Array.from({length:16},(_,k)=>({plug:!!SOURCES[k]||k<12,g:k<12?-44:4,pad:false,lv:NEG,peakT:0}));
+  // ganhos iniciais
+  S.ad[0].g=-30; S.ad[3].g=-60; S.ad[1].g=-45; S.ad[2].g=-43; S.ad[4].g=-46; S.ad[5].g=-44;
+  [6,7,8].forEach(k=>S.ad[k].g=-50);
+  [9,10,11].forEach(k=>{S.ad[k].g=-16;S.ad[k].pad=true});
+  S.ad[12].g=4;S.ad[13].g=4;S.ad[14].g=-8;S.ad[15].g=2;
+  S.phantom=[false,true]; S.sw1516='CH'; S.monSrc='MON'; S.monLvl=4; S.phLvl=3.5; S.contrast=.75;
+  S.ch=Array.from({length:32},(_,i)=>mkCh(i));
+  const f=[0,-45,-45,-45,-45,-45,-70,-70,-70,-70,-70,-10,-50,-50,-50,-10];
+  f.forEach((d,i)=>S.ch[i].fader=dbToPos(d));
+  S.ch.forEach((c,i)=>c.on=(i>=11&&i<=14)||i>=16);
+  S.ch[12].pan=-63;S.ch[13].pan=63;
+  S.aux=Array.from({length:8},(_,i)=>Object.assign(mkProc('AUX'+(i+1)),{fader:dbToPos(0)}));
+  S.bus=Array.from({length:8},(_,i)=>Object.assign(mkProc('BUS'+(i+1)),{fader:dbToPos(0)}));
+  S.st=Object.assign(mkProc('STEREO'),{fader:dbToPos(0)});
+  S.stin=Array.from({length:4},(_,i)=>Object.assign(mkProc('ST IN'+(i+1)),{pan:0,fader:dbToPos(0),on:false,patch:'FX'+(i+1),st:true,aux:Array(8).fill(0),auxPre:Array(8).fill(false),bus:Array(8).fill(false)}));
+  S.fx=[{type:'REVERB HALL',in:'AUX7',mix:100,time:2.4},{type:'REVERB ROOM',in:'AUX8',mix:100,time:1.2},{type:'MONO DELAY',in:'---',mix:100,time:0.35},{type:'CHORUS',in:'---',mix:100,time:0.5}];
+  S.pair=Array(16).fill(false);S.pair[6]=true; // 13/14 BG já em par? (falso para a missão)
+  S.pair[6]=false;
+  S.omni=['AUX1','AUX2','AUX3','AUX4'];
+  S.layer='1-16'; S.fm=0; S.sel={t:'st'}; S.band=1;
+  S.page='METER'; S.tab={METER:1}; S.cur={};
+  S.stinBank=0; S.clock='INT 44.1k';
+  S.soloMode='RECORD'; S.listen='AFL';
+  S.osc={on:false,lvl:-18,w:1,asg:{st:true,aux:Array(8).fill(false),bus:Array(8).fill(false)}};
+  S.midi={rx:1,tx:1,scRx:true,scTx:false};
+  S.prefs={autoEq:true,recallConf:false,storeConf:true,meterPos:'PRE FADER',peakHold:false};
+  S.uk=[1,2,6,7,8,9,10,0];
+  S.scenes=Array(100).fill(null);
+  S.sceneNum=1; S.curScene=1; S.edited=false;
+  S.dialog=null; S.ev={}; S.evs={}; S.seq=0; S.explored=[];
+  S.remote=Array(16).fill(dbToPos(0));
+  S.scenes[0]={title:'Initial Data',ro:true,data:null};
+  S.scenes[1]={title:'TEC NEWS 25',data:null};
+  return S;
+}
+let S=defaultState();
+function snap(){return JSON.parse(JSON.stringify({ch:S.ch,aux:S.aux,bus:S.bus,st:S.st,stin:S.stin,fx:S.fx,pair:S.pair},(k,v)=>v===Infinity?'INF':v===NEG?'NINF':v),(k,v)=>v==='INF'?Infinity:v==='NINF'?NEG:v)}
+function initScenes(){S.scenes[1].data=snap();const s0=snap();/* scene 0: mesa zerada */
+  const z=JSON.parse(JSON.stringify(s0));z.ch.forEach((c,i)=>{c.fader=0;c.on=true;c.pan=0;c.eq=mkEq();c.dyn=mkDyn();c.aux=Array(8).fill(0);c.st=true;c.bus=Array(8).fill(false);c.name=i<16?'CH'+(i+1):'CH'+(i+1)});
+  z.st.fader=0;z.aux.forEach(a=>a.fader=0);z.bus.forEach(b=>b.fader=0);z.stin.forEach(s=>{s.fader=0;s.on=true});z.pair=Array(16).fill(false);S.scenes[0].data=z;}
+initScenes();
+
+/* ---------- eventos (para as missões) ---------- */
+let onEvent=()=>{};
+function ev(n){S.ev[n]=(S.ev[n]||0)+1;S.evs[n]=++S.seq;onEvent(n)}
+function markEdit(){S.edited=true}
+
+/* ---------- alvos das tiras ---------- */
+function stripT(i){if(S.layer==='REMOTE')return null;if(S.layer==='MASTER')return i<8?{t:'aux',i}:{t:'bus',i:i-8};return{t:'ch',i:(S.layer==='17-32'?16:0)+i}}
+function tObj(t){if(!t)return null;return t.t==='ch'?S.ch[t.i]:t.t==='aux'?S.aux[t.i]:t.t==='bus'?S.bus[t.i]:t.t==='stin'?S.stin[t.i]:S.st}
+const selObj=()=>tObj(S.sel);
+function tName(t){if(!t)return'';if(t.t==='ch')return'CH'+String(t.i+1).padStart(2,'0');if(t.t==='aux')return'AUX'+(t.i+1);if(t.t==='bus')return'BUS'+(t.i+1);if(t.t==='stin')return'ST IN'+(t.i+1);return'STEREO'}
+const partner=i=>S.pair[i>>1]?i^1:-1;
+function linked(t){if(t&&t.t==='ch'){const p=partner(t.i);return p>=0?[S.ch[t.i],S.ch[p]]:[S.ch[t.i]]}return[tObj(t)]}
+function editSel(fn){linked(S.sel).forEach(fn);markEdit()}
+function stripGet(i){const t=stripT(i);if(!t)return S.remote[i];const o=tObj(t);if(S.fm>0&&t.t==='ch')return o.aux[S.fm-1];return o.fader}
+function stripSet(i,v){v=clamp(v,0,1);const t=stripT(i);if(!t){S.remote[i]=v;return}
+  linked(t).forEach(o=>{if(S.fm>0&&t.t==='ch')o.aux[S.fm-1]=v;else o.fader=v});markEdit()}
+function setSel(t){S.sel=t;ev('sel:'+tName(t))}
+
+/* ---------- envelopes das fontes ---------- */
+const ENV={};
+function envOf(key,src){let e=ENV[key];if(!e){e=ENV[key]={cur:-70,tgt:-70,tm:0,turn:Math.random()*3,talk:false,ph:Math.random()*9,syl:0,bar:0}}return e}
+let T=0;
+function envStep(e,src,dt){
+  if(src.t==='mus'){e.ph+=dt;e.bar=Math.floor((T+(src.alt?1:0))/2)%4;e.cur=-6+3*(0.5+0.5*Math.sin(e.ph*12.57))+(Math.random()-.5)*1.5;return}
+  const p=src.t==='voz'?0.42:0.6;
+  e.turn-=dt;if(e.turn<=0){e.talk=Math.random()<p;e.turn=e.talk?2+Math.random()*5:1.2+Math.random()*4}
+  e.tm-=dt;if(e.tm<=0){e.tm=.08+Math.random()*.17;e.syl++;e.tgt=e.talk?(Math.random()<.15?-34:-14+Math.random()*14+(Math.random()<.05?5:0)):-72}
+  e.cur+=(e.tgt-e.cur)*Math.min(1,dt*(e.tgt>e.cur?38:11));
+  if(src.t==='vt'){const m=-12+2*Math.sin(T*6);e.cur=Math.max(e.cur,m)}
+}
+const sensEff=k=>k<12?S.ad[k].g+(S.ad[k].pad?20:0):S.ad[k].g;
+function adSrc(k){return(k>=14&&S.sw1516==='2TR')?SRC2TR[k-14]:SOURCES[k]}
+function nominalPeak(k){const s=adSrc(k);if(!s)return NEG;return s.lvl+6-sensEff(k)-12}
+const unlocked=()=>!S.clock.startsWith('INT');
+const fs=()=>S.clock.startsWith('INT')?S.clock.slice(4):'---';
+const fxAvail=n=>!(n>=2&&/88|96/.test(S.clock));
+
+/* ---------- modelo de nível (a cada quadro) ---------- */
+const MD={stL:NEG,stR:NEG,mon:NEG,fxIn:[NEG,NEG,NEG,NEG],fxOut:[NEG,NEG,NEG,NEG],stinLv:[NEG,NEG,NEG,NEG]};
+function srcLevel(p){if(!p)return NEG;if(p.startsWith('AD')&&!p.startsWith('ADAT'))return S.ad[+p.slice(2)-1].lv;if(p.startsWith('FX')){const n=+p[2]-1;return MD.fxOut[n]}return NEG}
+function model(dt){
+  T+=dt;
+  const ul=unlocked();
+  for(let k=0;k<16;k++){const a=S.ad[k],src=adSrc(k);let lv=NEG;
+    if(src){const e=envOf(k>=14&&S.sw1516==='2TR'?'2tr'+k:'ad'+k,src);envStep(e,src,dt);
+      const plugged=(k>=14&&S.sw1516==='2TR')?true:a.plug;
+      const power=!src.cond||S.phantom[k<8?0:1];
+      if(plugged&&power)lv=src.lvl+e.cur-sensEff(k)-12}
+    if(ul)lv=NEG;
+    a.raw=lv;a.lv=Math.min(lv,0);a.peakT=lv>=-3?.45:Math.max(0,a.peakT-dt)}
+  const osc=S.osc.on&&!ul?S.osc.lvl:NEG;
+  // canais
+  const chs=S.ch;
+  chs.forEach(c=>{let pre=srcLevel(c.patch);pre=pre===NEG?NEG:pre+c.att+eqGainApprox(c);const d=dynOut(c.dyn,pre);c.dyn.gr+=(d.gr-c.dyn.gr)*Math.min(1,dt*15);c.lvPre=d.out;c.lvPost=c.on?d.out+posToDb(c.fader):NEG});
+  // aux
+  const auxIn=Array.from({length:8},()=>[]);const busIn=Array.from({length:8},()=>[]);
+  chs.forEach(c=>{for(let k=0;k<8;k++){if(c.aux[k]>0&&c.on){const b=c.auxPre[k]?c.lvPre:c.lvPost;auxIn[k].push(b+posToDb(c.aux[k]))}if(c.bus[k])busIn[k].push(c.lvPost)}});
+  S.stin.forEach(s=>{for(let k=0;k<8;k++){if(s.aux[k]>0&&s.on)auxIn[k].push((s.auxPre[k]?s.lvPre:s.lvPost)+posToDb(s.aux[k]));if(s.bus[k])busIn[k].push(s.lvPost)}});
+  for(let k=0;k<8;k++){if(S.osc.asg.aux[k])auxIn[k].push(osc);if(S.osc.asg.bus[k])busIn[k].push(osc)}
+  S.aux.forEach((a,k)=>{const sum=pSum(auxIn[k]);const d=dynOut(a.dyn,sum===NEG?NEG:sum+eqGainApprox(a));a.lvPre=d.out;a.lv=a.on?d.out+posToDb(a.fader):NEG});
+  S.bus.forEach((b,k)=>{const sum=pSum(busIn[k]);b.lvPre=sum;b.lv=b.on?sum+posToDb(b.fader):NEG});
+  // efeitos
+  S.fx.forEach((f,n)=>{let i=NEG;if(f.in.startsWith('AUX'))i=S.aux[+f.in.slice(3)-1].lv;MD.fxIn[n]=i;MD.fxOut[n]=(f.type==='BYPASS'||!fxAvail(n))?(f.type==='BYPASS'?i:NEG):(i===NEG?NEG:i-6+(f.mix-100)/10)});
+  S.stin.forEach((s,j)=>{const lv=srcLevel(s.patch);s.lvPre=lv;s.lvPost=s.on?lv+posToDb(s.fader):NEG;MD.stinLv[j]=lv});
+  // solo
+  const soloed=[...chs.filter(c=>c.solo),...S.stin.filter(s=>s.solo)];
+  const anySolo=soloed.length>0||S.aux.some(a=>a.solo)||S.bus.some(b=>b.solo);
+  S.anySolo=anySolo;
+  // stereo
+  const L=[],R=[];
+  const add=(lv,pan)=>{if(lv===NEG)return;const th=(pan+63)/126*Math.PI/2;L.push(lv+20*Math.log10(Math.max(1e-6,Math.cos(th)*1.4142)));R.push(lv+20*Math.log10(Math.max(1e-6,Math.sin(th)*1.4142)))};
+  chs.forEach(c=>{if(!c.st)return;if(S.soloMode==='MIX'&&anySolo&&!c.solo)return;add(c.lvPost,c.pan)});
+  S.stin.forEach(s=>{if(!s.st)return;if(S.soloMode==='MIX'&&anySolo&&!s.solo)return;add(s.lvPost,s.pan)});
+  if(S.osc.asg.st&&osc!==NEG){L.push(osc);R.push(osc)}
+  const st=S.st,mf=posToDb(st.fader);
+  const l=pSum(L),r=pSum(R);
+  const sd=dynOut(st.dyn,l===NEG?NEG:l+eqGainApprox(st));const sdR=dynOut(st.dyn,r===NEG?NEG:r+eqGainApprox(st));
+  st.dyn.gr+=(sd.gr-st.dyn.gr)*Math.min(1,dt*15);
+  MD.stL=st.on?sd.out+mf:NEG;MD.stR=st.on?sdR.out+mf:NEG;
+  // monitor
+  let mon;if(anySolo){mon=pSum(soloed.map(c=>S.listen==='PFL'?c.lvPre:c.lvPost).concat(S.aux.filter(a=>a.solo).map(a=>a.lv),S.bus.filter(b=>b.solo).map(b=>b.lv)))}else mon=Math.max(MD.stL,MD.stR);
+  if(S.monSrc==='2TR')mon=-14;
+  MD.mon=mon;
+}
+function eqGainApprox(o){if(!o.eqOn)return 0;// ganho médio na região da voz
+  return(eqResp(o,250)+eqResp(o,1000)*1.5+eqResp(o,3000))/3.5}
+
+/* ---------- medidores com queda ---------- */
+const MET={};
+function met(id,db,dt){let m=MET[id];if(!m)m=MET[id]={v:NEG,pk:NEG,pt:0};const v=db>-200?db:NEG;
+  if(v>m.v||m.v===NEG)m.v=v;else m.v=Math.max(v,m.v-dt*26);
+  if(v>m.pk){m.pk=v;m.pt=1.2}else{m.pt-=dt;if(m.pt<0&&!S.prefs.peakHold)m.pk=Math.max(m.v,m.pk-dt*20)}
+  return m}
+
+/* =====================================================================
+   CONSTRUÇÃO DO PAINEL
+   ===================================================================== */
+function knobHTML(cls,id,ctl,i,extra=''){const tks=Array.from({length:11},(_,n)=>{const a=-135+n*27;return`<i class="tk" style="transform:rotate(${a}deg) translateY(-${cls.includes('lg')?27:cls.includes('sm')?20:24}px)"></i>`}).join('');
+  return`<div class="knob ${cls}" id="${id}" data-ctl="${ctl}" data-i="${i}" ${extra}>${tks}<div class="cap"></div></div>`}
+function btn(cls,id,ctl,i,led,attrs=''){return`<button type="button" class="b ${cls}" id="${id}" data-ctl="${ctl}" data-i="${i}" ${attrs} aria-label="${id}"><i class="led ${led}"></i></button>`}
+function buildConsole(){
+  let top=`<div class="lblcol"><div class="lbl" style="margin-top:-2px">INPUT<br>(BAL)</div><div class="lbl" style="margin-top:22px">INSERT<br>T:OUT R:IN<br>(UNBAL)</div><div class="lbl" style="margin-top:28px">PAD</div></div>`;
+  for(let k=0;k<12;k++){top+=`<div class="incol" data-k="${k}">
+    <span class="ab" style="top:2px">A</span><div class="xlr${S.ad[k].plug?' plug':''}" id="xlr-${k}" data-ctl="plug" data-i="${k}"></div>
+    <span class="ab" style="top:58px">B</span><div class="jack" style="margin-top:8px" data-ctl="trsb" data-i="${k}"></div>
+    <div class="jack" style="margin-top:8px" data-ctl="insert" data-i="${k}"></div><div class="lbl" style="margin-top:2px">INSERT I/O</div>
+    <div style="margin-top:8px">${btn('flat noled','pad-'+k,'pad',k,'')}</div><div class="lbl" style="font-size:8.5px">20dB</div>
+    <div class="gainwrap"><span class="chno">${k+1}</span>${knobHTML('','gain-'+k,'gain',k)}</div>
+    <div class="gsc"><span>-16</span><span>GAIN</span><span>-60</span></div>
+    <div class="gsc" style="margin-top:1px"><em>+4</em><span></span><em>-40</em></div>
+    <div class="pk" data-ctl="peakled" data-i="${k}"><i class="led r" id="pk-${k}"></i>PEAK</div>
+    <div class="pk" data-ctl="peakled" data-i="${k}"><i class="led g" id="sg-${k}"></i>SIGNAL</div></div>`}
+  for(const pr of [[12,13],[14,15]]){top+=`<div class="col1316">
+    <div style="display:flex;gap:6px;margin-top:4px">${pr.map(k=>`<div class="jack plugbig${S.ad[k].plug?'':' un'}" id="xlr-${k}" data-ctl="plug" data-i="${k}" style="position:relative"></div>`).join('')}</div>
+    <div class="lbl" style="margin-top:4px">INPUT ${pr[0]+1} / ${pr[1]+1}</div>
+    <div style="height:40px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;margin-top:8px">${pr[0]===14?`${btn('flat noled','sw1516','sw1516',0,'')}<div class="lbl" style="font-size:8px;margin-top:2px">▀ CH15/16<br>▄ 2TR IN</div>`:''}</div>
+    ${pr.map(k=>`<div class="gainwrap" style="height:52px"><span class="chno">${k+1}</span>${knobHTML('sm','gain-'+k,'gain',k)}</div><div class="gsc" style="width:60px"><span>+4</span><span>GAIN</span><span>-26</span></div>`).join('')}
+    <div class="pk" style="grid-template-columns:auto 10px 10px auto;margin-top:6px"><span>${pr[0]+1}</span><i class="led r" id="pk-${pr[0]}"></i><i class="led r" id="pk-${pr[1]}"></i><span>${pr[1]+1}</span></div>
+    <div class="pk" style="grid-template-columns:auto 10px 10px auto"><span>PK/SIG</span><i class="led g" id="sg-${pr[0]}"></i><i class="led g" id="sg-${pr[1]}"></i><span></span></div></div>`}
+  top+=`<div class="tblk"><div class="lbl" style="margin-top:2px">PHANTOM +48V</div>
+    <div class="phs"><div class="sw"><div class="lbl" style="font-size:8px">CH1-8</div><div class="toggle" id="ph-0" data-ctl="phantom" data-i="0"></div><div class="offon"><span>OFF</span><span>ON</span></div></div>
+    <div class="sw"><div class="lbl" style="font-size:8px">CH9-12</div><div class="toggle" id="ph-1" data-ctl="phantom" data-i="1"></div><div class="offon"><span>OFF</span><span>ON</span></div></div></div>
+    <div style="display:grid;grid-template-columns:auto auto auto;gap:4px 8px;margin-top:12px;align-items:center" data-ctl="rca" data-i="0"><span></span><span class="lbl">IN</span><span class="lbl">OUT</span><span class="lbl">L</span><div class="rca"></div><div class="rca"></div><span class="lbl">R</span><div class="rca red"></div><div class="rca red"></div></div>
+    <div class="lbl" style="margin-top:4px">2TR<br>-10dBV (UNBAL)</div>
+    <div style="margin-top:auto" class="logo">01V<sup>96</sup><small>DIGITAL MIXING CONSOLE</small></div></div>
+    <div class="monblk"><div style="margin-top:96px">${btn('flat noled','monsw','monsw',0,'')}</div><div class="lbl" style="font-size:8px;margin-top:2px">▀ MONITOR<br>▄ 2TR IN</div>
+    <div style="margin-top:6px">${knobHTML('cream lg','monlvl','monlvl',0)}</div><div class="gsc" style="width:70px"><span>0</span><span>LEVEL</span><span>10</span></div>
+    <div class="lbl" style="font-size:12px;margin-top:8px">MONITOR<br>OUT</div></div>
+    <div class="phblk"><div class="jack" id="phjack" data-ctl="phjack" data-i="0" style="margin-top:44px;width:32px;height:32px"></div><div class="lbl" style="margin-top:2px">PHONES</div>
+    <div style="margin-top:38px">${knobHTML('cream lg','phlvl','phlvl',0)}</div><div class="gsc" style="width:70px"><span>0</span><span>LEVEL</span><span>10</span></div>
+    <div class="lbl" style="font-size:12px;margin-top:8px">PHONES</div></div>`;
+
+  const DA=[['SCENE','SCENE'],['DIO','DIO/SETUP'],['MIDI','MIDI'],['UTILITY','UTILITY'],['INSERT','ø/INSERT/<br>DELAY'],['PAN','PAN/<br>ROUTING'],['PAIR','PAIR/<br>GROUP'],['PATCH','PATCH'],['DYN','DYNAMICS'],['EQ','EQ'],['EFFECT','EFFECT'],['VIEW','VIEW']];
+  let mid=`<div class="lblk"><div class="blktitle">DISPLAY ACCESS</div><div class="dgrid">${DA.map(([p,l])=>`<div class="cell">${btn('noled','da-'+p,'disp',p,'')}<div class="lbl">${l}</div></div>`).join('')}</div>
+   <div class="blktitle" style="margin-top:4px">FADER MODE</div><div class="fm"><div class="dgrid" style="background:none;padding:0">${[1,2,3,4,5,6,7,8].map(n=>`<div class="cell">${btn('','fm-'+n,'fmode',n,'g')}<div class="lbl" style="height:auto;font-style:italic">AUX ${n}</div></div>`).join('')}</div>
+   <div style="display:flex;flex-direction:column;align-items:flex-start;margin-top:4px">${btn('','home','home',0,'g')}<div class="lbl" style="margin-top:2px">HOME (METER)</div></div></div>
+   <div class="layer" style="margin-top:14px"><span class="ttl">LAYER</span>${['1-16','17-32','MASTER','REMOTE'].map(l=>`<div class="cell">${btn('','ly-'+l,'layer',l,'g')}<div class="lbl">${l}</div></div>`).join('')}</div></div>`;
+  const segs=['OVER','0','3','6','9','12','15','18','24','30','40','50'];
+  mid+=`<div class="lcdblk"><div class="lcdframe" style="position:relative"><div class="lcdwrap" id="lcdwrap" data-ctl="lcd" data-i="0"><canvas id="lcd" width="768" height="576"></canvas></div>
+    <div class="stmeter" data-ctl="stmeter" data-i="0"><div class="cols"><div class="seg" id="mL">${segs.map(()=>'<i></i>').join('')}</div><div class="sc">${segs.map(s=>`<span>${s}</span>`).join('')}</div><div class="seg" id="mR">${segs.map(()=>'<i></i>').join('')}</div></div><div class="lbl" style="font-size:8px">STEREO</div>
+    <div style="margin-top:auto">${knobHTML('sm grey','contrast','contrast',0)}</div><div class="lbl" style="font-size:7px">CONTRAST</div></div></div>
+    <div class="fkeys">${['◄','F1','F2','F3','F4','►'].map((l,n)=>`<div class="cell">${btn('noled','fk-'+n,'fk',n,'')}<div class="lbl" style="font-size:11px">${l}</div></div>`).join('')}</div></div>`;
+  mid+=`<div class="rblk"><div class="scene"><div class="scenebox"><span class="ttl">SCENE MEMORY</span>${[['store','STORE'],['down','▼'],['up','▲'],['recall','RECALL']].map(([a,l])=>`<div class="cell">${btn('big noled','sc-'+a,'scene',a,'')}<div class="lbl" style="font-size:10px">${l}</div></div>`).join('')}</div>
+     <div class="solobox"><div class="cell"><i class="led o" id="soloLed" data-ctl="sololed" data-i="0" style="margin-bottom:12px"></i><div class="lbl">SOLO</div></div><div class="cell">${btn('big noled','clear','clear',0,'')}<div class="lbl">CLEAR</div></div></div></div>
+    <div class="selch"><div class="ttl">SELECTED CHANNEL</div><div style="display:flex;align-items:center;gap:8px">${knobHTML('green','k-pan','pan',0)}<span class="lbl">PAN</span></div>
+     <div class="ttl" style="margin-top:2px">EQUALIZER</div><div class="eqgrid">
+      ${knobHTML('','k-q','eqq',0)}<div class="cell">${btn('','band-3','band',3,'g')}<span class="lbl">HIGH</span></div>
+      <span class="lbl" style="grid-column:1">Q</span><span></span>
+      ${knobHTML('','k-f','eqf',0)}<div class="cell">${btn('','band-2','band',2,'g')}<span class="lbl">HIGH-MID</span></div>
+      <span class="lbl">FREQUENCY</span><div class="cell">${btn('','band-1','band',1,'g')}<span class="lbl">LOW-MID</span></div>
+      ${knobHTML('','k-g','eqg',0)}<div class="cell">${btn('','band-0','band',0,'g')}<span class="lbl">LOW</span></div>
+      <span class="lbl">GAIN</span><span></span></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+     <div class="dataz"><div class="decinc"><div class="cell">${btn('big noled','dec','dec',0,'')}<span class="lbl">DEC</span></div><div class="cell">${btn('big noled','inc','inc',0,'')}<span class="lbl">INC</span></div></div>
+       <div class="wheel" id="wheel" data-ctl="wheel" data-i="0" style="grid-row:span 2"><div class="face"></div></div>
+       <div class="cursor"><span></span>${btn('big noled','cur-u','cur','u','')}<span></span>${btn('big noled','cur-l','cur','l','')}<span style="font-size:11px">◄▲▼►</span>${btn('big noled','cur-r','cur','r','')}<span></span>${btn('big noled','cur-d','cur','d','')}<span></span></div>
+       <div style="display:flex;flex-direction:column;align-items:center;gap:3px">${btn('big noled','enter','enter',0,'')}<span class="lbl">ENTER</span></div></div>
+     <div class="stinsel" style="align-self:flex-end">${btn('noled','stinbtn','stinbtn',0,'')}<span class="lbl">ST IN</span><div class="grid"><span>1 <i class="led g" id="stl-0"></i> 2</span><span></span><span>3 <i class="led g" id="stl-1"></i> 4</span><span></span></div></div></div></div>`;
+
+  let bot='';
+  for(let i=0;i<16;i++){bot+=`<div class="strip">${btn('sel','sel-'+i,'sel',i,'g')}<div class="lbl">SEL</div>${btn('solo','solo-'+i,'solo',i,'o')}<div class="lbl">SOLO</div>${btn('on','on-'+i,'on',i,'y')}<div class="lbl">ON</div>
+   <div class="num">${i+1}</div><div class="tape" data-ctl="tape" data-i="${i}"></div>${faderHTML('fader-'+i,i,'')}
+   <div class="plab"><b>${i+1}</b><span>${i+17}</span><span>${i<8?'AUX '+(i+1):'BUS '+(i-7)}</span></div><div class="ytape${['','','','','','','x','x','x'][i]==='x'?' none':''}" data-ctl="ytape" data-i="${i}">${i>=6&&i<=8?'':NAMES16[i]}</div></div>`}
+  bot+=`<div class="ststrip">${btn('sel','st-sel','stsel',0,'g')}<div class="lbl">SEL</div><div style="height:41px"></div>${btn('on','st-on','ston',0,'y')}<div class="lbl">ON</div><div class="num">&nbsp;</div><div class="tape" style="width:80px;visibility:hidden"></div>${faderHTML('fader-st','st','red')}<div class="lbl" style="font-size:12px;margin-top:20px">STEREO</div></div>`;
+  bot+=`<div class="stinarea"><div class="two">${[0,1].map(j=>`<div class="strip">${btn('sel','stin-sel-'+j,'stinsel',j,'g')}<div class="lbl">SEL</div>${btn('solo','stin-solo-'+j,'stinsolo',j,'o')}<div class="lbl">SOLO</div>${btn('on','stin-on-'+j,'stinon',j,'y')}<div class="lbl">ON</div></div>`).join('')}</div>
+   <div class="stinlab"><span>ST IN 1/3</span><span>ST IN 2/4</span></div><div class="two">${[0,1].map(j=>knobHTML('green lg','stin-k-'+j,'stinknob',j)).join('')}</div>
+   <div class="ukeys"><div class="ttl">USER DEFINED<br>KEYS</div>${[1,2,3,4,5,6,7,8].map(n=>`<button type="button" class="b" id="uk-${n}" data-ctl="ukey" data-i="${n-1}" aria-label="User key ${n}"><i class="led"></i><span>${n}</span></button>`).join('')}</div></div>`;
+  $('#console').innerHTML=`<div class="sec-top">${top}</div><div class="sec-mid">${mid}</div><div class="sec-bot">${bot}</div>`;
+}
+function faderHTML(id,i,cls){const sc=SCALE.map(([d,l])=>{const y=(1-dbToPos(d))*100;return`<span style="top:${y}%">${l}</span><i style="top:${y}%"></i>`}).join('');
+  return`<div class="fader ${cls}" id="${id}" data-ctl="fader" data-i="${i}"><div class="sc">${sc}</div><div class="track"></div><div class="thumb"></div></div>`}
+
+/* =====================================================================
+   LCD
+   ===================================================================== */
+const LCD={W:320,H:240};
+const PAGES={
+  METER:{t:'METER',tabs:['CH1-32','ST IN','MASTER','EFFECT']},
+  SCENE:{t:'SCENE',tabs:['SCENE','RCL SAFE']},
+  DIO:{t:'DIO/SETUP',tabs:['W.CLOCK','SOLO','INFO']},
+  MIDI:{t:'MIDI',tabs:['SETUP','PGM ASGN']},
+  UTILITY:{t:'UTILITY',tabs:['OSC','USER DEF','PREFER','BATTERY']},
+  INSERT:{t:'ø/INS/DLY',tabs:['PHASE','INSERT','DELAY']},
+  PAN:{t:'PAN/ROUTE',tabs:['PAN','ROUTING']},
+  PAIR:{t:'PAIR/GRP',tabs:['PAIR']},
+  PATCH:{t:'PATCH',tabs:['IN PATCH','OUT PATCH']},
+  DYN:{t:'DYNAMICS',tabs:['DYN EDIT','DYN LIB']},
+  EQ:{t:'EQ',tabs:['EQ EDIT','EQ LIB']},
+  EFFECT:{t:'EFFECT',tabs:['FX1','FX2','FX3','FX4']},
+  VIEW:{t:'VIEW',tabs:['CH VIEW','FADER']},
+  AUX:{t:'AUX',tabs:['SEND']},
+  REMOTE:{t:'REMOTE',tabs:['DAW']}
+};
+let lctx,INK,BG='#b5e852';
+const curTab=()=>S.tab[S.page]||0;
+const curKey=()=>S.page+'/'+curTab();
+function setPage(p,{noCycle}={}){if(S.dialog){closeInput();S.dialog=null}if(S.page===p&&!noCycle){S.tab[p]=((S.tab[p]||0)+1)%PAGES[p].tabs.length}else{S.page=p}ev('page:'+p);ev('tab:'+p+':'+curTab())}
+function F(c){lctx.font=c}
+function tx(s,x,y,{sz=8,b=false,al='left',col=INK}={}){F(`${b?'600 ':'500 '}${sz}px "IBM Plex Mono",monospace`);lctx.fillStyle=col;lctx.textAlign=al;lctx.fillText(s,x,y)}
+function rect(x,y,w,h,f=INK){lctx.fillStyle=f;lctx.fillRect(x,y,w,h)}
+function box(x,y,w,h,lw=.8){lctx.strokeStyle=INK;lctx.lineWidth=lw;lctx.strokeRect(x+.5,y+.5,w-1,h-1)}
+function line(x1,y1,x2,y2,lw=.8){lctx.strokeStyle=INK;lctx.lineWidth=lw;lctx.beginPath();lctx.moveTo(x1,y1);lctx.lineTo(x2,y2);lctx.stroke()}
+function vmeter(x,y,w,h,db,pk){const n=Math.floor(h/3),f=db===NEG?0:clamp((db+60)/60,0,1),k=Math.round(f*n);for(let s=0;s<n;s++){const yy=y+h-(s+1)*3;if(s<k)rect(x,yy,w,2);else if(s%4===0)rect(x+w/2-.5,yy+1,1,1)}if(pk!==undefined&&pk>-60){const s=Math.round(clamp((pk+60)/60,0,1)*n)-1;rect(x,y+h-(s+1)*3,w,2)}}
+function hbar(x,y,w,h,frac){box(x,y,w,h);rect(x+1,y+1,Math.max(0,(w-2)*clamp(frac,0,1)),h-2)}
+let FIELDS=[];
+function fld(x,y,w,h,txt,o={}){FIELDS.push(Object.assign({x,y,w,h,txt},o))}
+function drawFields(){const ci=clamp(S.cur[curKey()]||0,0,Math.max(0,FIELDS.length-1));S.cur[curKey()]=ci;
+  FIELDS.forEach((f,i)=>{const foc=i===ci&&!S.dialog;if(foc){rect(f.x,f.y,f.w,f.h)}else if(f.box!==false)box(f.x,f.y,f.w,f.h);
+    if(f.draw)f.draw(foc);else tx(typeof f.txt==='function'?f.txt():f.txt,f.x+f.w/2,f.y+f.h-3.2,{sz:f.sz||7,al:'center',col:foc?BG:INK,b:true})})}
+function curField(){return FIELDS[S.cur[curKey()]||0]}
+
+function drawLCD(dt){
+  const ctx=lctx;ctx.setTransform(2.4,0,0,2.4,0,0);
+  const c=S.contrast;INK=`rgba(18,32,6,${0.45+0.55*c})`;
+  const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'#c3f25c');g.addColorStop(1,'#a2de45');ctx.fillStyle=g;ctx.fillRect(0,0,320,240);BG='#b5e852';
+  FIELDS=[];
+  const P=PAGES[S.page];const tabs=S.page==='AUX'?['AUX '+S.fm]:P.tabs;
+  // cabeçalho
+  box(0,0,64,23);tx(S.page==='AUX'?'AUX '+S.fm:P.t,3,9,{sz:7.5,b:true});tx(tabs[curTab()]||'',3,19,{sz:7});
+  const blink=S.sceneNum!==S.curScene&&Math.floor(T*2.5)%2===0;
+  if(!blink)tx(String(S.sceneNum).padStart(2,'0'),68,19,{sz:17,b:true});
+  const sc=S.scenes[S.sceneNum];tx(sc?sc.title:'No Data!',96,9,{sz:7});
+  if(S.edited&&S.sceneNum===S.curScene){rect(96,12,22,9);tx('EDIT',107,19,{sz:6.5,al:'center',col:BG,b:true})}
+  box(200,0,120,23);const so=selObj();tx(tName(S.sel),203,9,{sz:7,b:true});tx(so?so.name:'',248,9,{sz:7});
+  tx(fs(),203,19,{sz:7});tx(unlocked()?'UNLOCK':'INT',240,19,{sz:7});if(S.anySolo&&Math.floor(T*3)%2)tx('SOLO',300,19,{sz:6.5,al:'center',b:true});
+  line(0,24,320,24);
+  // conteúdo
+  try{(DRAW[S.page]||(()=>{}))(dt)}catch(e){tx('ERRO: '+e.message,6,60)}
+  drawFields();
+  // abas
+  for(let n=0;n<4;n++){const x=2+n*79,y=226;if(!tabs[n])continue;const act=n===curTab();if(act){rect(x,y,76,14);tx(tabs[n],x+38,y+10,{sz:7,al:'center',col:BG,b:true})}else{box(x,y,76,14);tx(tabs[n],x+38,y+10,{sz:7,al:'center'})}}
+  if(S.dialog)drawDialog();
+}
+function drawDialog(){const d=S.dialog;rect(34,64,252,104,BG);box(34,64,252,104,1.5);box(37,67,246,98,.8);d.lines.forEach((l,i)=>tx(l,160,86+i*13,{sz:8,al:'center',b:i===0}));
+  rect(60,146,80,14);tx('ENTER = OK',100,156,{sz:7,al:'center',col:BG,b:true});box(180,146,80,14);tx('◄ = CANCELA',220,156,{sz:7,al:'center'})}
+function drawEqGraph(o,x,y,w,h,showPts=true){box(x,y,w,h);const fx=f=>x+w*Math.log(f/20)/Math.log(1000);const gy=d=>y+h/2-d/18*(h/2-3);
+  [100,1000,10000].forEach(f=>{for(let yy=y+2;yy<y+h;yy+=3)rect(fx(f),yy,.6,.6)});for(let xx=x+2;xx<x+w;xx+=3)rect(xx,y+h/2,.6,.6);
+  tx('100',fx(100),y+h-2,{sz:5.5,al:'center'});tx('1k',fx(1000),y+h-2,{sz:5.5,al:'center'});tx('10k',fx(10000),y+h-2,{sz:5.5,al:'center'});
+  lctx.strokeStyle=INK;lctx.lineWidth=1.3;lctx.beginPath();for(let i=0;i<=w;i++){const f=20*Math.pow(1000,i/w);const d=clamp(eqResp(o,f),-18,18);const yy=gy(d);i?lctx.lineTo(x+i,yy):lctx.moveTo(x+i,yy)}lctx.stroke();
+  if(showPts&&o.eqOn)o.eq.forEach((b,i)=>{const px=fx(clamp(fOf(b.fi),20,20000));const op=QOPT(i)[b.qi];const py=gy(typeof op==='number'||/SHF/.test(op)?clamp(b.g,-18,18):0);rect(px-2,py-2,4,4,i===S.band?INK:BG);box(px-2,py-2,4,4)})}
+
+const DRAW={};
+DRAW.METER=dt=>{const t=curTab();
+  fld(6,28,82,12,()=>'POS:'+S.prefs.meterPos,{inc:()=>{const o=['PRE EQ','PRE FADER','POST FADER'];S.prefs.meterPos=o[(o.indexOf(S.prefs.meterPos)+1)%3]},ent(){this.inc()}});
+  fld(232,28,82,12,()=>'PEAK HOLD '+(S.prefs.peakHold?'ON':'OFF'),{inc:()=>S.prefs.peakHold=!S.prefs.peakHold,ent(){this.inc()}});
+  const pos=S.prefs.meterPos;const chLv=c=>pos==='POST FADER'?c.lvPost:c.lvPre;
+  const scale=(x,y,h)=>{[0,-6,-12,-18,-30,-48].forEach(d=>{const yy=y+h-(d+60)/60*h;tx(String(d),x,yy+2,{sz:5.5,al:'right'})})};
+  if(t===0){for(let r=0;r<2;r++){const y=r?134:50;scale(14,y,66);for(let i=0;i<16;i++){const c=S.ch[r*16+i];const m=met('c'+(r*16+i),chLv(c),dt);vmeter(18+i*18.5,y,10,66,m.v,m.pk);tx(String(r*16+i+1),23+i*18.5,y+75,{sz:5.5,al:'center'})}}tx('CH1-32  '+pos,160,222,{sz:6,al:'center'})}
+  if(t===1){scale(40,52,120);S.stin.forEach((s,j)=>{[0,1].forEach(ch=>{const lv=pos==='POST FADER'?s.lvPost:s.lvPre;const m=met('s'+j+ch,lv,dt);const x=50+(j*2+ch)*31;vmeter(x,52,16,120,m.v,m.pk);tx(fmtDb(m.v,0),x+8,184,{sz:6,al:'center'});tx((j+1)+(ch?'R':'L'),x+8,196,{sz:7,al:'center',b:true})})});line(50,203,296,203);tx('STEREO INPUT',173,214,{sz:7,al:'center'})}
+  if(t===2){scale(14,52,118);const arr=[...S.aux.map((a,i)=>['A'+(i+1),a.lv]),...S.bus.map((b,i)=>['B'+(i+1),b.lv]),['L',MD.stL],['R',MD.stR]];arr.forEach(([n,lv],i)=>{const x=20+i*16.3+(i>=16?6:0);const m=met('m'+i,lv,dt);vmeter(x,52,10,118,m.v,m.pk);tx(n,x+5,182,{sz:5.5,al:'center'})});tx('AUX 1-8      BUS 1-8      STEREO',160,200,{sz:6.5,al:'center'})}
+  if(t===3){scale(30,52,118);S.fx.forEach((f,n)=>{['IN','OUT'].forEach((k,q)=>{const lv=q?MD.fxOut[n]:MD.fxIn[n];const x=40+(n*2+q)*33;const m=met('f'+n+q,lv,dt);vmeter(x,52,14,118,m.v,m.pk);tx(k,x+7,182,{sz:6,al:'center'})});tx('FX'+(n+1),73+n*66,196,{sz:7,al:'center',b:true});tx(f.type.slice(0,11),73+n*66,207,{sz:5.5,al:'center'})})}
+};
+DRAW.SCENE=()=>{const t=curTab();if(t===0){tx('No.  TITLE',10,36,{sz:7,b:true});tx('PROTECT',300,36,{sz:6.5,al:'right'});
+  for(let r=-3;r<=3;r++){const n=S.sceneNum+r;if(n<0||n>99)continue;const y=50+(r+3)*17;const s=S.scenes[n];
+    if(r===0){fld(6,y-10,250,14,'',{box:true,inc:d=>{S.sceneNum=clamp(S.sceneNum+d,0,99)},draw:foc=>{const col=foc?BG:INK;tx((n===S.curScene?'►':' ')+String(n).padStart(2,'0')+'  '+(s?s.title:'No Data!'),12,y,{sz:8,b:true,col})}})}
+    else tx((n===S.curScene?'►':' ')+String(n).padStart(2,'0')+'  '+(s?s.title:'No Data!'),12,y,{sz:8});
+    if(s&&s.ro)tx('R',296,y,{sz:7,al:'right'})}
+  fld(262,94,52,14,'RECALL',{ent:()=>doRecall()});fld(262,112,52,14,'STORE',{ent:()=>doStore()});
+  tx('▲/▼ ou roda: escolher   ENTER: executar',160,214,{sz:6,al:'center'})}
+ else{tx('RECALL SAFE: canais protegidos não mudam ao chamar cena',160,36,{sz:6,al:'center'});
+  for(let i=0;i<32;i++){const c=S.ch[i];const x=8+(i%8)*38,y=46+Math.floor(i/8)*36;tx(String(i+1).padStart(2,'0'),x+17,y+8,{sz:6,al:'center'});fld(x,y+11,34,14,()=>c.safe?'SAFE':'---',{inc:()=>{c.safe=!c.safe},ent(){this.inc()}})}}};
+DRAW.DIO=()=>{const t=curTab();
+ if(t===0){tx('MASTER CLOCK SELECT',10,38,{sz:7.5,b:true});CLOCKS.forEach((c,i)=>{const x=10+(i%4)*76,y=48+Math.floor(i/4)*40;fld(x,y,72,16,c,{ent:()=>{S.clock=c;ev('clock:'+c)},inc(){this.ent()}});tx(S.clock===c?'● SELECT':'',x+36,y+27,{sz:6,al:'center'});tx(i<4?'LOCK':'UNLOCK',x+36,y+35,{sz:5.5,al:'center'})});
+   if(unlocked())tx('!! CLOCK EXTERNO SEM SINAL: ÁUDIO MUDO !!',160,150,{sz:7.5,al:'center',b:true});
+   tx('88.2k/96k: só EFFECT 1 e 2 disponíveis',160,190,{sz:6.5,al:'center'})}
+ if(t===1){tx('SOLO SETUP',10,40,{sz:7.5,b:true});tx('MODE',20,64,{sz:7});fld(90,54,110,14,()=>S.soloMode+' SOLO',{inc:()=>{S.soloMode=S.soloMode==='RECORD'?'MIX':'RECORD';ev('solomode')},ent(){this.inc()}});
+   tx('LISTEN',20,88,{sz:7});fld(90,78,110,14,()=>S.listen,{inc:()=>{S.listen=S.listen==='AFL'?'PFL':'AFL'},ent(){this.inc()}});
+   tx('RECORD: solo só na monitoração (seguro no ar).',20,124,{sz:6.5});tx('MIX: corta os outros canais na saída STEREO!',20,138,{sz:6.5});tx('PFL = pré-fader  AFL = pós-fader',20,156,{sz:6.5})}
+ if(t===2){['SLOT 1   : (vazio)','ADAT IN  : sem sinal','2TR IN D : sem sinal','TO HOST  : USB','WORD CLK : INT '+fs()].forEach((l,i)=>tx(l,20,48+i*16,{sz:7.5}))}};
+DRAW.MIDI=()=>{if(curTab()===0){tx('MIDI SETUP',10,40,{sz:7.5,b:true});const rows=[['RX CH',()=>S.midi.rx,d=>S.midi.rx=clamp(S.midi.rx+d,1,16)],['TX CH',()=>S.midi.tx,d=>S.midi.tx=clamp(S.midi.tx+d,1,16)],['SCENE RX',()=>S.midi.scRx?'ON':'OFF',()=>S.midi.scRx=!S.midi.scRx],['SCENE TX',()=>S.midi.scTx?'ON':'OFF',()=>S.midi.scTx=!S.midi.scTx]];
+  rows.forEach(([l,g,f],i)=>{tx(l,20,64+i*20,{sz:7});fld(110,54+i*20,60,14,()=>String(g()),{inc:f,ent(){f(1)}})});tx('Program Change chama cenas por MIDI.',20,160,{sz:6.5})}
+ else{tx('PGM CHANGE → SCENE',10,40,{sz:7.5,b:true});for(let i=0;i<8;i++)tx('PGM '+String(i+1).padStart(3,' ')+'  →  SCENE '+String(i+1).padStart(2,'0'),30,58+i*15,{sz:7})}};
+DRAW.UTILITY=()=>{const t=curTab(),o=S.osc;
+ if(t===0){tx('OSCILLATOR',10,40,{sz:7.5,b:true});fld(10,48,60,16,()=>o.on?'ON':'OFF',{ent:()=>{o.on=!o.on;ev('osc:'+(o.on?'on':'off'))},inc(){this.ent()}});
+   tx('LEVEL',84,46,{sz:6.5});fld(84,50,56,14,()=>(o.lvl===-96?'-∞':o.lvl)+'dB',{inc:d=>o.lvl=clamp(o.lvl+d,-96,0)});
+   tx('WAVEFORM',152,46,{sz:6.5});fld(152,50,90,14,()=>OSCW[o.w],{inc:d=>o.w=(o.w+d+5)%5});
+   tx('ASSIGN',10,84,{sz:7,b:true});fld(10,90,30,14,'ST',{draw:foc=>tx('ST'+(o.asg.st?'●':''),25,101,{sz:6.5,al:'center',col:foc?BG:INK}),ent:()=>o.asg.st=!o.asg.st,inc(){this.ent()}});
+   for(let k=0;k<8;k++){fld(44+k*33,90,31,14,'',{draw:foc=>tx('A'+(k+1)+(o.asg.aux[k]?'●':''),44+k*33+15,101,{sz:6.5,al:'center',col:foc?BG:INK}),ent:()=>o.asg.aux[k]=!o.asg.aux[k],inc(){this.ent()}});
+     fld(44+k*33,108,31,14,'',{draw:foc=>tx('B'+(k+1)+(o.asg.bus[k]?'●':''),44+k*33+15,119,{sz:6.5,al:'center',col:foc?BG:INK}),ent:()=>o.asg.bus[k]=!o.asg.bus[k],inc(){this.ent()}})}
+   const m=met('osc',o.on?o.lvl:NEG,1/30);hbar(10,140,300,10,m.v===NEG?0:(m.v+60)/60);tx('Teste de linha: 1 kHz a -18 dBFS (alinhamento) ',160,170,{sz:6.5,al:'center'})}
+ if(t===1){tx('USER DEFINED KEYS',10,40,{sz:7.5,b:true});for(let n=0;n<8;n++){const y=48+n*20;tx('KEY '+(n+1),14,y+11,{sz:7});fld(70,y,200,16,()=>UKF[S.uk[n]],{inc:d=>S.uk[n]=(S.uk[n]+d+UKF.length)%UKF.length})}}
+ if(t===2){tx('PREFERENCE',10,40,{sz:7.5,b:true});const P=S.prefs;[['AUTO EQ DISPLAY','autoEq'],['RECALL CONFIRMATION','recallConf'],['STORE CONFIRMATION','storeConf'],['PEAK HOLD','peakHold']].forEach(([l,k],i)=>{tx(l,20,64+i*20,{sz:7});fld(200,54+i*20,50,14,()=>P[k]?'ON':'OFF',{inc:()=>P[k]=!P[k],ent(){this.inc()}})})}
+ if(t===3){tx('BATTERY : OK',20,60,{sz:8});tx('SYSTEM  : simulação didática',20,80,{sz:8});tx('Bateria interna guarda cenas e ajustes',20,110,{sz:6.5});tx('com a mesa desligada.',20,122,{sz:6.5})}};
+const off=()=>S.layer==='17-32'?16:0;
+DRAW.INSERT=()=>{const t=curTab();
+ if(t===0){tx('PHASE (ø) — inverte a polaridade',10,38,{sz:7});for(let i=0;i<16;i++){const c=S.ch[off()+i];const x=6+(i%8)*39,y=48+Math.floor(i/8)*46;tx(String(off()+i+1),x+18,y+8,{sz:6.5,al:'center'});tx(c.name.slice(0,6),x+18,y+17,{sz:5.5,al:'center'});fld(x,y+20,36,14,()=>c.phase?'REV':'NOR',{inc:()=>{linked({t:'ch',i:off()+i}).forEach(z=>z.phase=!c.phase);markEdit();ev('phase')},ent(){this.inc()}})}}
+ if(t===1){const o=selObj();if(!o.patch){tx('Selecione um canal de entrada',160,100,{sz:8,al:'center'});return}tx('INSERT (digital) — '+tName(S.sel),10,40,{sz:7.5,b:true});
+   tx('INSERT',20,66,{sz:7});fld(90,56,50,14,()=>o.ins?'ON':'OFF',{inc:()=>{o.ins=!o.ins;markEdit()},ent(){this.inc()}});
+   tx('POSITION',20,90,{sz:7});fld(90,80,80,14,()=>o.insPos,{inc:()=>{const p=['PRE EQ','PRE FADER','POST FADER'];o.insPos=p[(p.indexOf(o.insPos)+1)%3]}});
+   tx('Os jacks INSERT I/O (ch1-12) são analógicos,',20,130,{sz:6.5});tx('antes do conversor, e não dependem desta tela.',20,142,{sz:6.5})}
+ if(t===2){const o=selObj();if(!o.patch){tx('Selecione um canal de entrada',160,100,{sz:8,al:'center'});return}tx('CHANNEL DELAY — '+tName(S.sel),10,40,{sz:7.5,b:true});
+   tx('DELAY',20,66,{sz:7});fld(90,56,50,14,()=>o.dlyOn?'ON':'OFF',{inc:()=>{o.dlyOn=!o.dlyOn;markEdit();ev('delay')},ent(){this.inc()}});
+   tx('TIME',20,90,{sz:7});fld(90,80,80,14,()=>o.dly.toFixed(1)+' ms',{inc:d=>{o.dly=clamp(+(o.dly+d*(Math.abs(d)>1?1:0.5)).toFixed(1),0,600);markEdit()}});
+   tx('= '+(o.dly/33.367).toFixed(2)+' quadros (29,97 fps)',90,112,{sz:7});tx('Use para sincronizar áudio com vídeo (lip-sync).',20,150,{sz:6.5})}};
+DRAW.PAN=()=>{const t=curTab();
+ if(t===0){tx('PAN — layer '+(S.layer==='MASTER'?'1-16':S.layer==='17-32'?'17-32':'1-16'),10,38,{sz:7});const o2=S.layer==='17-32'?16:0;for(let i=0;i<16;i++){const c=S.ch[o2+i];const x=6+(i%8)*39,y=48+Math.floor(i/8)*80;
+   tx(String(o2+i+1),x+18,y+8,{sz:6.5,al:'center'});const cx=x+18,cy=y+30,r=12;lctx.strokeStyle=INK;lctx.lineWidth=1;lctx.beginPath();lctx.arc(cx,cy,r,.75*Math.PI,2.25*Math.PI);lctx.stroke();const a=(-135+(c.pan+63)/126*270)*Math.PI/180;line(cx,cy,cx+Math.sin(a)*r,cy-Math.cos(a)*r,1.6);
+   fld(x+1,y+46,34,13,()=>c.pan===0?'CENTER':(c.pan<0?'L'+(-c.pan):'R'+c.pan),{sz:6,inc:d=>{c.pan=clamp(c.pan+d,-63,63);markEdit()},ent:()=>{c.pan=0}})}}
+ else{const o2=S.layer==='17-32'?16:0;tx('ROUTING',8,36,{sz:7,b:true});const rows=['ST',...Array.from({length:8},(_,k)=>'B'+(k+1))];
+   rows.forEach((r,ri)=>tx(r,16,58+ri*17,{sz:6.5,al:'right'}));for(let i=0;i<16;i++){const c=S.ch[o2+i];tx(String(o2+i+1),27+i*18.2,46,{sz:5.5,al:'center'});
+   rows.forEach((r,ri)=>{const get=()=>ri===0?c.st:c.bus[ri-1];fld(20+i*18.2,48+ri*17,15,13,'',{draw:foc=>{if(get())rect(20+i*18.2+3,48+ri*17+3,9,7,foc?BG:INK)},inc:()=>{linked({t:'ch',i:o2+i}).forEach(z=>{if(ri===0)z.st=!get();else z.bus[ri-1]=!get()});markEdit();ev('route')},ent(){this.inc()}})})}}};
+DRAW.PAIR=()=>{tx('PAIR — canais ímpar/par vizinhos ficam ligados',10,38,{sz:7});for(let p=0;p<16;p++){const x=8+(p%8)*38,y=50+Math.floor(p/8)*50;tx((2*p+1)+'-'+(2*p+2),x+17,y+8,{sz:6.5,al:'center'});
+  fld(x,y+12,34,16,()=>S.pair[p]?'PAIR':'---',{inc:()=>{S.pair[p]=!S.pair[p];if(S.pair[p]){const a=S.ch[2*p],b=S.ch[2*p+1];['fader','on','eqOn','att','st','phase'].forEach(k=>b[k]=a[k]);b.eq=JSON.parse(JSON.stringify(a.eq));b.dyn=JSON.parse(JSON.stringify(a.dyn,(k,v)=>v===Infinity?1e9:v));b.aux=[...a.aux];b.bus=[...a.bus]}markEdit();ev('pair')},ent(){this.inc()}})}
+  tx('ST IN 1-4 já são estéreo. Pan não é ligado.',160,170,{sz:6.5,al:'center'});tx('Atalho no real: segure SEL de um e aperte o do vizinho.',160,184,{sz:6.5,al:'center'})};
+DRAW.PATCH=()=>{if(curTab()===0){tx('INPUT PATCH',8,36,{sz:7,b:true});for(let i=0;i<32;i++){const c=S.ch[i];const x=4+Math.floor(i/8)*79,y=44+(i%8)*21;tx(String(i+1).padStart(2,'0'),x+12,y+10,{sz:6.5,al:'right'});
+   fld(x+16,y,58,14,()=>c.patch,{inc:d=>{c.patch=PATCHOPT[(PATCHOPT.indexOf(c.patch)+d+PATCHOPT.length)%PATCHOPT.length];markEdit();ev('patch')}})}}
+ else{tx('OUTPUT PATCH',8,36,{sz:7,b:true});S.omni.forEach((o,i)=>{tx('OMNI OUT '+(i+1),20,62+i*20,{sz:7});fld(110,52+i*20,60,14,()=>S.omni[i],{inc:d=>{S.omni[i]=OUTOPT[(OUTOPT.indexOf(S.omni[i])+d+OUTOPT.length)%OUTOPT.length]}})});
+   tx('STEREO OUT (XLR)  : ST L/R',20,150,{sz:6.5});tx('2TR OUT (RCA/DIG) : ST L/R',20,164,{sz:6.5});tx('MONITOR OUT       : monitor',20,178,{sz:6.5})}};
+DRAW.DYN=dt=>{const o=selObj(),d=o.dyn;if(curTab()===1){tx('DYNAMICS LIBRARY → '+tName(S.sel),10,38,{sz:7,b:true});DYNLIB.forEach((L,i)=>fld(20,46+i*20,280,15,L.n,{ent:()=>{editSel(z=>Object.assign(z.dyn,L.d,{on:true}));ev('dynlib')}}));tx('ENTER = RECALL na entrada selecionada',160,200,{sz:6.5,al:'center'});return}
+  const gx=12,gy=32,gs=96;box(gx,gy,gs,gs);for(let i=1;i<6;i++)for(let p=gx+2;p<gx+gs;p+=4)rect(p,gy+i*16,.6,.6);
+  lctx.strokeStyle=INK;lctx.lineWidth=1.3;lctx.beginPath();for(let i=0;i<=gs;i++){const lv=-72+72*i/gs;const r=d.on?dynOut(d,lv).out:lv;const yy=gy+gs-(clamp(r,-72,0)+72)/72*gs;i?lctx.lineTo(gx+i,yy):lctx.moveTo(gx+i,yy)}lctx.stroke();
+  const lin=o.lvPre;if(lin>-72){const xx=gx+(clamp(lin,-72,0)+72)/72*gs;line(xx,gy,xx,gy+gs,.5)}
+  tx('GR',124,40,{sz:6});const gm=clamp(d.gr/20,0,1);box(122,44,10,84);rect(123,45,8,82*gm);
+  fld(140,30,40,15,()=>d.on?'ON':'OFF',{ent:()=>{editSel(z=>z.dyn.on=!d.on);ev('dyn:on')},inc(){this.ent()}});
+  fld(186,30,62,15,()=>d.type,{inc:dd=>{const t=DYNT[(DYNT.indexOf(d.type)+dd+DYNT.length)%DYNT.length];editSel(z=>z.dyn.type=t);ev('dyn:type')}});
+  const P=isGate(d.type)?[['THRESH',()=>d.thr+'dB',v=>d.thr=clamp(d.thr+v,-72,0),'thr'],['RANGE',()=>d.range+'dB',v=>d.range=clamp(d.range+v,-70,0),'range'],['ATTACK',()=>d.atk+'ms',v=>d.atk=clamp(d.atk+v,0,120),'atk'],['HOLD',()=>d.hold+'ms',v=>d.hold=clamp(d.hold+v*5,0,2000),'hold'],['DECAY',()=>d.rel+'ms',v=>d.rel=clamp(d.rel+v*10,5,5000),'rel']]
+   :[['THRESH',()=>d.thr+'dB',v=>d.thr=clamp(d.thr+v,-54,0),'thr'],['RATIO',()=>fmtR(RATIOS[d.ri]),v=>d.ri=clamp(d.ri+v,0,RATIOS.length-1),'ri'],['ATTACK',()=>d.atk+'ms',v=>d.atk=clamp(d.atk+v,0,120),'atk'],['RELEASE',()=>d.rel+'ms',v=>d.rel=clamp(d.rel+v*10,5,5000),'rel'],['GAIN',()=>d.gain+'dB',v=>d.gain=clamp(d.gain+v*.5,0,18),'gain'],['KNEE',()=>String(d.knee),v=>d.knee=clamp(d.knee+v,0,5),'knee']];
+  P.forEach(([l,g,f,k],i)=>{const x=140+(i%3)*60,y=58+Math.floor(i/3)*38;tx(l,x+28,y,{sz:6,al:'center'});fld(x,y+3,56,15,g,{inc:v=>{f(v);const val=d[k];linked(S.sel).forEach(z=>z.dyn[k]=val);markEdit();ev('dyn:'+k)}})});
+  tx('IN '+fmtDb(o.lvPre,0)+'   GR '+d.gr.toFixed(1)+'dB',12,146,{sz:6.5});tx(d.on?'':'(processador desligado)',12,160,{sz:6.5});
+  tx('1 processador por canal: escolha o TYPE',160,212,{sz:6.5,al:'center'})};
+DRAW.EQ=()=>{const o=selObj();if(curTab()===1){tx('EQ LIBRARY → '+tName(S.sel),10,38,{sz:7,b:true});EQLIB.forEach((L,i)=>fld(20,46+i*20,280,15,L.n,{ent:()=>{editSel(z=>{z.eqOn=true;L.b.forEach((b,bi)=>{const op=QOPT(bi);z.eq[bi]={qi:op.indexOf(b[0])>=0?op.indexOf(b[0]):op.indexOf(0.7),fi:fiOf(b[1]),g:b[2]}})});ev('eqlib')}}));tx('ENTER = RECALL na entrada selecionada',160,200,{sz:6.5,al:'center'});return}
+  drawEqGraph(o,8,28,304,96);
+  fld(8,128,46,14,()=>'EQ '+(o.eqOn?'ON':'OFF'),{ent:()=>{editSel(z=>z.eqOn=!o.eqOn);ev('eq:on')},inc(){this.ent()}});
+  fld(58,128,64,14,()=>'ATT '+(o.att>0?'+':'')+o.att+'dB',{inc:d=>{editSel(z=>z.att=clamp(o.att+d,-96,12))}});
+  tx('ATT: atenuador digital antes do EQ',128,138,{sz:6});
+  for(let b=0;b<4;b++){const x=10+b*77,y=148;const B=o.eq[b];if(b===S.band)rect(x-2,y-2,74,74,'rgba(0,0,0,.08)');tx(BANDN[b],x+35,y+6,{sz:7,al:'center',b:true});
+    const op=QOPT(b)[B.qi];const hasG=typeof op==='number'||/SHF/.test(op);
+    tx('Q',x+2,y+20,{sz:6});fld(x+14,y+10,56,13,()=>String(op),{inc:d=>{bandEdit(b,'qi',d)}});
+    tx('F',x+2,y+36,{sz:6});fld(x+14,y+26,56,13,()=>fmtF(fOf(B.fi)),{inc:d=>{bandEdit(b,'fi',d)}});
+    tx('G',x+2,y+52,{sz:6});fld(x+14,y+42,56,13,()=>hasG?(B.g>0?'+':'')+B.g.toFixed(1):'--',{inc:d=>{bandEdit(b,'g',d)}})}};
+function bandEdit(b,k,d){S.band=b;const o=selObj();const B=o.eq[b];if(k==='qi')B.qi=clamp(B.qi-d,0,QOPT(b).length-1);if(k==='fi')B.fi=clamp(B.fi+d,0,118);if(k==='g')B.g=clamp(B.g+d*.5,-18,18);
+  const v=B[k];linked(S.sel).forEach(z=>z.eq[b][k]=v);markEdit();ev('eq:'+k)}
+DRAW.EFFECT=()=>{const n=curTab(),f=S.fx[n];tx('EFFECT '+(n+1),10,40,{sz:8,b:true});if(!fxAvail(n)){tx('Indisponível em 88.2/96 kHz',160,100,{sz:8,al:'center'});return}
+  tx('TYPE',10,62,{sz:7});fld(50,52,120,15,()=>f.type,{inc:d=>{f.type=FXTYPES[(FXTYPES.indexOf(f.type)+d+FXTYPES.length)%FXTYPES.length];markEdit();ev('fx:type')}});
+  tx('INPUT',10,86,{sz:7});fld(50,76,60,15,()=>f.in,{inc:d=>{const o=['---',...Array.from({length:8},(_,i)=>'AUX'+(i+1))];f.in=o[(o.indexOf(f.in)+d+o.length)%o.length];markEdit()}});
+  tx('MIX',10,110,{sz:7});fld(50,100,60,15,()=>f.mix+'%',{inc:d=>{f.mix=clamp(f.mix+d,0,100)}});
+  const pl=isRev(f.type)?'REV TIME':isDly(f.type)?'DELAY':'RATE';tx(pl,120,110,{sz:7});fld(170,100,60,15,()=>isRev(f.type)?f.time.toFixed(1)+'s':isDly(f.type)?Math.round(f.time*1000)+'ms':f.time.toFixed(2)+'Hz',{inc:d=>{f.time=clamp(+(f.time+d*.1).toFixed(2),.05,9.9)}});
+  box(10,130,300,56);tx(f.in+'  →  [ FX'+(n+1)+' '+f.type+' ]  →  ST IN '+(n+1),160,152,{sz:7,al:'center'});tx('saída do efeito volta pelo ST IN '+(n+1)+' (patch FX'+(n+1)+')',160,170,{sz:6.5,al:'center'});
+  const mi=met('fxi'+n,MD.fxIn[n],1/30),mo=met('fxo'+n,MD.fxOut[n],1/30);tx('IN',236,60,{sz:6});hbar(250,54,60,8,mi.v===NEG?0:(mi.v+60)/60);tx('OUT',236,76,{sz:6});hbar(250,70,60,8,mo.v===NEG?0:(mo.v+60)/60)};
+DRAW.VIEW=()=>{const o=selObj();if(curTab()===1){tx('FADER — '+S.layer,10,38,{sz:7,b:true});for(let i=0;i<16;i++){const v=stripGet(i);const x=10+(i%8)*38,y=56+Math.floor(i/8)*60;tx(String(i+1),x+16,y,{sz:6.5,al:'center'});hbar(x+2,y+4,28,8,v);tx(fmtDb(posToDb(v),0),x+16,y+24,{sz:6.5,al:'center'})}tx('STEREO '+fmtDb(posToDb(S.st.fader)),160,190,{sz:7,al:'center'});return}
+  tx(tName(S.sel),10,38,{sz:8,b:true});fld(56,28,90,14,()=>o.name,{ent:()=>openName(o),inc(){}});tx('ENTER: renomear',150,38,{sz:6});
+  if(o.patch!==undefined){tx('IN '+o.patch,240,38,{sz:7});tx('ø '+(o.phase?'REV':'NOR'),290,38,{sz:7})}
+  drawEqGraph(o,8,46,124,58,false);tx('EQ '+(o.eqOn?'ON':'OFF'),12,114,{sz:6.5});
+  tx('DYN '+(o.dyn.on?o.dyn.type+' '+o.dyn.thr+'dB':'OFF'),70,114,{sz:6.5});
+  if(o.pan!==undefined)tx('PAN '+(o.pan===0?'C':(o.pan<0?'L'+(-o.pan):'R'+o.pan)),12,128,{sz:7});
+  if(o.st!==undefined){tx('ST'+(o.st?'●':'○')+' '+o.bus.map((b,k)=>b?'B'+(k+1):'').filter(Boolean).join(' '),70,128,{sz:7})}
+  tx('FADER '+fmtDb(posToDb(o.fader))+'  '+(o.on?'ON':'MUTE'),12,142,{sz:7.5,b:true});
+  if(o.aux){tx('AUX SEND',150,58,{sz:6.5,b:true});o.aux.forEach((a,k)=>{const y=62+k*10;tx(String(k+1),152,y+7,{sz:6});fld(160,y,100,8,'',{box:true,draw:foc=>{rect(161,y+1,98*a,6,foc?BG:INK)},inc:d=>{linked(S.sel).forEach(z=>z.aux[k]=clamp(a+d*.01,0,1));markEdit();ev('auxsend')}});tx(o.auxPre[k]?'PRE':'PST',264,y+7,{sz:6})})}
+  const m=met('view',o.lvPre,1/30);tx('IN',12,160,{sz:6});hbar(28,154,120,8,m.v===NEG?0:(m.v+60)/60)};
+DRAW.AUX=()=>{const k=S.fm-1,o2=S.layer==='17-32'?16:0;tx('AUX '+(k+1)+' SEND — faders = envio',10,38,{sz:7,b:true});tx('MASTER '+fmtDb(posToDb(S.aux[k].fader)),310,38,{sz:7,al:'right'});
+  for(let i=0;i<16;i++){const c=S.ch[o2+i];const x=6+i*19.5;tx(String(o2+i+1),x+8,52,{sz:5.5,al:'center'});box(x+3,56,10,100);rect(x+4,56+99*(1-c.aux[k]),8,99*c.aux[k]);
+    fld(x,160,17,12,'',{draw:foc=>tx(c.auxPre[k]?'PR':'PS',x+8.5,169,{sz:5.5,al:'center',col:foc?BG:INK}),inc:()=>{linked({t:'ch',i:o2+i}).forEach(z=>z.auxPre[k]=!c.auxPre[k]);markEdit();ev('auxpre')},ent(){this.inc()}})}
+  tx('PR = pré-fader (retorno/ponto)  PS = pós-fader',160,190,{sz:6.5,al:'center'});tx('HOME volta os faders ao normal',160,204,{sz:6.5,al:'center'})};
+DRAW.REMOTE=()=>{tx('REMOTE LAYER',160,80,{sz:10,al:'center',b:true});tx('Faders controlam um software (DAW)',160,104,{sz:7,al:'center'});tx('pela porta USB (TO HOST) ou MIDI.',160,118,{sz:7,al:'center'});tx('Nenhuma DAW conectada nesta simulação.',160,146,{sz:7,al:'center'})};
+
+/* ---------- ações de cena ---------- */
+function applyScene(n){const sc=S.scenes[n];if(!sc||!sc.data)return false;const d=JSON.parse(JSON.stringify(sc.data,(k,v)=>v===Infinity?'INF':v===NEG?'NINF':v),(k,v)=>v==='INF'?Infinity:v==='NINF'?NEG:v);
+  d.ch.forEach((c,i)=>{if(!S.ch[i].safe){c.safe=false;S.ch[i]=c}});
+  ['aux','bus','stin'].forEach(k=>d[k].forEach((o,i)=>S[k][i]=o));S.st=d.st;S.fx=d.fx;S.pair=d.pair;S.curScene=n;S.edited=false;return true}
+function doRecall(){const n=S.sceneNum;const sc=S.scenes[n];if(!sc||!sc.data){flashMsg(['RECALL','Cena '+String(n).padStart(2,'0')+' vazia (No Data!)']);return}
+  const go=()=>{applyScene(n);ev('recall');ev('recall:'+n);S.dialog=null};if(S.prefs.recallConf){S.dialog={lines:['RECALL SCENE '+String(n).padStart(2,'0')+'?',sc.title],ok:go}}else go()}
+function doStore(){const n=S.sceneNum;if(n===0){flashMsg(['STORE','Cena 00 é somente leitura']);return}
+  const cur=S.scenes[n];if(cur&&cur.ro){flashMsg(['STORE','Cena protegida']);return}
+  openTitle(cur?cur.title:(S.scenes[S.curScene]?.title||'NEW SCENE'),title=>{S.scenes[n]={title:title||'SCENE '+n,data:snap()};S.curScene=n;S.edited=false;ev('store');ev('store:'+n)})}
+let flashT=0;function flashMsg(lines){S.dialog={lines,ok:()=>{S.dialog=null},info:true};clearTimeout(flashT);flashT=setTimeout(()=>{if(S.dialog&&S.dialog.info)S.dialog=null},1800)}
+function openTitle(v,cb){openInput(v,'STORE SCENE '+String(S.sceneNum).padStart(2,'0')+' — TITLE',cb)}
+function openName(o){openInput(o.name,'CHANNEL NAME — '+tName(S.sel),v=>{if(v){o.name=v.slice(0,16);markEdit();ev('rename')}})}
+function openInput(val,title,cb){closeInput();const w=$('#lcdwrap');const inp=document.createElement('input');inp.className='lcdin';inp.id='lcdin';inp.maxLength=16;inp.value=val;inp.setAttribute('aria-label',title);w.appendChild(inp);
+  S.dialog={lines:[title,'','',''],ok:()=>{const v=inp.value.trim();closeInput();S.dialog=null;cb(v)},input:true};
+  inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){S.dialog.ok()}if(e.key==='Escape'){closeInput();S.dialog=null}});setTimeout(()=>inp.focus({preventScroll:true}),30)}
+function closeInput(){const i=$('#lcdin');if(i)i.remove()}
+
+/* ---------- navegação no display ---------- */
+function cursorMove(dir){if(S.dialog){if(dir==='l'){closeInput();S.dialog=null}return}const fl=FIELDS;if(!fl.length)return;const ci=S.cur[curKey()]||0,c=fl[ci];const cx=c.x+c.w/2,cy=c.y+c.h/2;const v={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]}[dir];
+  let best=-1,bs=1e9;fl.forEach((f,i)=>{if(i===ci)return;const dx=f.x+f.w/2-cx,dy=f.y+f.h/2-cy;const along=dx*v[0]+dy*v[1];if(along<=2)return;const perp=Math.abs(dx*v[1]-dy*v[0]);const s=along+perp*2.2;if(s<bs){bs=s;best=i}});
+  if(best<0){best=(dir==='r'||dir==='d')?Math.min(fl.length-1,ci+1):Math.max(0,ci-1)}S.cur[curKey()]=best;ev('cursor')}
+function dataInc(d){if(S.dialog)return;const f=curField();if(!f)return;if(f.inc)f.inc(d);else if(f.ent&&Math.abs(d)>0)return;ev('data')}
+function dataEnter(){if(S.dialog){S.dialog.ok&&S.dialog.ok();return}const f=curField();if(f&&f.ent){f.ent();ev('enter')}else if(f&&f.inc){f.inc(1);ev('enter')}}
+function fkey(n){if(S.dialog&&n===0){closeInput();S.dialog=null;return}const tabs=PAGES[S.page].tabs;if(n===0){S.tab[S.page]=Math.max(0,curTab()-1)}else if(n===5){S.tab[S.page]=Math.min(tabs.length-1,curTab()+1)}else if(tabs[n-1]&&S.page!=='AUX'){S.tab[S.page]=n-1}ev('fkey');ev('tab:'+S.page+':'+curTab())}
+
+/* ---------- ações dos controles ---------- */
+function act(ctl,i){
+  const n=+i;
+  if(S.dialog&&['disp','home','fmode','layer'].includes(ctl)){closeInput();S.dialog=null}
+  switch(ctl){
+  case'plug':S.ad[n].plug=!S.ad[n].plug;ev('plug');break;
+  case'pad':S.ad[n].pad=!S.ad[n].pad;ev('pad:'+n);break;
+  case'phantom':S.phantom[n]=!S.phantom[n];ev('phantom:'+n);break;
+  case'sw1516':S.sw1516=S.sw1516==='CH'?'2TR':'CH';ev('sw1516');break;
+  case'monsw':S.monSrc=S.monSrc==='MON'?'2TR':'MON';ev('monsw:'+S.monSrc);break;
+  case'disp':setPage(i);if(i==='SCENE')S.cur['SCENE/0']=0;break;
+  case'fmode':S.fm=n;S.page='AUX';S.tab.AUX=0;ev('fmode:'+n);break;
+  case'home':S.fm=0;S.page='METER';ev('home');break;
+  case'layer':S.layer=i;if(i==='REMOTE'){S.page='REMOTE'}else if(S.page==='REMOTE')S.page='METER';ev('layer:'+i);break;
+  case'fk':fkey(n);break;
+  case'scene':if(i==='up'){S.sceneNum=Math.min(99,S.sceneNum+1);ev('scup')}if(i==='down'){S.sceneNum=Math.max(0,S.sceneNum-1);ev('scdown')}if(i==='store'){if(S.page!=='SCENE')S.page='SCENE';doStore()}if(i==='recall'){doRecall()}break;
+  case'clear':[...S.ch,...S.stin,...S.aux,...S.bus].forEach(o=>o.solo=false);ev('clear');break;
+  case'band':S.band=n;if(S.prefs.autoEq){S.page='EQ';S.tab.EQ=0}ev('band:'+n);break;
+  case'dec':dataInc(-1);ev('dec');break;
+  case'inc':dataInc(1);ev('inc');break;
+  case'cur':cursorMove(i);break;
+  case'enter':dataEnter();break;
+  case'stinbtn':S.stinBank=S.stinBank?0:1;ev('stinbank:'+S.stinBank);break;
+  case'sel':{const t=stripT(n);if(t)setSel(t);break}
+  case'solo':{const t=stripT(n);if(t){const o=tObj(t);const v=!o.solo;linked(t).forEach(z=>z.solo=v);ev('solo:'+tName(t))}break}
+  case'on':{const t=stripT(n);if(t){const o=tObj(t);const v=!o.on;linked(t).forEach(z=>z.on=v);markEdit();ev('on:'+tName(t))}break}
+  case'stsel':setSel({t:'st'});break;
+  case'ston':S.st.on=!S.st.on;markEdit();ev('on:STEREO');break;
+  case'stinsel':setSel({t:'stin',i:S.stinBank*2+n});break;
+  case'stinsolo':{const o=S.stin[S.stinBank*2+n];o.solo=!o.solo;ev('solo:stin');break}
+  case'stinon':{const o=S.stin[S.stinBank*2+n];o.on=!o.on;markEdit();ev('on:ST IN'+(S.stinBank*2+n+1));break}
+  case'ukey':userKey(n);break;
+  case'lcd':break;
+  }
+}
+function userKey(n){const f=UKF[S.uk[n]];ev('ukey:'+n);
+  if(f.startsWith('SCENE RECALL')){S.sceneNum=+f.slice(-2);doRecall()}
+  else if(f==='SCENE INC RECALL'){S.sceneNum=Math.min(99,S.sceneNum+1);doRecall()}
+  else if(f==='SCENE DEC RECALL'){S.sceneNum=Math.max(0,S.sceneNum-1);doRecall()}
+  else if(f==='OSCILLATOR ON/OFF'){S.osc.on=!S.osc.on;ev('osc:'+(S.osc.on?'on':'off'))}
+  else if(f==='LAYER 1-16')act('layer','1-16');else if(f==='LAYER 17-32')act('layer','17-32');else if(f==='MASTER LAYER')act('layer','MASTER');
+  else if(f==='METER PAGE')act('home',0);else if(f==='ST IN BANK')act('stinbtn',0)}
+
+/* ---------- knobs: valor 0..1 (absolutos) ou passos (encoders) ---------- */
+function knobDef(ctl,i){const n=+i;
+  switch(ctl){
+  case'gain':return n<12?{get:()=>(-16-S.ad[n].g)/44,set:f=>{S.ad[n].g=Math.round(-16-f*44)},label:()=>'GAIN CH'+(n+1)+': '+(S.ad[n].pad?S.ad[n].g+20:S.ad[n].g)+' dB'+(S.ad[n].pad?' (PAD)':'')}
+                     :{get:()=>(4-S.ad[n].g)/30,set:f=>{S.ad[n].g=Math.round(4-f*30)},label:()=>'GAIN CH'+(n+1)+': '+S.ad[n].g+' dB'};
+  case'monlvl':return{get:()=>S.monLvl/10,set:f=>S.monLvl=+(f*10).toFixed(1),label:()=>'MONITOR LEVEL '+S.monLvl.toFixed(1)};
+  case'phlvl':return{get:()=>S.phLvl/10,set:f=>S.phLvl=+(f*10).toFixed(1),label:()=>'PHONES LEVEL '+S.phLvl.toFixed(1)};
+  case'contrast':return{get:()=>S.contrast,set:f=>S.contrast=f,label:()=>'CONTRAST '+Math.round(S.contrast*100)+'%'};
+  case'stinknob':{const o=()=>S.stin[S.stinBank*2+n];return{get:()=>o().fader,set:f=>{o().fader=f;markEdit()},label:()=>'ST IN'+(S.stinBank*2+n+1)+' LEVEL '+fmtDb(posToDb(o().fader))}}
+  case'pan':return{get:()=>{const o=selObj();return o&&o.pan!==undefined?(o.pan+63)/126:.5},set:f=>{const o=selObj();if(o&&o.pan!==undefined){o.pan=Math.round(f*126-63);markEdit();ev('pan')}},label:()=>{const o=selObj();return o&&o.pan!==undefined?'PAN '+tName(S.sel)+': '+(o.pan===0?'CENTER':(o.pan<0?'L':'R')+Math.abs(o.pan)):'PAN: sem pan em '+tName(S.sel)}};
+  case'eqq':return{enc:true,inc:d=>{bandEdit(S.band,'qi',d);if(S.prefs.autoEq){S.page='EQ';S.tab.EQ=0}},label:()=>'Q '+BANDN[S.band]+': '+QOPT(S.band)[selObj().eq[S.band].qi]};
+  case'eqf':return{enc:true,inc:d=>{bandEdit(S.band,'fi',d);if(S.prefs.autoEq){S.page='EQ';S.tab.EQ=0}},label:()=>'FREQ '+BANDN[S.band]+': '+fmtF(fOf(selObj().eq[S.band].fi))};
+  case'eqg':return{enc:true,inc:d=>{bandEdit(S.band,'g',d);if(S.prefs.autoEq){S.page='EQ';S.tab.EQ=0}},label:()=>'GAIN '+BANDN[S.band]+': '+selObj().eq[S.band].g.toFixed(1)+' dB'};
+  case'wheel':return{enc:true,inc:d=>{dataInc(d);ev('wheel')},label:()=>'DATA'};
+  }return null}
+
+/* =====================================================================
+   ÁUDIO (Web Audio) — opcional, para ouvir nos fones
+   ===================================================================== */
+const AU={on:false};
+function sp(param,v,tc=.02){if(param._v===v)return;param._v=v;if(!isFinite(v))v=0;param.setTargetAtTime(v,AU.C.currentTime,tc)}
+function noiseBuf(C,sec=2,pink=false){const b=C.createBuffer(1,C.sampleRate*sec,C.sampleRate),d=b.getChannelData(0);let b0=0,b1=0,b2=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(pink){b0=.997*b0+w*.029591;b1=.985*b1+w*.032534;b2=.95*b2+w*.048056;d[i]=(b0+b1+b2+w*.1)*.6}else d[i]=w}return b}
+function makeIR(C,sec){const len=C.sampleRate*sec,b=C.createBuffer(2,len,C.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}return b}
+function synth(C,src){const out=C.createGain();const s={out,src};
+  if(src.t==='mus'||src.t==='vt'){const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=src.side?5200:3600;const g=C.createGain();g.gain.value=.16;lp.connect(g);
+    s.mo=[0,1,2,3].map(j=>{const o=C.createOscillator();o.type=j===3?'sine':'triangle';o.connect(lp);o.start();return o});s.mg=g;g.connect(out)}
+  if(src.t!=='mus'){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=src.f0;const f1=C.createBiquadFilter();f1.type='bandpass';f1.Q.value=5;f1.frequency.value=600;const f2=C.createBiquadFilter();f2.type='bandpass';f2.Q.value=7;f2.frequency.value=1600;
+    const g1=C.createGain();g1.gain.value=.9;const g2=C.createGain();g2.gain.value=.55;o.connect(f1);o.connect(f2);f1.connect(g1);f2.connect(g2);const vg=C.createGain();g1.connect(vg);g2.connect(vg);
+    let last=vg;if(src.t==='tel'||src.t==='link'){const hp=C.createBiquadFilter();hp.type='highpass';hp.frequency.value=src.t==='tel'?380:200;const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=src.t==='tel'?3200:6000;vg.connect(hp);hp.connect(lp);last=lp}
+    const ve=C.createGain();ve.gain.value=0;last.connect(ve);ve.connect(out);o.start();Object.assign(s,{vo:o,f1,f2,ve})}
+  return s}
+const CHORDS=[[57,60,64,45],[53,57,60,41],[55,59,62,43],[52,55,59,40]];
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function audioInit(){const C=new(window.AudioContext||window.webkitAudioContext)();AU.C=C;
+  AU.out=C.createGain();const lim=C.createDynamicsCompressor();lim.threshold.value=-4;lim.ratio.value=20;lim.attack.value=.002;lim.release.value=.12;AU.out.connect(lim);lim.connect(C.destination);
+  AU.stBus=C.createGain();AU.stMaster=C.createGain();AU.stDyn=C.createDynamicsCompressor();AU.stBus.connect(AU.stDyn);AU.stDyn.connect(AU.stMaster);
+  AU.soloBus=C.createGain();AU.monSt=C.createGain();AU.monSolo=C.createGain();AU.mon2tr=C.createGain();AU.stMaster.connect(AU.monSt);AU.soloBus.connect(AU.monSolo);[AU.monSt,AU.monSolo,AU.mon2tr].forEach(g=>g.connect(AU.out));
+  AU.aux=Array.from({length:8},()=>{const g=C.createGain();return g});
+  AU.fx=[0,1,2,3].map(()=>{const inp=C.createGain(),conv=C.createConvolver(),rv=C.createGain(),dl=C.createDelay(2),fb=C.createGain(),dg=C.createGain(),dry=C.createGain(),out=C.createGain();conv.buffer=makeIR(C,2.4);inp.connect(conv);conv.connect(rv);rv.connect(out);inp.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(dg);dg.connect(out);inp.connect(dry);dry.connect(out);fb.gain.value=.35;return{inp,rv,dl,dg,dry,out,cur:null}});
+  AU.syn=SOURCES.map(s=>s?synth(C,s):null);AU.syn2=SRC2TR.map(s=>synth(C,s));
+  AU.ad=Array.from({length:16},(_,k)=>{const gA=C.createGain(),gB=C.createGain(),trim=C.createGain();gA.connect(trim);gB.connect(trim);if(AU.syn[k])AU.syn[k].out.connect(gA);if(k>=14)AU.syn2[k-14].out.connect(gB);return{gA,gB,trim}});
+  AU.trOut=C.createGain();AU.syn2.forEach((s,i)=>{const p=C.createStereoPanner();p.pan.value=i?1:-1;s.out.connect(p);p.connect(AU.mon2tr)});
+  const mkChain=()=>{const inp=C.createGain(),ph=C.createGain(),dl=C.createDelay(1),eq=[0,1,2,3].map(()=>C.createBiquadFilter()),cmp=C.createDynamicsCompressor(),mk=C.createGain(),fd=C.createGain(),pan=C.createStereoPanner(),stS=C.createGain(),soS=C.createGain(),pre=C.createGain();
+    inp.connect(ph);ph.connect(dl);dl.connect(eq[0]);eq[0].connect(eq[1]);eq[1].connect(eq[2]);eq[2].connect(eq[3]);eq[3].connect(cmp);cmp.connect(mk);mk.connect(pre);pre.connect(fd);fd.connect(pan);pan.connect(stS);stS.connect(AU.stBus);
+    const soPre=C.createGain();pre.connect(soPre);soPre.connect(soS);const soPost=C.createGain();fd.connect(soPost);soPost.connect(soS);soS.connect(AU.soloBus);
+    const aux=Array.from({length:8},(_,k)=>{const a=C.createGain(),b=C.createGain(),g=C.createGain();pre.connect(a);fd.connect(b);a.connect(g);b.connect(g);g.connect(AU.aux[k]);return{a,b,g}});
+    return{inp,ph,dl,eq,cmp,mk,pre,fd,pan,stS,soS,soPre,soPost,aux,src:null}};
+  AU.mkChain=mkChain;AU.ch=[];AU.stin=S.stin.map(mkChain);
+  AU.osc=C.createOscillator();AU.osc.start();AU.noise=C.createBufferSource();AU.noise.buffer=noiseBuf(C,3,true);AU.noise.loop=true;AU.noise.start();
+  AU.oscG=C.createGain();AU.oscW=C.createGain();AU.noiseW=C.createGain();AU.osc.connect(AU.oscW);AU.noise.connect(AU.noiseW);AU.oscW.connect(AU.oscG);AU.noiseW.connect(AU.oscG);AU.oscSt=C.createGain();AU.oscG.connect(AU.oscSt);AU.oscSt.connect(AU.stBus);
+  AU.on=true}
+function nodeFor(p){if(!p)return null;if(p.startsWith('AD')&&!p.startsWith('ADAT'))return AU.ad[+p.slice(2)-1].trim;if(p.startsWith('FX'))return AU.fx[+p[2]-1].out;return null}
+function syncChain(c,o,isSt){
+  const want=o.patch;if(c.src!==want){const old=nodeFor(c.src);if(old){try{old.disconnect(c.inp)}catch(e){}}const nw=nodeFor(want);if(nw)nw.connect(c.inp);c.src=want}
+  sp(c.inp.gain,dbLin(o.att||0));sp(c.ph.gain,o.phase?-1:1);sp(c.dl.delayTime,o.dlyOn?o.dly/1000:0);
+  o.eq.forEach((b,bi)=>{const f=c.eq[bi];const op=QOPT(bi)[b.qi];let type='peaking';if(o.eqOn){if(op==='HPF')type='highpass';else if(op==='LPF')type='lowpass';else if(op==='L.SHF')type='lowshelf';else if(op==='H.SHF')type='highshelf'}
+    if(f.type!==type)f.type=type;sp(f.frequency,fOf(b.fi));sp(f.gain,o.eqOn&&(typeof op==='number'||/SHF/.test(op))?b.g:0);sp(f.Q,typeof op==='number'?op:0.707)});
+  const d=o.dyn,comp=d.on&&!isGate(d.type)&&d.type!=='EXPAND';sp(c.cmp.threshold,comp?Math.max(-60,d.thr):0);sp(c.cmp.ratio,comp?Math.min(20,RATIOS[d.ri]===Infinity?20:RATIOS[d.ri]):1);sp(c.cmp.attack,comp?Math.max(.001,d.atk/1000):.003);sp(c.cmp.release,comp?Math.min(1,d.rel/1000):.25);sp(c.cmp.knee,comp?d.knee*3:0);sp(c.mk.gain,comp?dbLin(d.gain):1);
+  const mixMute=S.soloMode==='MIX'&&S.anySolo&&!o.solo;
+  sp(c.fd.gain,o.on?dbLin(posToDb(o.fader)):0);sp(c.pan.pan,(o.pan||0)/63);sp(c.stS.gain,o.st&&!mixMute?1:0);
+  sp(c.soS.gain,o.solo?1:0);sp(c.soPre.gain,S.listen==='PFL'&&o.on?1:0);sp(c.soPost.gain,S.listen==='AFL'?1:0);
+  if(o.aux)c.aux.forEach((a,k)=>{const lv=o.aux[k]>0&&o.on?dbLin(posToDb(o.aux[k])):0;sp(a.a.gain,o.auxPre[k]?1:0);sp(a.b.gain,o.auxPre[k]?0:1);sp(a.g.gain,lv)})}
+function audioSync(){if(!AU.on)return;const C=AU.C,ul=unlocked();
+  for(let k=0;k<16;k++){const a=S.ad[k],src=adSrc(k);const two=k>=14&&S.sw1516==='2TR';sp(AU.ad[k].gA.gain,two?0:1);sp(AU.ad[k].gB.gain,two?1:0);
+    let g=0;if(src&&(two||a.plug)&&(!src.cond||S.phantom[k<8?0:1])&&!ul)g=dbLin(Math.min(src.lvl-sensEff(k)-12,14));sp(AU.ad[k].trim.gain,g)}
+  const upd=(sy,key,src)=>{if(!sy)return;const e=ENV[key];if(!e)return;if(sy.ve){sp(sy.ve.gain,dbLin(Math.max(-70,e.cur))*.9,.012);if(e.syl!==sy.syl){sy.syl=e.syl;const t=C.currentTime;const fem=src.f0>180;sy.vo.frequency.setTargetAtTime(src.f0*(0.88+Math.random()*.3),t,.03);sy.f1.frequency.setTargetAtTime((fem?380:300)+Math.random()*500,t,.02);sy.f2.frequency.setTargetAtTime((fem?1200:900)+Math.random()*1400,t,.02)}}
+    if(sy.mo){const bar=e.bar!==undefined?e.bar:Math.floor(T/2)%4;const ch=CHORDS[bar];if(sy.bar!==bar){sy.bar=bar;sy.mo.forEach((o,j)=>o.frequency.setTargetAtTime(mtof(ch[j]+(src.side&&j<3?12:0)),C.currentTime,.01))}sp(sy.mg.gain,src.t==='vt'?.07:.16*dbLin(e.cur+6))}};
+  SOURCES.forEach((s,k)=>{if(s)upd(AU.syn[k],'ad'+k,s)});SRC2TR.forEach((s,i)=>{const key='2tr'+(14+i);if(!ENV[key])envOf(key,s);if(S.sw1516!=='2TR'&&S.monSrc==='2TR')envStep(ENV[key],s,1/60);upd(AU.syn2[i],key,s)});
+  S.ch.forEach((o,i)=>{if(!AU.ch[i]){if(!nodeFor(o.patch))return;AU.ch[i]=AU.mkChain()}syncChain(AU.ch[i],o)});S.stin.forEach((o,i)=>syncChain(AU.stin[i],Object.assign(o,{phase:false,dlyOn:false}),true));
+  S.aux.forEach((a,k)=>sp(AU.aux[k].gain,a.on?dbLin(posToDb(a.fader)):0));
+  S.fx.forEach((f,n)=>{const F2=AU.fx[n];if(F2.cur!==f.in){if(F2.cur&&F2.cur.startsWith('AUX'))try{AU.aux[+F2.cur.slice(3)-1].disconnect(F2.inp)}catch(e){}if(f.in.startsWith('AUX'))AU.aux[+f.in.slice(3)-1].connect(F2.inp);F2.cur=f.in}
+    const ok=fxAvail(n)&&f.type!=='BYPASS';sp(F2.rv.gain,ok&&isRev(f.type)?f.mix/100*1.2:0);sp(F2.dg.gain,ok&&isDly(f.type)?f.mix/100:0);sp(F2.dry.gain,f.type==='BYPASS'||(ok&&!isRev(f.type)&&!isDly(f.type))?1:0);sp(F2.dl.delayTime,clamp(f.time,.01,1.9))});
+  const st=S.st;sp(AU.stMaster.gain,st.on&&!ul?dbLin(posToDb(st.fader)):0);const d=st.dyn,comp=d.on&&!isGate(d.type);sp(AU.stDyn.threshold,comp?d.thr:0);sp(AU.stDyn.ratio,comp?Math.min(20,RATIOS[d.ri]===Infinity?20:RATIOS[d.ri]):1);
+  const o=S.osc;sp(AU.osc.frequency,[100,1000,10000,1000,1000][o.w]);sp(AU.oscW.gain,o.w<3?1:0);sp(AU.noiseW.gain,o.w===3?1:o.w===4?(Math.floor(C.currentTime*2)%2?1:0):0);sp(AU.oscG.gain,o.on&&!ul?dbLin(o.lvl):0);sp(AU.oscSt.gain,o.asg.st?1:0);
+  const mon=S.monSrc==='2TR';sp(AU.monSt.gain,!mon&&!S.anySolo?1:0);sp(AU.monSolo.gain,!mon&&S.anySolo?1:0);sp(AU.mon2tr.gain,mon?.6:0);
+  sp(AU.out.gain,Math.pow(S.phLvl/10,2)*1.4,.03)}
+async function toggleAudio(){if(!AU.C){try{audioInit()}catch(e){console.warn(e);return false}}if(AU.C.state==='suspended'){await AU.C.resume();AU.on=true;return true}if(AU.on){await AU.C.suspend();AU.on=false;return false}AU.on=true;return true}
+
+/* =====================================================================
+   SINCRONIZAÇÃO DO PAINEL (a cada quadro)
+   ===================================================================== */
+const EL={};
+function cacheEls(){['soloLed','mL','mR','home','wheel'].forEach(id=>EL[id]=$('#'+id));EL.faders=Array.from({length:16},(_,i)=>$('#fader-'+i+' .thumb'));EL.stf=$('#fader-st .thumb');
+  EL.knobs=$$('.knob').map(k=>({el:k,cap:k.querySelector('.cap'),ctl:k.dataset.ctl,i:k.dataset.i}));EL.tapes=$$('.tape[data-i]')}
+function setLit(el,v){if(!el)return;const l=el.classList.contains('led')?el:el.querySelector('.led');if(l&&l.classList.contains('lit')!==!!v)l.classList.toggle('lit',!!v)}
+const encA={};
+let dragging=null;
+function syncPanel(dt){
+  for(let k=0;k<16;k++){const a=S.ad[k];setLit($('#pk-'+k),a.peakT>0);setLit($('#sg-'+k),a.lv>-40)}
+  for(let k=0;k<12;k++){const p=$('#pad-'+k);if(p.classList.contains('press')!==S.ad[k].pad)p.classList.toggle('press',S.ad[k].pad)}
+  $$('.xlr,.jack.plugbig').forEach(x=>{const k=+x.dataset.i;x.classList.toggle('plug',S.ad[k].plug);x.style.opacity=S.ad[k].plug?1:.45});
+  [0,1].forEach(n=>$('#ph-'+n).classList.toggle('on',S.phantom[n]));
+  $('#sw1516').classList.toggle('press',S.sw1516==='2TR');$('#monsw').classList.toggle('press',S.monSrc==='2TR');
+  for(let n=1;n<=8;n++)setLit($('#fm-'+n),S.fm===n);setLit(EL.home,S.fm===0);
+  ['1-16','17-32','MASTER','REMOTE'].forEach(l=>setLit($('#ly-'+l),S.layer===l));
+  for(let b=0;b<4;b++)setLit($('#band-'+b),S.band===b);
+  setLit(EL.soloLed,S.anySolo&&Math.floor(T*3)%2===0);
+  setLit($('#stl-0'),S.stinBank===0);setLit($('#stl-1'),S.stinBank===1);
+  for(let i=0;i<16;i++){const t=stripT(i),o=tObj(t);setLit($('#sel-'+i),t&&S.sel.t===t.t&&S.sel.i===t.i);setLit($('#solo-'+i),o&&o.solo);setLit($('#on-'+i),o&&o.on);
+    if(dragging!==i){const v=stripGet(i);EL.faders[i].style.top=(20+(1-v)*280)+'px'}
+    const tp=EL.tapes[i];const nm=S.layer==='MASTER'?'':(o&&t.t==='ch'&&t.i>=16?o.name:'');if(tp.textContent!==nm)tp.textContent=nm}
+  setLit($('#st-sel'),S.sel.t==='st');setLit($('#st-on'),S.st.on);if(dragging!=='st')EL.stf.style.top=(20+(1-S.st.fader)*280)+'px';
+  [0,1].forEach(j=>{const s=S.stin[S.stinBank*2+j];setLit($('#stin-sel-'+j),S.sel.t==='stin'&&S.sel.i===S.stinBank*2+j);setLit($('#stin-solo-'+j),s.solo);setLit($('#stin-on-'+j),s.on)});
+  S.uk.forEach((f,n)=>{});
+  EL.knobs.forEach(k=>{const d=knobDef(k.ctl,k.i);if(!d)return;let a;if(d.enc){a=encA[k.ctl]||0}else a=-135+clamp(d.get(),0,1)*270;k.cap.style.setProperty('--a',a+'deg')});
+  EL.wheel.querySelector('.face').style.setProperty('--a',(encA.wheel||0)+'deg');
+  const segs=['OVER','0','3','6','9','12','15','18','24','30','40','50'].map(s=>s==='OVER'?0.01:-(+s));
+  [['mL',MD.stL],['mR',MD.stR]].forEach(([id,lv])=>{const m=met('st'+id,lv,dt);const is=EL[id].children;segs.forEach((th,n)=>{const on=m.v>=th||(n===0&&m.pk>0);const cls=n===0?'r':n<=2?'y':'';const el=is[n];const want='lit'+(cls?' '+cls:'');if(on!==el.classList.contains('lit')||(on&&cls&&!el.classList.contains(cls)))el.className=on?want:''})})}
+
+/* ---------- interação ---------- */
+let showInfo=()=>{};
+function bindConsole(){const con=$('#console');
+  con.addEventListener('click',e=>{const b=e.target.closest('button[data-ctl],.toggle[data-ctl],.xlr[data-ctl],.jack.plugbig[data-ctl]');if(!b)return;act(b.dataset.ctl,b.dataset.i);showInfo(b.dataset.ctl,b.dataset.i)});
+  con.addEventListener('pointerover',e=>{const c=e.target.closest('[data-ctl]');if(c&&e.pointerType==='mouse')showInfo(c.dataset.ctl,c.dataset.i,true)});
+  con.addEventListener('pointerdown',e=>{const k=e.target.closest('.knob,.fader,.wheel');if(!k)return;e.preventDefault();const ctl=k.dataset.ctl,i=k.dataset.i;showInfo(ctl,i);con.focus({preventScroll:true});
+    if(ctl==='fader'){faderDrag(e,k,i);return}
+    const d=knobDef(ctl,i);if(!d)return;k.setPointerCapture(e.pointerId);
+    let lastY=e.clientY,acc=0;const r=k.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let lastA=Math.atan2(e.clientY-cy,e.clientX-cx);
+    const mv=ev2=>{const sc=getScale();if(ctl==='wheel'){const a=Math.atan2(ev2.clientY-cy,ev2.clientX-cx);let da=(a-lastA)*180/Math.PI;if(da>180)da-=360;if(da<-180)da+=360;lastA=a;acc+=da;encA.wheel=(encA.wheel||0)+da;while(Math.abs(acc)>=12){const s=Math.sign(acc);d.inc(s);acc-=s*12}showInfo(ctl,i);return}
+      const dy=(lastY-ev2.clientY)/sc;lastY=ev2.clientY;if(d.enc){acc+=dy;encA[ctl]=(encA[ctl]||0)+dy*2.5;while(Math.abs(acc)>=7){const s=Math.sign(acc);d.inc(s);acc-=s*7}}else{d.set(clamp(d.get()+dy/(ev2.shiftKey?600:160),0,1));markEdit()}showInfo(ctl,i)};
+    const up=()=>{k.removeEventListener('pointermove',mv);k.removeEventListener('pointerup',up);k.removeEventListener('pointercancel',up);ev('knob:'+ctl+':'+i)};
+    k.addEventListener('pointermove',mv);k.addEventListener('pointerup',up);k.addEventListener('pointercancel',up)});
+  con.addEventListener('wheel',e=>{const k=e.target.closest('.knob,.fader,.wheel');if(!k)return;e.preventDefault();const ctl=k.dataset.ctl,i=k.dataset.i,s=e.deltaY<0?1:-1;
+    if(ctl==='fader'){if(i==='st')S.st.fader=clamp(S.st.fader+s*.01,0,1);else stripSet(+i,stripGet(+i)+s*.01);markEdit();ev('fader:'+i)}
+    else{const d=knobDef(ctl,i);if(!d)return;if(d.enc){d.inc(s);encA[ctl]=(encA[ctl]||0)+s*15}else{d.set(clamp(d.get()+s*.025,0,1));markEdit()}ev('knob:'+ctl+':'+i)}showInfo(ctl,i)},{passive:false});
+  $('#lcd').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*320,y=(e.clientY-r.top)/r.height*240;
+    if(y>224){const n=Math.floor((x-2)/79);if(n>=0&&n<4)fkey(n+1);return}const i=FIELDS.findIndex(f=>x>=f.x&&x<=f.x+f.w&&y>=f.y&&y<=f.y+f.h);if(i>=0){if(S.cur[curKey()]===i)dataEnter();else{S.cur[curKey()]=i;ev('cursor')}}});
+  con.addEventListener('keydown',e=>{if(e.target.id==='lcdin')return;const k=e.key;const m={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r'};
+    if(m[k]){e.preventDefault();cursorMove(m[k]);pulse('cur-'+m[k])}else if(k==='Enter'){e.preventDefault();dataEnter();pulse('enter')}else if(k==='+'||k==='='||k==='PageUp'){e.preventDefault();dataInc(1);pulse('inc')}else if(k==='-'||k==='PageDown'){e.preventDefault();dataInc(-1);pulse('dec')}})}
+function pulse(id){const b=$('#'+id);if(!b)return;b.classList.add('press');setTimeout(()=>b.classList.remove('press'),120)}
+let getScale=()=>1;
+function faderDrag(e,el,i){const th=el.querySelector('.thumb');const rect=el.getBoundingClientRect();const sc=getScale();const top=rect.top+20*sc,len=280*sc;
+  const isThumb=e.target===th;let off=0;const val=()=>i==='st'?S.st.fader:stripGet(+i);if(isThumb){off=(e.clientY-top)-(1-val())*len}
+  const set=v=>{if(i==='st'){S.st.fader=clamp(v,0,1);markEdit()}else stripSet(+i,v)};
+  dragging=i==='st'?'st':+i;th.classList.add('drag');el.setPointerCapture(e.pointerId);
+  const mv=ev2=>{let v=1-((ev2.clientY-top-off)/len);if(ev2.shiftKey)v=val()+(1-((ev2.clientY-top-off)/len)-val())*.25;set(v);th.style.top=(20+(1-val())*280)+'px';showInfo('fader',i)};
+  if(!isThumb)mv(e);
+  const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);th.classList.remove('drag');dragging=null;ev('fader:'+i)};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)}
+
+/* =====================================================================
+   CURSO — textos de ajuda, módulos, missões, prova
+   ===================================================================== */
+const INFO={
+ plug:['INPUT A — XLR balanceado','Entrada de microfone ou linha dos canais 1 a 12 (nos canais 13 a 16 são P10 TRS de linha). No simulador, clique para conectar ou desconectar o cabo.'],
+ trsb:['INPUT B — P10 TRS balanceado','Alternativa ao XLR no mesmo canal, pensada para fontes de linha. Use A ou B, não os dois ao mesmo tempo.'],
+ insert:['INSERT I/O — P10 TRS desbalanceado','Inserção analógica antes do conversor A/D (ponta = saída para o equipamento externo, anel = retorno). Serve para um compressor ou de-esser externo só naquele canal.'],
+ pad:['PAD 20 dB','Atenua a entrada em 20 dB antes do pré-amplificador. Use em fontes fortes (linha, híbrida, playback) ou quando o PEAK acende mesmo com pouco GAIN. Com PAD ligado, leia a escala de baixo do GAIN (+4 a -40).'],
+ gain:['GAIN — pré-amplificador','Define a sensibilidade da entrada. Girar para a direita dá mais ganho. Canais 1–12: -16 a -60 (sem PAD). Canais 13–16: +4 a -26. Meta: SIGNAL aceso com voz normal e PEAK sempre apagado.'],
+ peakled:['PEAK / SIGNAL','SIGNAL acende quando há sinal na entrada (acima de cerca de -40 dBFS). PEAK acende a 3 dB do clipe digital: se piscar, reduza o GAIN ou ligue o PAD.'],
+ phantom:['PHANTOM +48V','Alimentação de microfones condensadores (lapelas, shotguns). Liga em grupos: CH1–8 e CH9–12. Abaixe o fader antes de ligar ou desligar e nunca use com fontes de linha desbalanceadas.'],
+ sw1516:['Chave CH15/16 ⇄ 2TR IN','Escolhe o que entra nos canais 15 e 16: as entradas P10 15/16 ou a entrada 2TR IN (RCA). Atenção: ao mudar para 2TR IN, as fontes ligadas nos jacks 15/16 deixam de entrar.'],
+ rca:['2TR IN / OUT (RCA, -10 dBV)','Entrada e saída estéreo desbalanceadas para gravador ou player. A 2TR OUT copia a saída STEREO.'],
+ monsw:['Chave MONITOR ⇄ 2TR IN','Escolhe o que você escuta na MONITOR OUT e nos fones: o barramento de monitor (STEREO, ou o SOLO quando houver solo) ou o sinal da 2TR IN.'],
+ monlvl:['MONITOR OUT LEVEL','Volume das caixas de monitoração ligadas na MONITOR OUT (painel traseiro). Não muda nada na saída STEREO que vai para o ar.'],
+ phlvl:['PHONES LEVEL','Volume dos fones. Escuta a mesma fonte da monitoração. No simulador, controla o volume do botão "Ligar som".'],
+ phjack:['PHONES','Saída de fones de ouvido (P10 estéreo).'],
+ 'disp:SCENE':['SCENE','Lista de cenas: chamar (RECALL), gravar (STORE), proteger e definir RECALL SAFE.'],
+ 'disp:DIO':['DIO/SETUP','Clock (word clock), modo de SOLO, informações de entradas digitais e slot.'],
+ 'disp:MIDI':['MIDI','Canal MIDI e tabela de Program Change para chamar cenas por controle externo.'],
+ 'disp:UTILITY':['UTILITY','Oscilador de teste, teclas USER DEFINED, preferências e bateria.'],
+ 'disp:INSERT':['ø/INSERT/DELAY','Inversão de fase, insert digital e delay de canal (sincronia de áudio com vídeo).'],
+ 'disp:PAN':['PAN/ROUTING','Pan dos canais e roteamento para STEREO e BUS 1–8.'],
+ 'disp:PAIR':['PAIR/GROUP','Faz par de canais vizinhos (ímpar/par) para operar fontes estéreo com um fader só.'],
+ 'disp:PATCH':['PATCH','Patch de entrada (qual sinal entra em cada canal) e de saída (o que sai nas OMNI OUT).'],
+ 'disp:DYN':['DYNAMICS','Processador de dinâmica do canal selecionado: compressor, expansor, gate, ducking.'],
+ 'disp:EQ':['EQ','Equalizador paramétrico de 4 bandas do canal selecionado, com gráfico e biblioteca.'],
+ 'disp:EFFECT':['EFFECT','Os 4 processadores de efeito internos (reverb, delay, chorus…).'],
+ 'disp:VIEW':['VIEW','Resumo de todos os parâmetros do canal selecionado e lista dos faders.'],
+ fmode:['FADER MODE — AUX 1 a 8','Os faders 1–16 passam a controlar o ENVIO de cada canal para o AUX escolhido: retornos, ponto, mix-minus. HOME volta ao normal.'],
+ home:['HOME (METER)','Volta os faders ao modo normal (nível do canal) e abre a página de medidores.'],
+ layer:['LAYER','Escolhe o que as 16 tiras controlam: canais 1–16, canais 17–32, MASTER (masters AUX 1–8 e BUS 1–8) ou REMOTE (software no computador). Os faders motorizados se movem sozinhos.'],
+ lcd:['Display LCD','Mostra a página escolhida. Toque num campo para selecioná-lo; toque de novo para confirmar. Na mesa real use as setas, a roda e ENTER.'],
+ contrast:['CONTRAST','Ajusta o contraste do display.'],
+ stmeter:['Medidor STEREO','Nível da saída STEREO L/R em dB abaixo do máximo digital. Mantenha os picos entre -12 e -6. OVER = clipe.'],
+ fk:['◄ F1 F2 F3 F4 ►','F1 a F4 escolhem as abas mostradas na parte de baixo do display. ◄ e ► andam entre as abas.'],
+ scene:['SCENE MEMORY','STORE grava a mesa inteira na cena escolhida. ▲ ▼ escolhem o número (ele pisca no display). RECALL chama a cena escolhida.'],
+ sololed:['Indicador SOLO','Pisca enquanto há algum canal em solo.'],
+ clear:['CLEAR','Tira todos os canais de solo de uma vez.'],
+ pan:['PAN','Posição do canal selecionado no estéreo (L63 a R63). Em canais de saída não há pan.'],
+ eqq:['EQ — Q','Largura da banda escolhida. Q alto = banda estreita. Na banda LOW há HPF e L.SHF; na HIGH, H.SHF e LPF.'],
+ eqf:['EQ — FREQUENCY','Frequência central da banda escolhida (21 Hz a 20 kHz).'],
+ eqg:['EQ — GAIN','Reforço ou corte da banda escolhida (±18 dB).'],
+ band:['HIGH / HIGH-MID / LOW-MID / LOW','Escolhe qual das 4 bandas os knobs Q, FREQUENCY e GAIN controlam. O LED mostra a banda ativa.'],
+ dec:['DEC','Diminui em 1 passo o valor do campo selecionado no display.'],
+ inc:['INC','Aumenta em 1 passo o valor do campo selecionado no display.'],
+ cur:['Setas do cursor','Movem o cursor entre os campos do display.'],
+ wheel:['Roda DATA','Altera rapidamente o valor do campo selecionado. Arraste em círculo ou use a roda do mouse.'],
+ enter:['ENTER','Confirma, liga/desliga botões do display e executa ações (RECALL, STORE, bibliotecas).'],
+ stinbtn:['ST IN','Alterna as duas tiras ST IN entre ST IN 1/2 e ST IN 3/4. O LED mostra o par ativo.'],
+ sel:['SEL','Seleciona o canal. EQ, PAN, dinâmica e as páginas do display passam a mostrar este canal.'],
+ solo:['SOLO','Manda o canal para a escuta (fones/monitor) sem mexer no que vai para o ar, no modo RECORD SOLO.'],
+ on:['ON','Liga o canal (LED amarelo aceso). Apagado = canal mudo, inclusive para AUX pré-fader.'],
+ fader:['Fader motorizado de 100 mm','Nível do canal. Em FADER MODE AUX, vira o nível de envio para aquele AUX. Na layer MASTER, controla os masters de AUX e BUS. Arraste o botão ou use a roda do mouse.'],
+ stsel:['SEL do STEREO','Seleciona o master STEREO (para EQ e dinâmica da saída).'],
+ ston:['ON do STEREO','Liga ou corta toda a saída STEREO. Cuidado: corta o programa.'],
+ stinsel:['SEL do ST IN','Seleciona o ST IN que está nesta tira.'],
+ stinsolo:['SOLO do ST IN','Solo do ST IN desta tira.'],
+ stinon:['ON do ST IN','Liga ou corta o ST IN desta tira.'],
+ stinknob:['Nível do ST IN','Nível dos canais de entrada estéreo ST IN (por padrão, retornos dos efeitos internos).'],
+ ukey:['USER DEFINED KEYS','Teclas programáveis (UTILITY > USER DEF): chamar cena, ligar oscilador, trocar layer…'],
+ tape:['Fita de identificação','Espaço para escrever o nome do canal. Nos canais 17–32 o simulador mostra o nome do canal.'],
+ ytape:['Fita de identificação','Nomes das fontes neste estúdio: lapelas, híbrida (CALL), link, VT, trilha (BG), celular e PA.'],
+ trsb2:['INPUT 13–16','Entradas P10 de linha dos canais 13 a 16.']
+};
+function infoValue(ctl,i){try{const d=knobDef(ctl,i);if(d&&d.label)return d.label();
+  if(ctl==='fader'){if(i==='st')return'STEREO '+fmtDb(posToDb(S.st.fader))+' dB';const t=stripT(+i);if(!t)return'REMOTE';const v=stripGet(+i);return(S.fm>0&&t.t==='ch'?'Envio '+tName(t)+' → AUX'+S.fm:tName(t)+' '+tObj(t).name)+': '+fmtDb(posToDb(v))+' dB'}
+  if(['sel','solo','on'].includes(ctl)){const t=stripT(+i);return t?tName(t)+' '+tObj(t).name:'REMOTE'}
+  if(ctl==='pad')return'CH'+(+i+1)+' PAD '+(S.ad[+i].pad?'ligado':'desligado');
+  if(ctl==='plug')return SOURCES[+i]?SOURCES[+i].n:'sem fonte ligada';
+  if(ctl==='peakled')return'CH'+(+i+1)+': '+fmtDb(S.ad[+i].lv,0)+' dBFS';
+  if(ctl==='phantom')return(+i?'CH9-12':'CH1-8')+': '+(S.phantom[+i]?'ON':'OFF');
+  if(ctl==='layer')return'LAYER '+i;if(ctl==='fmode')return'AUX '+i;
+  if(ctl==='stmeter')return'L '+fmtDb(MD.stL,0)+' / R '+fmtDb(MD.stR,0);
+  if(ctl==='ukey')return'KEY '+(+i+1)+': '+UKF[S.uk[+i]];
+ }catch(e){}return''}
+let lastInfo='';
+showInfo=(ctl,i,hover)=>{let key=ctl==='disp'?'disp:'+i:ctl;if(ctl==='plug'&&+i>=12)key='plug';const inf=INFO[key];if(!inf)return;
+  if(!S.explored.includes(key)){S.explored.push(key);ev('explore')}
+  const v=infoValue(ctl,i);const k=key+v;if(k===lastInfo)return;lastInfo=k;
+  $('#infot').innerHTML=inf[0]+(v?`<small>${v}</small>`:'');$('#infod').textContent=inf[1]};
+
+/* ---------- utilidades de missão ---------- */
+const chDb=i=>posToDb(S.ch[i].fader);
+const near=(a,b,t)=>Math.abs(a-b)<=t;
+const after=(a,b)=>(S.evs[a]||0)>(S.evs[b]||0);
+const had=n=>!!S.ev[n];
+
+const MODULES=[
+{t:'Comece aqui',sub:'Como usar o curso e o simulador',body:`
+<p>A 01V96 é uma mesa digital compacta com <b>40 canais de mixagem</b>: 32 canais mono e 4 entradas estéreo (ST IN). Ela trabalha em até 96 kHz, tem 8 AUX, 8 BUS, saída STEREO, 4 processadores de efeito internos, EQ de 4 bandas e dinâmica em cada canal, 99 cenas de memória e faders motorizados.</p>
+<p>O simulador abaixo foi montado a partir das fotos da mesa do estúdio: mesmos nomes de canal (Apdor, Conv1, CALL, VT, BG, CEL, PA…), mesma cena 01 <code>TEC NEWS 25</code> e os faders na posição em que estavam.</p>
+<h3>Como mexer no simulador</h3>
+<ul>
+<li><b>Botões:</b> clique ou toque.</li>
+<li><b>Knobs e faders:</b> arraste para cima ou para baixo, ou use a roda do mouse por cima deles. Segure <span class="kbd">Shift</span> para ajuste fino.</li>
+<li><b>Roda DATA:</b> arraste em círculo ou use a roda do mouse.</li>
+<li><b>Display:</b> toque num campo para selecioná-lo e toque de novo para confirmar. Com a mesa focada, as setas do teclado movem o cursor, <span class="kbd">Enter</span> confirma e <span class="kbd">+</span> / <span class="kbd">−</span> funcionam como INC/DEC.</li>
+<li><b>Ouvir:</b> o botão <b>Ligar som (fones)</b> no topo toca o que você estaria ouvindo nos fones da mesa. O volume é o knob <button class="ref" data-show="phlvl">PHONES LEVEL</button>.</li>
+</ul>
+<p>Cada módulo tem uma parte de teoria e <b>missões</b> práticas. A missão atual fica fixa na barra do simulador e o botão <b>Mostrar</b> pisca o controle certo. As missões se completam sozinhas quando você faz a ação.</p>
+<div class="note"><b>Dica</b> Sem querer bagunçou tudo? Use <b>Reiniciar mesa</b>. Seu progresso no curso fica guardado neste navegador.</div>`,
+ m:[{t:'Ligue a mesa ao seu ouvido: clique em "Ligar som (fones)" no topo (opcional, mas recomendado).',chk:()=>AU.on,show:'phlvl'},
+    {t:'Toque em qualquer controle da mesa e leia a explicação que aparece embaixo dela.',chk:()=>S.explored.length>=1}]},
+
+{t:'Mapa da mesa',sub:'As seções do painel e o caminho do sinal',body:`
+<p>O painel tem três faixas. Saber onde cada coisa mora é metade da operação ao vivo.</p>
+<div class="tbl"><table><tr><th>Faixa</th><th>O que tem</th></tr>
+<tr><td>Topo</td><td>Entradas analógicas 1–16: <button class="ref" data-show="xlr-0">XLR</button>, P10, <button class="ref" data-show="pad-0">PAD</button>, <button class="ref" data-show="gain-0">GAIN</button>, LEDs PEAK/SIGNAL, <button class="ref" data-show="ph-0">PHANTOM</button>, 2TR, <button class="ref" data-show="monlvl">MONITOR</button> e <button class="ref" data-show="phlvl">PHONES</button>.</td></tr>
+<tr><td>Meio</td><td><button class="ref" data-show="da-SCENE">DISPLAY ACCESS</button>, <button class="ref" data-show="fm-1">FADER MODE</button>, <button class="ref" data-show="ly-1-16">LAYER</button>, display, <button class="ref" data-show="sc-recall">SCENE MEMORY</button>, <button class="ref" data-show="k-pan">SELECTED CHANNEL</button> (PAN e EQ), entrada de dados (<button class="ref" data-show="wheel">roda</button>, setas, ENTER) e <button class="ref" data-show="stinbtn">ST IN</button>.</td></tr>
+<tr><td>Baixo</td><td>16 tiras com <button class="ref" data-show="sel-0">SEL</button>, <button class="ref" data-show="solo-0">SOLO</button>, <button class="ref" data-show="on-0">ON</button> e fader; master <button class="ref" data-show="fader-st">STEREO</button>; 2 tiras ST IN e as <button class="ref" data-show="uk-1">USER DEFINED KEYS</button>.</td></tr></table></div>
+<h3>O caminho do sinal</h3>
+<p><b>Entrada</b> (XLR/P10) → PAD → GAIN → conversor A/D → <b>PATCH</b> (qual entrada vai para qual canal) → ATT → <b>EQ</b> → <b>DYNAMICS</b> → <b>ON</b> → <b>fader</b> → <b>PAN</b> → STEREO e BUS. Do canal também saem as mandadas <b>AUX</b> (antes ou depois do fader).</p>
+<h3>Painel traseiro (não simulado)</h3>
+<div class="tbl"><table><tr><th>Conector</th><th>Uso</th></tr>
+<tr><td>STEREO OUT L/R (XLR)</td><td>Saída principal (programa).</td></tr>
+<tr><td>OMNI OUT 1–4 (P10)</td><td>Saídas configuráveis no PATCH: AUX, BUS etc. (retornos, híbrida, gravador).</td></tr>
+<tr><td>MONITOR OUT L/R (P10)</td><td>Caixas de monitoração da técnica.</td></tr>
+<tr><td>2TR DIGITAL IN/OUT (coaxial)</td><td>Áudio digital estéreo.</td></tr>
+<tr><td>ADAT IN/OUT (óptico)</td><td>8 canais digitais de entrada e saída.</td></tr>
+<tr><td>SLOT</td><td>Placa de expansão de entradas e saídas.</td></tr>
+<tr><td>WORD CLOCK IN/OUT, MIDI, USB (TO HOST)</td><td>Sincronismo, controle externo e computador.</td></tr></table></div>`,
+ m:[{t:'Passe o mouse ou toque em 8 controles diferentes para ler o que cada um faz.',chk:()=>S.explored.length>=8},
+    {t:'Pressione HOME (METER) para ir à página de medidores.',chk:()=>had('home'),show:'home'}]},
+
+{t:'Entradas e ganho',sub:'XLR, PAD, GAIN, PHANTOM e os LEDs',body:`
+<p>Ganho bem ajustado na entrada é o que separa um som limpo de um som com chiado ou distorção. Tudo o que vem depois (EQ, compressor, fader) depende disto.</p>
+<h3>Os controles</h3>
+<ul><li><button class="ref" data-show="gain-0">GAIN</button>: gire para a direita para mais ganho. Nos canais 1–12, a escala vai de -16 a -60 (o número indica o nível de entrada esperado: -60 é para fontes bem fracas). Nos canais 13–16 (só linha), de +4 a -26.</li>
+<li><button class="ref" data-show="pad-0">PAD</button>: corta 20 dB antes do pré. Com ele ligado, vale a escala de baixo (+4 a -40). Use em sinal de linha (híbrida, link, VT) ligado no XLR.</li>
+<li><button class="ref" data-show="pk-0">PEAK / SIGNAL</button>: SIGNAL deve piscar com a fala normal. PEAK nunca deve acender.</li>
+<li><button class="ref" data-show="ph-0">PHANTOM +48V</button>: alimenta microfones condensadores, como lapelas. São dois grupos: CH1–8 e CH9–12. Sem phantom, a lapela fica muda.</li></ul>
+<div class="note warn"><b>Cuidado</b> Abaixe o fader do canal antes de ligar ou desligar o phantom, para não mandar um estalo para o ar. Não ligue phantom em equipamentos de linha desbalanceados.</div>
+<h3>Método para ajustar o ganho</h3>
+<ul><li>Peça para a pessoa falar no volume do programa (ou espere ela falar).</li><li>Abra <button class="ref" data-show="home">HOME (METER)</button> e acompanhe o canal na aba CH1-32.</li><li>Ajuste para os picos ficarem entre <b>-18 e -6 dBFS</b>. SIGNAL aceso, PEAK apagado.</li></ul>
+<p>Neste estúdio, as lapelas dos canais 1–6 estão mudas porque o phantom do grupo CH1–8 está desligado. O canal 1 está com pouco ganho e o canal 4 (Riva) está saturando.</p>`,
+ m:[{t:'Ligue o PHANTOM +48V do grupo CH1–8 para as lapelas funcionarem.',chk:()=>S.phantom[0],show:'ph-0'},
+    {t:'Ajuste o GAIN do canal 1 (Apdor) para que os picos fiquem entre -18 e -4 dBFS (gire para a direita).',chk:()=>{const p=nominalPeak(0);return S.phantom[0]&&p>=-18&&p<=-4},show:'gain-0'},
+    {t:'O canal 4 (Riva) está saturando: o PEAK pisca. Ligue o PAD do canal 4 ou reduza o GAIN até o PEAK parar.',chk:()=>S.phantom[0]&&nominalPeak(3)<-3,show:'pad-3'},
+    {t:'Veja a chave CH15/16 ⇄ 2TR IN: mude para 2TR IN e volte para CH15/16. Repare que o CEL some enquanto está em 2TR.',chk:()=>(S.ev.sw1516||0)>=2&&S.sw1516==='CH',show:'sw1516'}]},
+
+{t:'Canais e layers',sub:'SEL, ON, SOLO, faders motorizados e camadas',body:`
+<p>A mesa tem 32 canais mono, mas só 16 faders. As <b>layers</b> resolvem isso: as mesmas 16 tiras controlam grupos diferentes, e os faders motorizados vão sozinhos para a posição de cada grupo.</p>
+<ul><li><button class="ref" data-show="ly-1-16">1-16</button>: canais 1 a 16 (as entradas analógicas).</li>
+<li><button class="ref" data-show="ly-17-32">17-32</button>: canais 17 a 32 (no padrão, entradas ADAT e slot).</li>
+<li><button class="ref" data-show="ly-MASTER">MASTER</button>: faders 1–8 viram os masters AUX 1–8 e faders 9–16 viram BUS 1–8. As linhas impressas embaixo de cada fader mostram isso (1 / 17 / AUX 1).</li>
+<li><button class="ref" data-show="ly-REMOTE">REMOTE</button>: controle de um software de gravação no computador.</li></ul>
+<h3>Os três botões de cada tira</h3>
+<ul><li><button class="ref" data-show="sel-0">SEL</button>: escolhe o canal que o display e a seção SELECTED CHANNEL vão editar.</li>
+<li><button class="ref" data-show="solo-0">SOLO</button>: escuta o canal nos fones.</li>
+<li><button class="ref" data-show="on-0">ON</button>: liga o canal. LED amarelo aceso = no ar. Apagado = mudo.</li></ul>
+<p>Na foto, só os canais 12 a 15 (VT, BG, BG, CEL) estavam com ON aceso. Os microfones estavam mudos e com os faders baixos, que é o estado normal entre blocos.</p>
+<div class="note"><b>Prática</b> No ar, use o ON para abrir e fechar microfones e deixe o fader já na posição certa. Assim o nível de cada pessoa não muda de uma entrada para a outra.</div>`,
+ m:[{t:'Ligue o canal 1 (Apdor) com o botão ON. O LED amarelo acende.',chk:()=>S.ch[0].on,show:'on-0'},
+    {t:'Leve o fader do canal 2 (Conv1) até 0 dB (a marca 0 da escala).',chk:()=>near(chDb(1),0,1.5),show:'fader-1'},
+    {t:'Mude para a layer 17-32, veja os faders se moverem e volte para 1-16.',chk:()=>had('layer:17-32')&&after('layer:1-16','layer:17-32')&&S.layer==='1-16',show:'ly-17-32'},
+    {t:'Selecione o canal 5 (Marcio) com SEL. O nome dele aparece no canto do display.',chk:()=>S.sel.t==='ch'&&S.sel.i===4,show:'sel-4'}]},
+
+{t:'Display e navegação',sub:'DISPLAY ACCESS, abas, cursor, roda e ENTER',body:`
+<p>Quase toda a configuração fina mora no display. São 12 teclas de <b>DISPLAY ACCESS</b>, cada uma abrindo um grupo de páginas. Apertar de novo a mesma tecla passa para a próxima aba.</p>
+<div class="tbl"><table><tr><th>Tecla</th><th>Para quê</th></tr>
+<tr><td>SCENE</td><td>Lista de cenas, RECALL SAFE</td></tr><tr><td>DIO/SETUP</td><td>Clock, modo de solo</td></tr><tr><td>MIDI</td><td>Controle externo e Program Change</td></tr><tr><td>UTILITY</td><td>Oscilador, teclas do usuário, preferências</td></tr>
+<tr><td>ø/INSERT/DELAY</td><td>Fase, insert, atraso do canal</td></tr><tr><td>PAN/ROUTING</td><td>Pan e envio para STEREO/BUS</td></tr><tr><td>PAIR/GROUP</td><td>Pares estéreo</td></tr><tr><td>PATCH</td><td>Patch de entrada e saída</td></tr>
+<tr><td>DYNAMICS</td><td>Compressor, gate, expansor</td></tr><tr><td>EQ</td><td>Equalizador e biblioteca</td></tr><tr><td>EFFECT</td><td>Efeitos internos</td></tr><tr><td>VIEW</td><td>Resumo do canal</td></tr></table></div>
+<h3>Andando pelo display</h3>
+<ul><li><button class="ref" data-show="fk-1">F1–F4</button> escolhem as abas de baixo. <button class="ref" data-show="fk-0">◄</button> e <button class="ref" data-show="fk-5">►</button> andam entre elas.</li>
+<li><button class="ref" data-show="cur-u">Setas</button> movem o cursor (o campo destacado em negativo).</li>
+<li><button class="ref" data-show="wheel">Roda DATA</button>, <button class="ref" data-show="dec">DEC</button> e <button class="ref" data-show="inc">INC</button> alteram o valor.</li>
+<li><button class="ref" data-show="enter">ENTER</button> liga/desliga botões de tela e confirma ações.</li></ul>
+<p>O cabeçalho do display sempre mostra a página, a aba, o número e o nome da cena, a indicação <b>EDIT</b> quando algo mudou depois do último RECALL, o canal selecionado e a taxa de amostragem.</p>`,
+ m:[{t:'Abra a página EQ pela seção DISPLAY ACCESS.',chk:()=>had('page:EQ'),show:'da-EQ'},
+    {t:'Abra METER (HOME) e use F1–F4 para ver as abas CH1-32, ST IN, MASTER e EFFECT.',chk:()=>['0','1','2','3'].filter(n=>had('tab:METER:'+n)).length>=3,show:'fk-1'},
+    {t:'Na página METER, mova o cursor até PEAK HOLD e ligue com ENTER (ou toque duas vezes no campo).',chk:()=>S.prefs.peakHold,show:'enter'},
+    {t:'Gire a roda DATA para mudar algum valor no display.',chk:()=>had('wheel'),show:'wheel'}]},
+
+{t:'Canal selecionado: PAN e EQ',sub:'A seção SELECTED CHANNEL e o equalizador de 4 bandas',body:`
+<p>Os knobs da seção <b>SELECTED CHANNEL</b> sempre agem sobre o canal escolhido com <b>SEL</b>. Não há um knob de EQ por canal: você seleciona e ajusta.</p>
+<ul><li><button class="ref" data-show="k-pan">PAN</button>: posição no estéreo (L63 a R63).</li>
+<li>Botões <button class="ref" data-show="band-3">HIGH</button>, HIGH-MID, LOW-MID e <button class="ref" data-show="band-0">LOW</button>: escolhem a banda.</li>
+<li><button class="ref" data-show="k-q">Q</button>, <button class="ref" data-show="k-f">FREQUENCY</button> e <button class="ref" data-show="k-g">GAIN</button>: ajustam a banda escolhida (±18 dB).</li></ul>
+<p>Ao mexer nesses knobs, o display abre sozinho a página EQ (preferência AUTO EQ DISPLAY).</p>
+<h3>Tipos especiais nas bandas das pontas</h3>
+<ul><li><b>LOW</b>: girando o Q até o fim aparecem <b>L.SHF</b> (prateleira de graves) e <b>HPF</b> (filtro passa-altas, corta tudo abaixo da frequência).</li>
+<li><b>HIGH</b>: no outro extremo aparecem <b>H.SHF</b> e <b>LPF</b>.</li></ul>
+<h3>Receita para voz em telejornal</h3>
+<div class="tbl"><table><tr><th>Banda</th><th>O que fazer</th></tr>
+<tr><td>LOW</td><td>HPF em 80–120 Hz: tira ronco de ar-condicionado e batida na lapela.</td></tr>
+<tr><td>LOW-MID</td><td>Corte leve (-2 dB) em 250–400 Hz se a voz estiver "embolada".</td></tr>
+<tr><td>HIGH-MID</td><td>+2 a +3 dB em 2,5–4 kHz para inteligibilidade.</td></tr>
+<tr><td>HIGH</td><td>Prateleira suave para brilho, se a lapela estiver escondida na roupa.</td></tr></table></div>
+<p>Na aba <b>EQ LIB</b> há receitas prontas: selecione o canal, escolha a receita e pressione ENTER.</p>`,
+ m:[{t:'Selecione o canal 1 e corte graves: na banda LOW, deixe o GAIN em -6 dB ou menos (ou use HPF).',chk:()=>{const b=S.ch[0].eq[0];const o=QOPT(0)[b.qi];return o==='HPF'||b.g<=-6},show:'band-0'},
+    {t:'Ainda no canal 1, na banda HIGH-MID, coloque a frequência entre 2 e 4,5 kHz com GAIN de +2 dB ou mais.',chk:()=>{const b=S.ch[0].eq[2];const f=fOf(b.fi);return f>=2000&&f<=4500&&b.g>=2},show:'k-f'},
+    {t:'Selecione o canal 13 (BG) e confira o PAN: ele está todo à esquerda (L63). Mude para o centro e volte para L63.',chk:()=>had('pan')&&S.ch[12].pan<=-60&&S.sel.t==='ch'&&S.sel.i===12,show:'k-pan'},
+    {t:'Aplique a receita "Voz feminina" da EQ LIB no canal 2 (Conv1).',chk:()=>{const b=S.ch[1].eq;return QOPT(0)[b[0].qi]==='HPF'&&near(fOf(b[0].fi),120,8)},show:'da-EQ'}]},
+
+{t:'Dinâmica',sub:'Compressor, gate, expansor e ducking',body:`
+<p>Cada canal tem <b>um processador de dinâmica</b>, e você escolhe o tipo dele (TYPE): COMP (compressor), EXPAND, CMP-H e CMP-S (compander), GATE e DUCKING. Saídas (AUX, BUS, STEREO) também têm o seu.</p>
+<h3>Parâmetros do compressor</h3>
+<div class="tbl"><table><tr><th>Parâmetro</th><th>O que faz</th><th>Voz falada</th></tr>
+<tr><td>THRESH</td><td>Nível a partir do qual comprime</td><td>-20 a -10 dB</td></tr>
+<tr><td>RATIO</td><td>Quanto comprime (4:1 = 4 dB entram, 1 sai)</td><td>2:1 a 4:1</td></tr>
+<tr><td>ATTACK</td><td>Rapidez para começar</td><td>10–30 ms</td></tr>
+<tr><td>RELEASE</td><td>Rapidez para soltar</td><td>150–300 ms</td></tr>
+<tr><td>GAIN</td><td>Compensa o volume perdido</td><td>+2 a +5 dB</td></tr>
+<tr><td>KNEE</td><td>Suaviza a entrada da compressão</td><td>2–3</td></tr></table></div>
+<p>O medidor <b>GR</b> mostra quantos dB estão sendo reduzidos. Em voz, 3 a 6 dB nos picos é o normal; mais que isso deixa o som "esmagado".</p>
+<h3>Gate</h3>
+<p>Fecha o canal quando o sinal cai abaixo do THRESH. <b>RANGE</b> diz quanto o canal abaixa ao fechar. Útil para tirar o ruído de microfones abertos sem uso, mas pode cortar o começo de palavras se mal ajustado.</p>
+<div class="note"><b>Na prática</b> A dinâmica só funciona com <b>ON</b> ligado na página. Use DYN LIB para partir de uma receita e ajuste pelo ouvido e pelo GR.</div>`,
+ m:[{t:'Selecione o canal 1, abra DYNAMICS e ligue o processador (campo ON + ENTER) com TYPE = COMP.',chk:()=>S.ch[0].dyn.on&&S.ch[0].dyn.type==='COMP',show:'da-DYN'},
+    {t:'No canal 1, ajuste RATIO para 4:1 e THRESH entre -20 e -10 dB.',chk:()=>{const d=S.ch[0].dyn;return RATIOS[d.ri]===4&&d.thr<=-10&&d.thr>=-20},show:'wheel'},
+    {t:'Selecione o canal 3 (Conv2) e configure o TYPE como GATE, ligado.',chk:()=>S.ch[2].dyn.on&&S.ch[2].dyn.type==='GATE',show:'sel-2'}]},
+
+{t:'AUX e mix-minus',sub:'FADER MODE AUX, envios pré e pós-fader',body:`
+<p>Os 8 <b>AUX</b> são mixagens independentes da principal. Em TV e rádio eles alimentam os retornos (ponto eletrônico, fones do estúdio), a híbrida telefônica e o link.</p>
+<h3>Como mandar um canal para um AUX</h3>
+<ul><li>Aperte <button class="ref" data-show="fm-1">FADER MODE AUX 1</button>. O LED acende e os faders 1–16 vão para a posição de <b>envio</b> de cada canal para o AUX 1.</li>
+<li>Suba o fader dos canais que devem ir para aquele retorno.</li>
+<li>Aperte <button class="ref" data-show="home">HOME</button> para voltar os faders ao nível normal.</li></ul>
+<p>Também dá para ajustar o envio no display (página AUX ou VIEW). O master de cada AUX fica na layer <b>MASTER</b>.</p>
+<h3>Pré ou pós-fader</h3>
+<ul><li><b>PRE</b>: o envio não depende do fader principal. É o certo para retornos e ponto: o apresentador continua se ouvindo mesmo que você baixe o fader do programa.</li>
+<li><b>POST</b>: o envio acompanha o fader. Bom para efeitos.</li></ul>
+<p>Neste simulador o ON do canal corta também o envio pré-fader.</p>
+<h3>Mix-minus</h3>
+<p>Quem entra por telefone ou link precisa ouvir o programa <b>menos a própria voz</b>, senão ouve um eco de si mesmo com atraso. Monte um AUX com os microfones do estúdio e tudo mais, mas com o envio do próprio CALL em -∞, e ligue esse AUX (via OMNI OUT) na entrada da híbrida.</p>`,
+ m:[{t:'Pressione FADER MODE AUX 1. Os faders passam a mostrar os envios para o AUX 1.',chk:()=>S.fm===1,show:'fm-1'},
+    {t:'Monte o mix-minus do CALL no AUX 1: envio dos canais 1 e 2 em -10 dB ou mais, e o canal 10 (CALL) em -∞.',chk:()=>posToDb(S.ch[0].aux[0])>=-10&&posToDb(S.ch[1].aux[0])>=-10&&S.ch[9].aux[0]<0.01,show:'fader-0'},
+    {t:'Volte os faders ao modo normal com HOME (METER).',chk:()=>S.fm===0&&after('home','fmode:1'),show:'home'}]},
+
+{t:'Roteamento e patch',sub:'PAN/ROUTING, BUS e PATCH',body:`
+<p><b>Roteamento</b> decide para onde o canal vai depois do fader: a saída <b>STEREO</b> (o programa) e/ou os <b>BUS 1–8</b>. BUS são somas pós-fader, úteis para gravação separada, subgrupos ou uma saída extra.</p>
+<ul><li>Página <button class="ref" data-show="da-PAN">PAN/ROUTING</button> &gt; aba ROUTING: uma grade com os 16 canais da layer e as linhas ST e B1–B8. Um quadrado cheio = canal enviado.</li></ul>
+<h3>PATCH de entrada</h3>
+<p>O patch diz qual sinal entra em cada canal. No padrão, o canal 1 recebe AD1 (a entrada analógica 1), e assim por diante. Dá para mandar a mesma entrada para dois canais (por exemplo, a mesma lapela em dois canais com EQs diferentes) ou trazer um retorno de efeito para um canal mono.</p>
+<h3>PATCH de saída</h3>
+<p>As 4 saídas <b>OMNI OUT</b> do painel traseiro recebem o que você escolher: AUX, BUS ou STEREO. É assim que um AUX vira o retorno de um fone ou a alimentação da híbrida.</p>
+<div class="note warn"><b>Cuidado</b> Mudar o patch durante o programa troca a fonte do canal na hora. Confira antes de mexer.</div>`,
+ m:[{t:'Abra PAN/ROUTING, aba ROUTING, e envie o canal 12 (VT) para o BUS 1 (para gravação separada).',chk:()=>S.ch[11].bus[0],show:'da-PAN'},
+    {t:'Na mesma grade, tire o canal 9 do STEREO (ele não tem fonte ligada).',chk:()=>!S.ch[8].st,show:'da-PAN'},
+    {t:'Abra PATCH e veja as duas abas: IN PATCH (o canal 1 recebe AD1) e OUT PATCH (o que sai nas OMNI OUT 1–4).',chk:()=>had('tab:PATCH:0')&&had('tab:PATCH:1'),show:'da-PATCH'}]},
+
+{t:'Layer MASTER e STEREO',sub:'Masters de AUX e BUS, saída principal',body:`
+<p>Na layer <button class="ref" data-show="ly-MASTER">MASTER</button>, os faders controlam as saídas:</p>
+<ul><li>Faders 1–8 → masters <b>AUX 1–8</b> (volume geral de cada retorno).</li><li>Faders 9–16 → masters <b>BUS 1–8</b>.</li></ul>
+<p>SEL, SOLO e ON também passam a agir sobre esses masters. Selecionando um master, o EQ e a dinâmica do display passam a ser os da saída.</p>
+<h3>O master STEREO</h3>
+<p>O fader vermelho <button class="ref" data-show="fader-st">STEREO</button> é o volume final do programa. Ele fica sempre no mesmo lugar, em qualquer layer. Trabalhe com ele em <b>0 dB</b> e faça a mixagem nos canais. O <button class="ref" data-show="st-on">ON</button> do STEREO corta a saída inteira: só use de propósito.</p>
+<p>O medidor <button class="ref" data-show="mL">STEREO</button> ao lado do display mostra a saída. Mantenha os picos entre -12 e -6 e nunca deixe acender OVER.</p>`,
+ m:[{t:'Pressione LAYER MASTER.',chk:()=>had('layer:MASTER'),show:'ly-MASTER'},
+    {t:'Na layer MASTER, ajuste o master do AUX 1 (fader 1) para -5 dB.',chk:()=>near(posToDb(S.aux[0].fader),-5,1.5),show:'fader-0'},
+    {t:'Volte para a layer 1-16 e confirme que o fader STEREO está em 0 dB.',chk:()=>S.layer==='1-16'&&had('layer:MASTER')&&near(posToDb(S.st.fader),0,1.5),show:'ly-1-16'}]},
+
+{t:'Monitoração',sub:'SOLO, CLEAR, MONITOR, PHONES e 2TR',body:`
+<p>Você monitora pelo barramento de <b>MONITOR</b>, que chega na saída MONITOR OUT e nos fones. Normalmente ele escuta o STEREO. Quando há algum <b>SOLO</b>, passa a escutar só os canais em solo.</p>
+<ul><li><button class="ref" data-show="solo-0">SOLO</button> em qualquer tira, ST IN ou master.</li><li>O indicador <button class="ref" data-show="soloLed">SOLO</button> pisca enquanto houver solo.</li><li><button class="ref" data-show="clear">CLEAR</button> tira todos os solos.</li>
+<li><button class="ref" data-show="monsw">MONITOR ⇄ 2TR IN</button>: troca a escuta para o que chega na 2TR IN (útil para conferir uma gravação ou um player).</li>
+<li><button class="ref" data-show="monlvl">MONITOR OUT LEVEL</button> e <button class="ref" data-show="phlvl">PHONES LEVEL</button>: volumes de escuta. Não afetam o programa.</li></ul>
+<div class="note warn"><b>Atenção</b> Em DIO/SETUP &gt; SOLO existe o modo <b>MIX SOLO</b>, em que o solo <b>corta os outros canais na saída STEREO</b>. No ar, use <b>RECORD SOLO</b>, que só mexe na escuta. Confira o modo na mesa do seu estúdio.</div>
+<p><b>PFL</b> escuta antes do fader (bom para conferir uma fonte que ainda não entrou). <b>AFL</b> escuta depois do fader.</p>`,
+ m:[{t:'Ligue o som, pressione SOLO no canal 12 (VT) e ouça só ele.',chk:()=>S.ch[11].solo,show:'solo-11'},
+    {t:'Pressione CLEAR para tirar todos os solos.',chk:()=>had('clear')&&!S.anySolo,show:'clear'},
+    {t:'Mude a chave MONITOR para 2TR IN e depois volte para MONITOR.',chk:()=>had('monsw:2TR')&&S.monSrc==='MON',show:'monsw'},
+    {t:'Em DIO/SETUP > SOLO, confira que o modo é RECORD SOLO e o LISTEN é PFL.',chk:()=>S.soloMode==='RECORD'&&S.listen==='PFL',show:'da-DIO'}]},
+
+{t:'ST IN e efeitos',sub:'Entradas estéreo e os 4 processadores internos',body:`
+<p>Além dos 32 canais mono, há 4 canais <b>ST IN</b> estéreo. As duas tiras ST IN do painel mostram ST IN 1/2 ou 3/4, conforme o botão <button class="ref" data-show="stinbtn">ST IN</button>. Os knobs verdes ajustam o nível.</p>
+<p>No padrão, cada ST IN recebe a saída de um efeito interno (ST IN 1 = FX1, e assim por diante).</p>
+<h3>Os 4 efeitos internos</h3>
+<p>Página <button class="ref" data-show="da-EFFECT">EFFECT</button>, uma aba por efeito. Em cada um você escolhe:</p>
+<ul><li><b>TYPE</b>: reverb (HALL, ROOM, STAGE, PLATE), delays, eco, chorus, flange, phaser, pitch, de-esser.</li><li><b>INPUT</b>: qual AUX alimenta o efeito.</li><li><b>MIX</b> e o parâmetro principal (tempo de reverb ou de delay).</li></ul>
+<p>Para pôr reverb numa voz: mande o canal para o AUX que alimenta o efeito (envio pós-fader), e suba o ST IN do retorno. Em 88,2/96 kHz só os efeitos 1 e 2 funcionam.</p>
+<p>Nesta simulação: FX1 recebe do AUX 7 e FX2 do AUX 8.</p>`,
+ m:[{t:'Pressione o botão ST IN para mostrar ST IN 3/4 e depois volte para 1/2.',chk:()=>had('stinbank:1')&&S.stinBank===0,show:'stinbtn'},
+    {t:'Na página EFFECT, aba FX2, mude o TYPE para MONO DELAY.',chk:()=>S.fx[1].type==='MONO DELAY',show:'da-EFFECT'},
+    {t:'Ligue o ST IN 1 (botão ON da primeira tira ST IN) e ajuste o knob dele para -10 dB ou menos.',chk:()=>S.stin[0].on&&posToDb(S.stin[0].fader)<=-9,show:'stin-on-0'}]},
+
+{t:'Cenas',sub:'STORE, RECALL, RECALL SAFE',body:`
+<p>Uma <b>cena</b> é uma foto da mesa inteira: faders, ON, EQ, dinâmica, pan, envios, roteamento, efeitos. São 99 cenas mais a 00 (dados iniciais, só leitura).</p>
+<ul><li><button class="ref" data-show="sc-up">▲</button> / <button class="ref" data-show="sc-down">▼</button>: escolhem o número. Enquanto ele for diferente da cena carregada, o número pisca no display.</li>
+<li><button class="ref" data-show="sc-store">STORE</button>: grava a mesa na cena escolhida. Aparece um campo para o título; confirme com ENTER.</li>
+<li><button class="ref" data-show="sc-recall">RECALL</button>: chama a cena. Os faders motorizados vão para as posições gravadas.</li></ul>
+<p>O aviso <b>EDIT</b> no display mostra que a mesa mudou desde o último RECALL ou STORE.</p>
+<h3>RECALL SAFE</h3>
+<p>Na página SCENE, aba RCL SAFE, marque canais que <b>não</b> devem mudar ao chamar cena (por exemplo, a híbrida, se ela tem um ajuste que você não quer perder).</p>
+<div class="note"><b>Rotina</b> Grave uma cena para cada formato de programa e uma "segura" de abertura. Antes de entrar no ar, chame a cena do programa e confira os ON.</div>`,
+ m:[{t:'Escolha a cena 02 com ▲, pressione STORE, dê um título e confirme com ENTER.',chk:()=>had('store:2')&&S.scenes[2]&&S.scenes[2].data,show:'sc-store'},
+    {t:'Agora mexa: baixe o fader do canal 12 (VT) até o fim.',chk:()=>had('store:2')&&S.ch[11].fader<0.05,show:'fader-11'},
+    {t:'Volte para a cena 01 com ▼ e pressione RECALL. Veja os faders voltarem sozinhos.',chk:()=>had('store:2')&&after('recall:1','store:2'),show:'sc-recall'}]},
+
+{t:'Utilitários e setup',sub:'Oscilador, clock, pares, fase, delay, MIDI e teclas',body:`
+<h3>Oscilador (UTILITY &gt; OSC)</h3>
+<p>Gera um tom para alinhar níveis com a próxima etapa (switcher, gravador, transmissor). Padrão de referência comum: <b>1 kHz a -18 dBFS</b>. Escolha para onde vai em ASSIGN (ST, AUX, BUS). Desligue depois.</p>
+<h3>Clock (DIO/SETUP &gt; W.CLOCK)</h3>
+<p>Toda a cadeia digital precisa do mesmo relógio. Se você escolher um clock externo sem sinal, a mesa fica <b>UNLOCK</b> e o áudio some. Use o interno (INT 44.1k ou INT 48k; vídeo costuma usar 48 kHz) a não ser que o estúdio tenha um gerador de sincronismo.</p>
+<h3>Pares (PAIR/GROUP)</h3>
+<p>Canais vizinhos ímpar/par viram um par estéreo: fader, ON, EQ e dinâmica passam a andar juntos. Ótimo para a trilha BG L/R.</p>
+<h3>Fase e delay (ø/INSERT/DELAY)</h3>
+<p><b>Fase</b> inverte a polaridade (dois microfones captando a mesma fonte). <b>Delay</b> atrasa o áudio do canal para sincronizar com um vídeo atrasado (lip-sync); a tela mostra o atraso em quadros.</p>
+<h3>MIDI, USER DEFINED KEYS e PREFERENCE</h3>
+<p>MIDI permite chamar cenas por Program Change. As 8 <button class="ref" data-show="uk-1">USER DEFINED KEYS</button> recebem funções em UTILITY &gt; USER DEF (no simulador, a tecla 1 chama a cena 01 e a 3 liga o oscilador).</p>`,
+ m:[{t:'Ligue o oscilador em UTILITY > OSC com SINE 1kHz e LEVEL -18 dB.',chk:()=>S.osc.on&&S.osc.w===1&&S.osc.lvl===-18,show:'da-UTILITY'},
+    {t:'Desligue o oscilador.',chk:()=>had('osc:on')&&!S.osc.on,show:'da-UTILITY'},
+    {t:'Em DIO/SETUP, mude o clock para INT 48k.',chk:()=>S.clock==='INT 48k',show:'da-DIO'},
+    {t:'Em PAIR/GROUP, faça par dos canais 13 e 14 (BG L/R).',chk:()=>S.pair[6],show:'da-PAIR'},
+    {t:'Em ø/INSERT/DELAY, aba DELAY, ligue um atraso de 1 quadro (cerca de 33 ms) no canal 12 (VT).',chk:()=>S.ch[11].dlyOn&&S.ch[11].dly>=30&&S.ch[11].dly<=37,show:'da-INSERT'}]},
+
+{t:'Operação no ar',sub:'Rotina de telejornal e solução de problemas',body:`
+<h3>Antes do programa</h3>
+<ul><li>Chame a cena do programa (RECALL) e confira que o clock está travado (sem UNLOCK).</li><li>Phantom ligado nos grupos das lapelas.</li><li>Teste cada lapela e ajuste o GAIN (picos entre -18 e -6).</li><li>Teste a híbrida e o link: o convidado tem que se ouvir sem eco (mix-minus).</li><li>STEREO em 0 dB, nenhum SOLO ativo, oscilador desligado.</li></ul>
+<h3>Durante</h3>
+<ul><li>Abra e feche microfones com <b>ON</b>. Ajuste fino com o fader.</li><li>Use SOLO (em RECORD SOLO) para conferir fontes antes de abrir.</li><li>Olhe o medidor STEREO o tempo todo.</li></ul>
+<h3>Quando algo dá errado</h3>
+<div class="tbl"><table><tr><th>Sintoma</th><th>Onde olhar</th></tr>
+<tr><td>Lapela muda</td><td>PHANTOM do grupo, cabo, SIGNAL, ON, fader, patch.</td></tr>
+<tr><td>Som distorcido</td><td>PEAK aceso: GAIN alto ou falta PAD. STEREO em OVER.</td></tr>
+<tr><td>Nenhum som na mesa</td><td>Display mostra UNLOCK? Clock externo sem sinal. ON do STEREO.</td></tr>
+<tr><td>Convidado ouve eco</td><td>O envio do próprio canal dele para o AUX do retorno não está em -∞.</td></tr>
+<tr><td>Fones mudos</td><td>Chave MONITOR em 2TR IN, solo de canal vazio, PHONES LEVEL.</td></tr>
+<tr><td>Canal some ao chamar cena</td><td>Cena gravada com ON apagado. Use RECALL SAFE se precisar.</td></tr></table></div>`,
+ m:[{t:'Checklist: cena 01 chamada, phantom CH1–8 ligado, ON dos canais 1 a 6 acesos, STEREO em 0 dB, nenhum SOLO, oscilador desligado e clock interno.',chk:()=>S.curScene===1&&S.phantom[0]&&[0,1,2,3,4,5].every(i=>S.ch[i].on)&&near(posToDb(S.st.fader),0,1.5)&&!S.anySolo&&!S.osc.on&&!unlocked()&&S.st.on,show:'sc-recall'},
+    {t:'Simule a pane: em DIO/SETUP escolha o clock ADAT IN, veja o UNLOCK e o áudio sumir, e volte para um clock interno.',chk:()=>had('clock:ADAT IN')&&!unlocked(),show:'da-DIO'}]},
+
+{t:'Prova final',sub:'12 perguntas',quiz:true,body:`<p>Responda sem olhar a teoria. Cada resposta mostra a explicação. Você pode refazer quando quiser.</p>`,m:[]}
+];
+
+const QUIZ=[
+ {q:'O PEAK do canal 3 acende quando a pessoa fala. O que fazer primeiro?',o:['Baixar o fader do canal','Reduzir o GAIN (ou ligar o PAD)','Ligar o compressor','Baixar o master STEREO'],a:1,e:'PEAK é na entrada, antes do fader e do compressor. Só o GAIN e o PAD resolvem.'},
+ {q:'As lapelas dos canais 1–6 não dão sinal nenhum, nem SIGNAL. O mais provável é:',o:['Fader abaixado','ON apagado','PHANTOM +48V desligado no grupo CH1–8','SOLO ativo'],a:2,e:'SIGNAL é medido na entrada. Fader, ON e solo vêm depois. Lapela condensadora sem phantom não gera sinal.'},
+ {q:'Você quer controlar o master do AUX 3. Qual layer?',o:['1-16','17-32','MASTER','REMOTE'],a:2,e:'Na layer MASTER, faders 1–8 = AUX 1–8 e 9–16 = BUS 1–8.'},
+ {q:'Em FADER MODE AUX 2, o fader do canal 5 controla:',o:['O nível do canal 5 no STEREO','O envio do canal 5 para o AUX 2','O master do AUX 2','O pan do canal 5'],a:1,e:'FADER MODE transforma os faders em envios para o AUX escolhido. HOME volta ao normal.'},
+ {q:'Para o retorno (ponto) do apresentador, o envio AUX deve ser:',o:['Pós-fader','Pré-fader','Tanto faz','Pelo BUS'],a:1,e:'Pré-fader: o retorno não muda quando você mexe no fader do programa.'},
+ {q:'Mix-minus da híbrida é:',o:['O programa sem a voz de quem está no telefone','Só a voz do telefone','O programa com reverb','A saída STEREO inteira'],a:0,e:'Quem entra pelo telefone ouve tudo menos ele mesmo, para não ouvir eco.'},
+ {q:'Qual modo de solo é seguro durante o programa?',o:['MIX SOLO','RECORD SOLO','Os dois','Nenhum'],a:1,e:'RECORD SOLO só muda a escuta. MIX SOLO corta os outros canais na saída STEREO.'},
+ {q:'O display mostra UNLOCK e não sai som. Onde corrigir?',o:['PATCH','DIO/SETUP > W.CLOCK','UTILITY > OSC','EQ'],a:1,e:'UNLOCK é falta de clock. Volte para um clock interno ou restabeleça o externo.'},
+ {q:'O que o RECALL de uma cena faz com canais marcados em RECALL SAFE?',o:['Zera os canais','Não muda esses canais','Muta esses canais','Apaga a cena'],a:1,e:'RECALL SAFE protege os canais marcados contra mudanças ao chamar cenas.'},
+ {q:'Para tirar ronco grave de uma lapela, use na banda LOW:',o:['H.SHF','LPF','HPF em torno de 100 Hz','Q 10 com +6 dB'],a:2,e:'O HPF (passa-altas) corta tudo abaixo da frequência escolhida.'},
+ {q:'O áudio de um VT está adiantado em relação à imagem. Qual recurso usar?',o:['Delay do canal (ø/INSERT/DELAY)','Fase','Gate','PAD'],a:0,e:'O delay do canal atrasa o áudio. A tela mostra o atraso em quadros.'},
+ {q:'O que mostra o aviso EDIT no display?',o:['Mesa em modo de edição de nome','Algo mudou desde o último RECALL/STORE','Erro de cena','Clock externo'],a:1,e:'EDIT avisa que a mesa já não é igual à cena carregada.'}
+];
+
+/* =====================================================================
+   INTERFACE DO CURSO
+   ===================================================================== */
+let DONE=LS.get('e01v96.done',{});let CUR=LS.get('e01v96.mod',0);if(!MODULES[CUR])CUR=0;let QANS=LS.get('e01v96.quiz',{});
+const mid=(m,n)=>m+'.'+n;
+const totalM=()=>MODULES.reduce((s,m)=>s+m.m.length,0)+QUIZ.length;
+const doneCount=()=>Object.keys(DONE).length+Object.keys(QANS).filter(k=>QANS[k]===QUIZ[+k].a).length;
+function renderMods(){$('#modlist').innerHTML=MODULES.map((m,i)=>{const tot=m.quiz?QUIZ.length:m.m.length;const d=m.quiz?Object.keys(QANS).filter(k=>QANS[k]===QUIZ[+k].a).length:m.m.filter((_,n)=>DONE[mid(i,n)]).length;
+  return`<li><button type="button" class="${i===CUR?'cur':''} ${d===tot&&tot?'done':''}" data-mod="${i}"><span class="n">${String(i).padStart(2,'0')}</span><span class="t">${m.t}</span><span class="c">${d}/${tot}</span></button></li>`}).join('');
+  const t=totalM(),d=doneCount();$('#progtxt').textContent=d+'/'+t+' missões';$('#progbar').style.width=(d/t*100)+'%'}
+function renderLesson(){const m=MODULES[CUR];let h=`<div class="eyebrow">Módulo ${String(CUR).padStart(2,'0')} de ${MODULES.length-1}</div><h2>${m.t}</h2><div class="prose"><p style="color:var(--muted);margin-top:-6px">${m.sub}</p>${m.body}</div>`;
+  if(m.quiz){h+=`<div class="missions">`+QUIZ.map((q,i)=>{const a=QANS[i];const ans=a!==undefined;return`<div class="q ${ans?(a===q.a?'right':'wrong'):''}" data-q="${i}"><p>${i+1}. ${q.q}</p>${q.o.map((o,j)=>`<label><input type="radio" name="q${i}" id="q${i}o${j}" value="${j}" ${a===j?'checked':''}> <span>${o}</span></label>`).join('')}${ans?`<div class="fb ${a===q.a?'r':'w'}">${a===q.a?'Certo. ':'Resposta certa: '+q.o[q.a]+'. '}${q.e}</div>`:''}</div>`}).join('')+
+    `<p><b>Nota: ${Object.keys(QANS).filter(k=>QANS[k]===QUIZ[+k].a).length} de ${QUIZ.length}</b></p><button type="button" class="tbtn" id="qreset">Refazer prova</button></div>`}
+  else if(m.m.length){h+=`<div class="missions"><h3>Missões no simulador</h3><ol class="mlist">${m.m.map((x,n)=>`<li class="mi ${DONE[mid(CUR,n)]?'ok':''}" data-n="${n}"><span class="ck" aria-hidden="true"></span><span>${x.t}</span>${x.show?`<button type="button" class="go" data-show="${x.show}">Mostrar</button>`:'<span></span>'}</li>`).join('')}</ol></div>`}
+  h+=`<div class="navrow">${CUR>0?`<button type="button" class="tbtn" data-mod="${CUR-1}">← ${MODULES[CUR-1].t}</button>`:'<span></span>'}${CUR<MODULES.length-1?`<button type="button" class="tbtn" data-mod="${CUR+1}">${MODULES[CUR+1].t} →</button>`:''}</div>`;
+  $('#lesson').innerHTML=h;updateDock()}
+function updateDock(){const m=MODULES[CUR];$$('.mi').forEach(li=>li.classList.remove('next'));const n=m.m.findIndex((_,i)=>!DONE[mid(CUR,i)]);
+  if(m.quiz){$('#docktxt').textContent='Responda a prova final acima.';return}
+  if(n<0){$('#docktxt').innerHTML=m.m.length?'Módulo concluído. Siga para o próximo.':'—';return}
+  const li=$(`.mi[data-n="${n}"]`);if(li)li.classList.add('next');const x=m.m[n];$('#docktxt').innerHTML=`${x.t} ${x.show?`<button type="button" class="ref" data-show="${x.show}">Mostrar</button>`:''}`}
+function setMod(i){CUR=i;LS.set('e01v96.mod',i);renderMods();renderLesson();$('#lesson').scrollIntoView({behavior:'smooth',block:'start'})}
+let hlT=0;
+function highlight(id){$$('.hl').forEach(e=>e.classList.remove('hl'));let el=$('#'+id);if(!el)return;if(el.classList.contains('led'))el=el.parentElement;el.classList.add('hl');clearTimeout(hlT);hlT=setTimeout(()=>el.classList.remove('hl'),4500);
+  const sc=$('#simscroll');const r=el.getBoundingClientRect(),sr=sc.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+r.left-sr.left-sr.width/2+r.width/2,top:sc.scrollTop+r.top-sr.top-sr.height/2,behavior:'smooth'});
+  const simR=$('#sim').getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)window.scrollBy({top:r.top-innerHeight/2,behavior:'smooth'})}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200)}
+function checkMissions(){const m=MODULES[CUR];let ch=false;m.m.forEach((x,n)=>{const id=mid(CUR,n);if(!DONE[id]&&x.chk()){DONE[id]=true;ch=true;toast('Missão concluída')}});if(ch){LS.set('e01v96.done',DONE);renderMods();$$('.mi').forEach(li=>{if(DONE[mid(CUR,+li.dataset.n)])li.classList.add('ok')});updateDock()}}
+
+document.addEventListener('click',e=>{const s=e.target.closest('[data-show]');if(s){e.preventDefault();highlight(s.dataset.show);return}const m=e.target.closest('[data-mod]');if(m){setMod(+m.dataset.mod);return}
+  if(e.target.id==='qreset'){QANS={};LS.set('e01v96.quiz',QANS);renderLesson();renderMods()}});
+document.addEventListener('change',e=>{const q=e.target.closest('.q');if(!q)return;QANS[+q.dataset.q]=+e.target.value;LS.set('e01v96.quiz',QANS);const y=scrollY;renderLesson();renderMods();scrollTo(0,y)});
+
+/* ---------- zoom do simulador ---------- */
+let ZOOM=LS.get('e01v96.zoom',0);// 0 = ajustar
+function applyZoom(){const sc=$('#simscroll');const avail=sc.clientWidth-36;let z=ZOOM||clamp(avail/1480,.5,1.4);const con=$('#console');const h=con.offsetHeight;
+  $('#stage').style.transform=`scale(${z})`;$('#stagebox').style.width=1480*z+'px';$('#stagebox').style.height=h*z+'px';$('#zval').textContent=Math.round(z*100)+'%';getScale=()=>z}
+$('#zin').onclick=()=>{const z=ZOOM||parseFloat($('#zval').textContent)/100;ZOOM=clamp(+(z+.1).toFixed(2),.4,1.6);LS.set('e01v96.zoom',ZOOM);applyZoom()};
+$('#zout').onclick=()=>{const z=ZOOM||parseFloat($('#zval').textContent)/100;ZOOM=clamp(+(z-.1).toFixed(2),.4,1.6);LS.set('e01v96.zoom',ZOOM);applyZoom()};
+$('#zfit').onclick=()=>{ZOOM=0;LS.set('e01v96.zoom',0);applyZoom()};
+addEventListener('resize',applyZoom);
+
+/* ---------- botões do topo ---------- */
+$('#audioBtn').onclick=async()=>{const on=await toggleAudio();const b=$('#audioBtn');b.classList.toggle('live',on);b.setAttribute('aria-pressed',on);b.querySelector('span').textContent=on?'Som ligado':'Ligar som (fones)';checkMissions()};
+$('#resetBtn').onclick=()=>{const keep={explored:S.explored};S=defaultState();initScenes();S.explored=keep.explored;Object.keys(ENV).forEach(k=>delete ENV[k]);toast('Mesa reiniciada')};
+
+/* ---------- laço principal ---------- */
+function boot(){buildConsole();cacheEls();bindConsole();lctx=$('#lcd').getContext('2d');renderMods();renderLesson();applyZoom();
+  onEvent=()=>{clearTimeout(boot._c);boot._c=setTimeout(checkMissions,60)};
+  let last=performance.now(),acc=0,chk=0;
+  const loop=now=>{const dt=Math.min(.1,(now-last)/1000);last=now;model(dt);syncPanel(dt);acc+=dt;if(acc>1/30){drawLCD(acc);acc=0}audioSync();chk+=dt;if(chk>.4){chk=0;checkMissions()}requestAnimationFrame(loop)};
+  requestAnimationFrame(loop);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(applyZoom)}
+boot();
+</script>
+
+</body>
+</html>
